@@ -1,0 +1,192 @@
+---
+/**
+ * Skills Section - Figma Design
+ *
+ * Two-column layout with Front-End and Back-End skills
+ */
+
+import { getSkills } from '../../utils/data-loader';
+
+const skills = getSkills();
+
+// Extract frontend and backend skills from core_competencies
+const frontendSkills = skills.core_competencies.frontend_development || [];
+const backendSkills = skills.core_competencies.backend_development || [];
+---
+
+<section class="skills-section" id="skills">
+  <!-- Section Title -->
+  <h2 class="section-title">Skills</h2>
+
+  <!-- Two Column Layout -->
+  <div class="skills-columns">
+    <!-- Back-End Column (Left side, right-aligned text) -->
+    <div class="skills-column backend-column">
+      <h3 class="column-title">Back-End</h3>
+      <div class="skills-list">
+        {backendSkills.map(skill => (
+          <p class="skill-item">{skill}</p>
+        ))}
+      </div>
+    </div>
+
+    <!-- Front-End Column (Right side, left-aligned text) -->
+    <div class="skills-column frontend-column">
+      <h3 class="column-title">Front-End</h3>
+      <div class="skills-list">
+        {frontendSkills.map(skill => (
+          <p class="skill-item">{skill}</p>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .skills-section {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: var(--space-12) var(--space-8);
+  }
+
+  /* Blurred and faded background overlay - full page coverage */
+  .skills-section::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(10, 58, 82, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* Ensure content is above overlay */
+  .skills-section > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Section Title - Figma: 70px, cyan */
+  .section-title {
+    font-family: var(--font-display);
+    font-style: normal;
+    font-weight: 600;
+    font-size: 70px; /* Exact Figma value */
+    line-height: 85px; /* Exact Figma value */
+    text-align: center;
+    color: var(--color-secondary-light);
+    margin: 0 0 53px 0; /* Exact spacing from Figma */
+    letter-spacing: -0.02em;
+  }
+
+  /* Mobile-first: Single column layout */
+  .skills-columns {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+    max-width: 700px;
+    width: 100%;
+  }
+
+  .skills-column {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Mobile: All columns left-aligned */
+  .backend-column,
+  .frontend-column {
+    text-align: left;
+  }
+
+  .backend-column .column-title,
+  .frontend-column .column-title {
+    text-align: left;
+  }
+
+  /* Desktop: Two-column layout (768px and up) */
+  @media (min-width: 768px) {
+    .skills-columns {
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-10);
+    }
+
+    /* Desktop: Back-End column (left side, right-aligned) */
+    .backend-column {
+      text-align: right;
+    }
+
+    .backend-column .column-title {
+      text-align: right;
+    }
+
+    /* Desktop: Front-End column (right side, left-aligned) */
+    .frontend-column {
+      text-align: left;
+    }
+
+    .frontend-column .column-title {
+      text-align: left;
+    }
+  }
+
+  /* Column titles - Figma: 24px, white */
+  .column-title {
+    font-family: var(--font-display);
+    font-style: normal;
+    font-weight: var(--font-semibold);
+    font-size: var(--text-2xl);
+    line-height: 1.21;
+    color: var(--color-white);
+    margin: 0 0 var(--space-6) 0;
+  }
+
+  /* Skills list */
+  .skills-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  /* Skill items - Figma: 16px, 19px line-height, white */
+  .skill-item {
+    font-family: var(--font-display);
+    font-style: normal;
+    font-weight: var(--font-semibold);
+    font-size: var(--text-base);
+    line-height: 1.19; /* 19px/16px */
+    color: var(--color-white);
+    margin: 0;
+  }
+
+  /* Mobile responsive adjustments */
+  @media (max-width: 767px) {
+    .section-title {
+      font-size: 2.5rem; /* 40px */
+      margin-bottom: var(--space-8);
+    }
+
+    .column-title {
+      font-size: var(--text-xl);
+    }
+
+    .skill-item {
+      font-size: var(--text-sm);
+    }
+  }
+
+  @media print {
+    .skills-section {
+      padding: var(--space-4) 0;
+    }
+  }
+</style>

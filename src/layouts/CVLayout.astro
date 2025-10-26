@@ -1,0 +1,83 @@
+---
+/**
+ * CVLayout Component
+ *
+ * Layout specifically for CV pages with navigation and background
+ */
+
+import BaseLayout from './BaseLayout.astro';
+import StaticBackground from '../components/Background/StaticBackground.astro';
+import TabNav from '../components/Navigation/TabNav.astro';
+import SocialLinks from '../components/Footer/SocialLinks.astro';
+import { getConfig } from '../utils/data-loader';
+
+interface Props {
+  title?: string;
+  description?: string;
+  showBackground?: boolean;
+}
+
+const config = getConfig();
+const {
+  title,
+  description,
+  showBackground = config.features.enable_geometric_background
+} = Astro.props;
+---
+
+<BaseLayout title={title} description={description}>
+  <div class="cv-layout">
+    <!-- Background Layer -->
+    {showBackground && (
+      <StaticBackground />
+    )}
+
+    <!-- Content Layer -->
+    <div class="content-layer">
+      <!-- Tab Navigation -->
+      <TabNav />
+
+      <!-- Main Content -->
+      <main id="main-content" class="main-content">
+        <slot />
+      </main>
+
+      <!-- Social Links Footer -->
+      <SocialLinks />
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .cv-layout {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Content Layer */
+  .content-layer {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  /* Main Content */
+  .main-content {
+    flex: 1;
+    width: 100%;
+    max-width: 1437px;
+    margin: 0 auto;
+    padding: 0;
+  }
+
+  /* Print styles */
+  @media print {
+    .main-content {
+      padding: 0;
+    }
+  }
+</style>

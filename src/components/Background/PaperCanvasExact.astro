@@ -1,0 +1,228 @@
+---
+/**
+ * PaperCanvasExact Component
+ *
+ * Paper.js canvas with exact shapes from bg.svg design
+ * All positions, colors, and sizes match the original Figma design
+ */
+---
+
+<div id="geometric-canvas-container" class="paper-canvas-container">
+  <canvas id="geometric-canvas" resize></canvas>
+</div>
+
+<style>
+  .paper-canvas-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  #geometric-canvas {
+    width: 100%;
+    height: 100%;
+    pointer-events: auto;
+  }
+</style>
+
+<script>
+  import paper from 'paper';
+
+  // Initialize Paper.js when DOM is ready
+  document.addEventListener('DOMContentLoaded', () => {
+    const canvas = document.getElementById('geometric-canvas') as HTMLCanvasElement;
+    if (!canvas) return;
+
+    // Setup Paper.js
+    paper.setup(canvas);
+
+    // Colors from the SVG design
+    const colors = {
+      primaryLight: '#004B72',
+      secondary: '#3E9FD4',
+      accent: '#F0000F',
+      accentDark: '#E00514',
+      tertiary: '#006BA5',
+      white: '#FFFFFF',
+    };
+
+    // Exact shapes from bg.svg with their positions, types, and properties
+    const shapesData = [
+      // CENTER SHAPES - positioned around viewport center (683, 386)
+      // Top circle
+      { type: 'circle', x: 712.738, y: 271.64, radius: 69.5, strokeColor: colors.primaryLight, strokeWidth: 5 },
+      // Bottom circle
+      { type: 'circle', x: 670.738, y: 524.64, radius: 69.5, strokeColor: colors.primaryLight, strokeWidth: 5 },
+      // Rectangle (square)
+      { type: 'rect', x: 493.849 + 62, y: 270.26 + 62, width: 124, height: 124, radius: 17.5, rotation: -16.6403, strokeColor: colors.primaryLight, strokeWidth: 5 },
+      { type: 'rect', x: 848.255, y: 331.91, width: 24, height: 24, radius: 2.5, rotation: 22.6612, strokeColor: colors.white, strokeWidth: 5 },
+      { type: 'rect', x: 902.214, y: 376.752, width: 40, height: 40, radius: 2.5, rotation: -34.4661, strokeColor: colors.accent, strokeWidth: 5 },
+
+      // More circles
+      { type: 'circle', x: 1083.24, y: 154.14, radius: 23, strokeColor: colors.secondary, strokeWidth: 5 },
+      { type: 'circle', x: 1043.74, y: 239.64, radius: 15, strokeColor: colors.white, strokeWidth: 2 },
+      { type: 'circle', x: 854.738, y: 418.64, radius: 15, strokeColor: colors.white, strokeWidth: 2 },
+
+      // CENTER SHAPE - Triangle
+      { type: 'triangle', x: 811.616, y: 439.128, size: 40, rotation: 15, strokeColor: colors.primaryLight, strokeWidth: 5 },
+      { type: 'triangle', x: 1155.61, y: 135.053, size: 20, rotation: 0, strokeColor: colors.accent, strokeWidth: 5 },
+      { type: 'triangle', x: 839.168, y: 259.237, size: 25, rotation: 45, strokeColor: colors.accent, strokeWidth: 5 },
+
+      // More rectangles
+      { type: 'rect', x: 866.216, y: 233.772, width: 24, height: 24, radius: 2.5, rotation: -34.6751, strokeColor: colors.tertiary, strokeWidth: 5 },
+      { type: 'rect', x: 980.53, y: 168.411, width: 40, height: 40, radius: 2.5, rotation: -7.1514, strokeColor: colors.white, strokeWidth: 5 },
+
+      // More circles
+      { type: 'circle', x: 981.238, y: 309.14, radius: 23, strokeColor: colors.white, strokeWidth: 5 },
+      { type: 'circle', x: 898.738, y: 303.64, radius: 15.5, strokeColor: colors.accent, strokeWidth: 1 },
+
+      // Bottom left shapes
+      { type: 'rect', x: 396.18, y: 505.294, width: 28, height: 28, radius: 4.5, rotation: 22.6612, strokeColor: colors.tertiary, strokeWidth: 1 },
+      { type: 'rect', x: 271.433, y: 610.235, width: 44, height: 44, radius: 4.5, rotation: -34.4661, strokeColor: colors.white, strokeWidth: 1 },
+      { type: 'circle', x: 388.238, y: 591.14, radius: 23, strokeColor: colors.accent, strokeWidth: 5 },
+      { type: 'circle', x: 301.738, y: 681.64, radius: 13.5, strokeColor: colors.accent, strokeWidth: 5 },
+
+      // Middle shapes
+      { type: 'triangle', x: 515.168, y: 375.237, size: 30, rotation: 30, strokeColor: colors.accent, strokeWidth: 5 },
+      { type: 'rect', x: 527.216, y: 521.772, width: 24, height: 24, radius: 2.5, rotation: -34.6751, strokeColor: colors.white, strokeWidth: 5 },
+      { type: 'rect', x: 466.855, y: 552.109, width: 43, height: 43, radius: 4, rotation: -7.1514, strokeColor: colors.accent, strokeWidth: 2 },
+      { type: 'circle', x: 506.238, y: 460.14, radius: 24.5, strokeColor: colors.tertiary, strokeWidth: 2 },
+      { type: 'circle', x: 429.738, y: 463.64, radius: 13.5, strokeColor: colors.white, strokeWidth: 5 },
+
+      // Right side shapes
+      { type: 'rect', x: 1349.49, y: 92.4186, width: 24, height: 24, radius: 2.5, rotation: -141.68, strokeColor: colors.white, strokeWidth: 5 },
+      { type: 'rect', x: 1332.67, y: 39.6765, width: 40, height: 40, radius: 2.5, rotation: 161.193, strokeColor: colors.accent, strokeWidth: 5 },
+      { type: 'circle', x: 1120.17, y: 252.076, radius: 23, strokeColor: colors.secondary, strokeWidth: 5 },
+      { type: 'circle', x: 1132.46, y: 100.364, radius: 15, strokeColor: colors.white, strokeWidth: 2 },
+
+      // Lines
+      { type: 'line', x1: 1033.27, y1: 289.64, x2: 1043.88, y2: 300.246, strokeColor: colors.accentDark, strokeWidth: 5 },
+      { type: 'line', x1: 1159.92, y1: 83.182, x2: 1152.57, y2: 70.1062, strokeColor: colors.accentDark, strokeWidth: 5 },
+      { type: 'line', x1: 439.777, y1: 413.447, x2: 453.622, y2: 419.218, strokeColor: colors.accentDark, strokeWidth: 5 },
+
+      // Bottom shapes
+      { type: 'rect', x: 175.891, y: 772.016, width: 28, height: 28, radius: 4.5, rotation: -103.529, strokeColor: colors.tertiary, strokeWidth: 1 },
+      { type: 'rect', x: 139.997, y: 637.01, width: 44, height: 44, radius: 4.5, rotation: 174.929, strokeColor: colors.white, strokeWidth: 1 },
+      { type: 'circle', x: 117.317, y: 718.219, radius: 23, strokeColor: colors.accent, strokeWidth: 5 },
+      { type: 'circle', x: 171.788, y: 667.689, radius: 13.5, strokeColor: colors.accent, strokeWidth: 5 },
+      { type: 'rect', x: 37.1284, y: 665.948, width: 43, height: 43, radius: 4, rotation: -150.891, strokeColor: colors.accent, strokeWidth: 2 },
+      { type: 'circle', x: 40.7876, y: 756.689, radius: 13.5, strokeColor: colors.white, strokeWidth: 5 },
+
+      // Additional middle triangles
+      { type: 'triangle', x: 924.924, y: 158.046, size: 20, rotation: 60, strokeColor: colors.accent, strokeWidth: 1 },
+      { type: 'triangle', x: 952.3, y: 217.749, size: 25, rotation: -30, strokeColor: colors.tertiary, strokeWidth: 2 },
+      { type: 'triangle', x: 355.151, y: 653.265, size: 20, rotation: 90, strokeColor: colors.white, strokeWidth: 5 },
+      { type: 'triangle', x: 475.147, y: 503.033, size: 22, rotation: 120, strokeColor: colors.accent, strokeWidth: 5 },
+      { type: 'triangle', x: 217.204, y: 662.321, size: 28, rotation: -45, strokeColor: colors.secondary, strokeWidth: 5 },
+      { type: 'triangle', x: 226.481, y: 612.15, size: 18, rotation: 180, strokeColor: colors.white, strokeWidth: 5 },
+      { type: 'triangle', x: 17.1423, y: 703.352, size: 25, rotation: 270, strokeColor: colors.accent, strokeWidth: 5 },
+      { type: 'triangle', x: 289.913, y: 555.278, size: 30, rotation: 15, strokeColor: colors.secondary, strokeWidth: 5 },
+      { type: 'triangle', x: 1087.4, y: 222.868, size: 22, rotation: -60, strokeColor: colors.accent, strokeWidth: 5 },
+      { type: 'triangle', x: 1228.73, y: 239.136, size: 26, rotation: 45, strokeColor: colors.accent, strokeWidth: 1 },
+      { type: 'triangle', x: 1218.49, y: 174.26, size: 24, rotation: 135, strokeColor: colors.tertiary, strokeWidth: 2 },
+
+      // More rectangles
+      { type: 'rect', x: 1323.43, y: 178.508, width: 24, height: 24, radius: 2.5, rotation: 160.984, strokeColor: colors.tertiary, strokeWidth: 5 },
+      { type: 'rect', x: 1177.99, y: 214.147, width: 40, height: 40, radius: 2.5, rotation: -171.493, strokeColor: colors.white, strokeWidth: 5 },
+
+      // Final circles
+      { type: 'circle', x: 1215.29, y: 78.4505, radius: 23, strokeColor: colors.white, strokeWidth: 5 },
+      { type: 'circle', x: 1293.25, y: 106.014, radius: 15.5, strokeColor: colors.accent, strokeWidth: 1 },
+    ];
+
+    // Create shapes
+    const shapes: paper.Path[] = [];
+
+    shapesData.forEach(shapeData => {
+      let shape: paper.Path | paper.Shape;
+
+      switch(shapeData.type) {
+        case 'circle':
+          shape = new paper.Path.Circle({
+            center: [shapeData.x, shapeData.y],
+            radius: shapeData.radius,
+            strokeColor: shapeData.strokeColor,
+            strokeWidth: shapeData.strokeWidth,
+          });
+          break;
+
+        case 'rect':
+          shape = new paper.Path.Rectangle({
+            point: [shapeData.x - shapeData.width/2, shapeData.y - shapeData.height/2],
+            size: [shapeData.width, shapeData.height],
+            radius: shapeData.radius || 0,
+            strokeColor: shapeData.strokeColor,
+            strokeWidth: shapeData.strokeWidth,
+          });
+          // Set position to center after creation
+          shape.position = new paper.Point(shapeData.x, shapeData.y);
+          if (shapeData.rotation) {
+            shape.rotate(shapeData.rotation, shape.position);
+          }
+          break;
+
+        case 'triangle':
+          shape = new paper.Path.RegularPolygon({
+            center: [shapeData.x, shapeData.y],
+            sides: 3,
+            radius: shapeData.size,
+            strokeColor: shapeData.strokeColor,
+            strokeWidth: shapeData.strokeWidth,
+          });
+          if (shapeData.rotation) {
+            shape.rotate(shapeData.rotation);
+          }
+          break;
+
+        case 'line':
+          shape = new paper.Path.Line({
+            from: [shapeData.x1, shapeData.y1],
+            to: [shapeData.x2, shapeData.y2],
+            strokeColor: shapeData.strokeColor,
+            strokeWidth: shapeData.strokeWidth,
+            strokeCap: 'round',
+          });
+          break;
+
+        default:
+          return;
+      }
+
+      // Store original position
+      shape.data = {
+        originalPosition: shape.position.clone(),
+        originalRotation: shapeData.rotation || 0,
+        floatPhase: Math.random() * Math.PI * 2,
+        rotationSpeed: (Math.random() - 0.5) * 0.0001, // Very subtle rotation
+      };
+
+      shapes.push(shape);
+    });
+
+    // Very subtle animations - only gentle floating and minimal rotation
+    paper.view.onFrame = (event: any) => {
+      const time = event.count;
+
+      shapes.forEach(shape => {
+        // Very subtle floating (2-3 pixels max)
+        const floatOffset = Math.sin(time * 0.0004 + shape.data.floatPhase) * 2;
+        shape.position.y = shape.data.originalPosition.y + floatOffset;
+
+        // Extremely subtle rotation
+        shape.rotate(shape.data.rotationSpeed * 60);
+      });
+    };
+
+    // Handle resize
+    window.addEventListener('resize', () => {
+      paper.view.viewSize = new paper.Size(window.innerWidth, window.innerHeight);
+    });
+
+    // Activate Paper.js
+    paper.view.draw();
+  });
+</script>

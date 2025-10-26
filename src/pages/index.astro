@@ -1,0 +1,80 @@
+---
+/**
+ * Homepage - CV Website
+ *
+ * Main page displaying CV content with all sections
+ */
+
+import CVLayout from '../layouts/CVLayout.astro';
+import Hero from '../components/Sections/Hero.astro';
+import Skills from '../components/Sections/Skills.astro';
+import Experience from '../components/Sections/Experience.astro';
+import Contact from '../components/Sections/Contact.astro';
+---
+
+<CVLayout>
+  <!-- Mobile: All sections visible and scrollable -->
+  <!-- Desktop: Tab-based switching -->
+
+  <!-- Home Section -->
+  <div data-page-section="home" class="page-section active">
+    <Hero />
+  </div>
+
+  <!-- Skills Section -->
+  <div data-page-section="skills" class="page-section">
+    <Skills />
+  </div>
+
+  <!-- Experience Section -->
+  <div data-page-section="experience" class="page-section">
+    <Experience />
+  </div>
+</CVLayout>
+
+<style>
+  /* Mobile-first: All sections visible, scrollable */
+  .page-section {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    position: relative;
+    padding: 60px 20px 80px;
+  }
+
+  /* Skills section overlay (always active on mobile) */
+  [data-page-section="skills"] {
+    position: relative;
+  }
+
+  [data-page-section="skills"]::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(10, 58, 82, 0.7);
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  [data-page-section="skills"] > * {
+    position: relative;
+    z-index: 2;
+  }
+
+  /* Desktop: Tab-based switching (768px and up) */
+  @media (min-width: 768px) {
+    .page-section {
+      display: none;
+      padding: 0;
+    }
+
+    .page-section.active {
+      display: flex;
+    }
+  }
+</style>

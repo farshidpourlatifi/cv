@@ -1,0 +1,66 @@
+---
+/**
+ * Skills Page
+ *
+ * Renders the same layout as index but with Skills section active
+ */
+
+import CVLayout from '../layouts/CVLayout.astro';
+import Hero from '../components/Sections/Hero.astro';
+import Skills from '../components/Sections/Skills.astro';
+import Experience from '../components/Sections/Experience.astro';
+---
+
+<CVLayout title="Skills - Farshid Pourlatifi">
+  <!-- Home Section (hidden initially) -->
+  <div data-page-section="home" class="page-section" style="display: none;">
+    <Hero />
+  </div>
+
+  <!-- Skills Section (visible initially) -->
+  <div data-page-section="skills" class="page-section active">
+    <Skills />
+  </div>
+
+  <!-- Experience Section (hidden initially) -->
+  <div data-page-section="experience" class="page-section" style="display: none;">
+    <Experience />
+  </div>
+</CVLayout>
+
+<style>
+  .page-section {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    position: relative;
+  }
+
+  .page-section.active {
+    display: flex;
+  }
+
+  /* Add overlay for Skills section */
+  [data-page-section="skills"] {
+    position: relative;
+  }
+
+  [data-page-section="skills"]::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(10, 58, 82, 0.7);
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  [data-page-section="skills"] > * {
+    position: relative;
+    z-index: 2;
+  }
+</style>

@@ -1,0 +1,108 @@
+---
+/**
+ * Hero Section - Home Page
+ *
+ * Centered name and title based on Figma design
+ */
+
+import { getPersonalInfo } from '../../utils/data-loader';
+
+const personal = getPersonalInfo();
+const nameParts = personal.name.split(' ');
+const firstName = nameParts[0];
+const lastName = nameParts.slice(1).join(' ');
+---
+
+<section class="hero-section" id="hero">
+  <!-- Centered name group -->
+  <div class="hero-content">
+    <!-- First name -->
+    <h1 class="hero-first-name">
+      {firstName}
+    </h1>
+
+    <!-- Last name -->
+    <h2 class="hero-last-name">
+      {lastName}
+    </h2>
+
+    <!-- Title/Role -->
+    <p class="hero-title">
+      {personal.title}
+    </p>
+  </div>
+</section>
+
+<style>
+  .hero-section {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  .hero-content {
+    text-align: center;
+    position: relative;
+    z-index: 10;
+  }
+
+  /* First name - EXACT Figma: 70px, line-height 85px */
+  .hero-first-name {
+    font-family: var(--font-display);
+    font-style: normal;
+    font-weight: 600;
+    font-size: 70px; /* Exact value from Figma */
+    line-height: 85px; /* Exact value from Figma */
+    color: var(--color-white);
+    margin: 0;
+    letter-spacing: -0.02em;
+  }
+
+  /* Last name - EXACT Figma: 60px, line-height 73px */
+  .hero-last-name {
+    font-family: var(--font-display);
+    font-style: normal;
+    font-weight: 600;
+    font-size: 60px; /* Exact value from Figma */
+    line-height: 73px; /* Exact value from Figma */
+    color: var(--color-white);
+    margin: 0;
+    letter-spacing: -0.02em;
+  }
+
+  /* Title - EXACT Figma: 25px, line-height 30px */
+  .hero-title {
+    font-family: var(--font-display);
+    font-style: normal;
+    font-weight: 600;
+    font-size: 25px; /* Exact value from Figma */
+    line-height: 30px; /* Exact value from Figma */
+    color: var(--color-secondary-light);
+    margin: 9px 0 0 0; /* Slight spacing as per Figma */
+    letter-spacing: -0.01em;
+  }
+
+  /* Mobile responsive */
+  @media (max-width: 767px) {
+    .hero-first-name {
+      font-size: 2.5rem; /* 40px */
+    }
+
+    .hero-last-name {
+      font-size: 2rem; /* 32px */
+    }
+
+    .hero-title {
+      font-size: 1.125rem; /* 18px */
+    }
+  }
+
+  @media print {
+    .hero-section {
+      padding: var(--space-4) 0;
+    }
+  }
+</style>

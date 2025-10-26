@@ -1,0 +1,267 @@
+{
+  "positions": [
+    {
+      "company": "Younea S.à r.l.",
+      "location": "Luxembourg",
+      "position": "Senior Web Developer",
+      "employment_type": "Remote, Full-Time",
+      "period": "2024 – Present",
+      "slug": "younea",
+      "achievements": [
+        "Rearchitected LetzTalk SaaS platform using React/Redux architecture and AI integration (ElevenLabs, Dify, Vocode), supporting 6 active tenants with 8 deployments in progress",
+        "Implemented Satellite architecture for Master/Tenant system enabling white-label solutions for enterprise customers, reducing client onboarding time by 60%",
+        "Enhanced AI Voice Agent functionality with optimizations achieving 30% performance improvement and significantly reducing response latency",
+        "Developed custom WordPress plugins integrated with AI workflows, streamlining content management for multiple tenants",
+        "Established automated testing pipeline using Vitest and Playwright, improving code quality and deployment confidence",
+        "Collaborated with cross-functional teams across multiple time zones to deliver features on aggressive timelines"
+      ],
+      "technologies": [
+        "React",
+        "TypeScript",
+        "Redux",
+        "FastAPI",
+        "Python",
+        "PostgreSQL",
+        "Vocode",
+        "ElevenLabs",
+        "Dify",
+        "n8n",
+        "WordPress",
+        "Shadcn/ui",
+        "GitHub Actions",
+        "Vitest",
+        "Playwright",
+        "Microservices",
+        "Claude.ai",
+        "Cursor",
+        "Node.js",
+        "Bun"
+      ]
+    },
+    {
+      "company": "Dextern",
+      "location": "Dublin, Ireland",
+      "position": "Senior Frontend Developer",
+      "employment_type": "Remote, Full-Time 2020-2023 | Part-Time 2023-2024",
+      "period": "2020 – 2024",
+      "slug": "dextern",
+      "achievements": [
+        "Led zero-downtime migrations of 5+ e-commerce platforms from Magento 1 to Magento 2 and BigCommerce, maintaining 100% data integrity and all third-party integrations",
+        "Architected scalable SaaS product using Vue.js 3, Tailwind UI, and HapiJS backend, implementing modern component-based architecture and RESTful Application Programming Interfaces (APIs)",
+        "Optimized e-commerce performance across Magento 2, Shopify, and BigCommerce platforms, reducing page load times by 40% through code splitting and caching strategies",
+        "Implemented secure authentication and authorization systems using JSON Web Tokens (JWT) and OAuth 2.0",
+        "Developed automated deployment pipelines using Jenkins, reducing deployment time from 2 hours to 15 minutes",
+        "Integrated RabbitMQ message queuing for asynchronous processing, improving system scalability"
+      ],
+      "technologies": [
+        "Vue.js",
+        "TypeScript",
+        "JavaScript",
+        "PHP",
+        "Magento 2",
+        "BigCommerce",
+        "Shopify",
+        "HapiJS",
+        "Tailwind CSS",
+        "Jenkins",
+        "Jest",
+        "Cypress",
+        "RabbitMQ",
+        "Redis",
+        "Git",
+        "Node.js",
+        "Microservices"
+      ]
+    },
+    {
+      "company": "Cellusys",
+      "location": "Dublin, Ireland",
+      "position": "Senior Web Developer",
+      "employment_type": "Remote, Full-Time",
+      "period": "2019 – 2020",
+      "slug": "cellusys",
+      "achievements": [
+        "Redesigned 5 corporate WordPress websites with custom design system, increasing user time on site by 30% and returning visitors by 20%",
+        "Collaborated with design team to establish unique brand identity across all digital properties",
+        "Developed reusable component library using SASS, reducing development time for new pages by 50%",
+        "Implemented automated build processes using Grunt and Jenkins pipelines, streamlining deployment workflow",
+        "Optimized website performance achieving 90+ Google PageSpeed scores across all sites"
+      ],
+      "technologies": [
+        "PHP",
+        "JavaScript",
+        "jQuery",
+        "WordPress",
+        "SASS",
+        "CSS",
+        "Git",
+        "Jenkins",
+        "Grunt",
+        "Node.js"
+      ]
+    },
+    {
+      "company": "Systema Technologies",
+      "location": "Geneva, Switzerland",
+      "position": "Senior Frontend Developer",
+      "employment_type": "Remote, Part-Time",
+      "period": "2016 – 2019",
+      "slug": "systema",
+      "achievements": [
+        "Developed user interface and user experience (UI/UX) for \"Quantreex\" automated stock trading platform serving 1000+ active users",
+        "Implemented Web Worker solution for high-performance data processing, enabling real-time handling of 10,000+ trading position records with client-side search and sorting",
+        "Built static site generation workflow using Hugo and JavaServer Pages (JSP) for blog and marketing content",
+        "Created Node.js-based Application Programming Interface (API) for automated screenshot generation using headless Chrome",
+        "Developed RequireJS/Grunt build workflow with source code encryption for production deployments",
+        "Integrated third-party vanilla JavaScript components into BackboneJS application architecture"
+      ],
+      "technologies": [
+        "JavaScript",
+        "BackboneJS",
+        "RequireJS",
+        "jQuery",
+        "Bootstrap 3",
+        "LESS",
+        "PHP",
+        "Node.js",
+        "Docker",
+        "Git",
+        "Amazon Web Services (AWS)",
+        "Grunt",
+        "Hugo",
+        "Nightwatch"
+      ]
+    },
+    {
+      "company": "Fanafzar",
+      "location": "Tehran, Iran",
+      "position": "Senior Web Developer",
+      "employment_type": "On-Site, Part-Time",
+      "period": "2018 – 2019",
+      "slug": "fanafzar",
+      "achievements": [
+        "Developed UI/UX for \"Hayoola\" games marketplace (hayoola.com) and \"RobotCache\" US-based game store using Mithril.js framework",
+        "Leveraged Mithril.js performance benefits (3x faster than React, 12x lighter) for optimal user experience",
+        "Integrated WordPress and Hugo static site generator with e-commerce platform",
+        "Implemented BackboneJS/RequireJS architecture for single-page application (SPA) functionality"
+      ],
+      "technologies": [
+        "JavaScript",
+        "Mithril.js",
+        "BackboneJS",
+        "RequireJS",
+        "SASS",
+        "CSS",
+        "Git",
+        "Grunt",
+        "Node.js",
+        "PHP",
+        "WordPress",
+        "Hugo"
+      ]
+    },
+    {
+      "company": "Asr-e-Khodro (MyCar.ir)",
+      "location": "Tehran, Iran",
+      "position": "Senior Web Developer",
+      "employment_type": "On-Site, Part-Time",
+      "period": "2017 – 2018",
+      "slug": "asr-e-khodro",
+      "achievements": [
+        "Implemented Elasticsearch for classified advertisements system, enabling sub-second search across 100,000+ vehicle listings",
+        "Developed analytics data gathering tool using C# Web API and Elasticsearch for business intelligence",
+        "Built Backbone.js single-page applications for lead generation and sales processes",
+        "Implemented automated deployment pipeline as part of continuous delivery system",
+        "Maintained ASP.NET Model-View-Controller (MVC) applications with business logic implementation",
+        "Configured Google Analytics page tracking and event tracking for marketing insights",
+        "Managed website monitoring using New Relic and coordinated server migrations with zero downtime"
+      ],
+      "technologies": [
+        "C# ASP.NET MVC",
+        "JavaScript",
+        "BackboneJS",
+        "Bootstrap",
+        "Milligram",
+        "SASS",
+        "CSS",
+        "Git",
+        "Grunt",
+        "RequireJS",
+        "Node.js",
+        "Jenkins",
+        "Elasticsearch",
+        "Redis",
+        "RabbitMQ",
+        "Groovy"
+      ]
+    },
+    {
+      "company": "Mega Business Group",
+      "location": "Tehran, Iran",
+      "position": "Senior Web Developer",
+      "employment_type": "On-Site, Full-Time",
+      "period": "2014 – 2016",
+      "slug": "mega-business-group",
+      "achievements": [
+        "Configured Redis Sentinel-based failover cluster for highly available web application infrastructure",
+        "Implemented OAuth 2.0 specification for authentication and authorization across classified advertisements platform",
+        "Deployed Elasticsearch search engine for full-text search and filtering capabilities",
+        "Developed Backbone.js solutions for modular single-page application components",
+        "Created LESS-based styling workflow for consistent Bootstrap user interface across web properties",
+        "Integrated Microsoft Azure cloud services for scalable application hosting"
+      ],
+      "technologies": [
+        "ASP.NET MVC",
+        "C#",
+        "OWIN",
+        "Katana",
+        "JavaScript",
+        "jQuery",
+        "Grunt",
+        "RequireJS",
+        "BackboneJS",
+        "Elasticsearch",
+        "Groovy",
+        "Bootstrap",
+        "LESS",
+        "CSS",
+        "TeamCity",
+        "SQL Server",
+        "Redis",
+        "RabbitMQ",
+        "SVN",
+        "Microsoft Azure",
+        "Orchard CMS"
+      ]
+    },
+    {
+      "company": "Rayvarz Software Engineering Company",
+      "location": "Tehran, Iran",
+      "position": "Senior PHP/Drupal Developer",
+      "employment_type": "On-Site, Full-Time",
+      "period": "2009 – 2014",
+      "slug": "rayvarz",
+      "achievements": [
+        "Managed team of 5 developers as portal solutions team lead",
+        "Developed portal strategy based on Drupal content management system (CMS)",
+        "Integrated Drupal with company back-office systems, adopted by 80% of existing customers",
+        "Configured Apache Solr for advanced search functionality across portal content",
+        "Implemented caching strategies using Varnish and Memcached, reducing server load by 70%",
+        "Administered Linux servers running Apache/Nginx web servers"
+      ],
+      "technologies": [
+        "PHP",
+        "Drupal",
+        "MySQL",
+        "Linux",
+        "Apache",
+        "Nginx",
+        "Varnish",
+        "Memcached",
+        "Apache Solr",
+        "SVN",
+        "X-Debug"
+      ]
+    }
+  ]
+}

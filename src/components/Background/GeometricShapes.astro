@@ -1,0 +1,254 @@
+---
+/**
+ * GeometricShapes Component
+ *
+ * Decorative geometric shapes from Figma design
+ * These shapes add visual interest and depth to the background
+ */
+---
+
+<div class="geometric-shapes" aria-hidden="true">
+  <!-- Group 1: Top-left shapes -->
+  <div class="shape-group top-left">
+    <div class="shape circle-outline large" style="left: 713px; top: 392px;">
+      <svg viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="90" cy="90" r="87" stroke="var(--color-primary-light)" stroke-width="5"/>
+      </svg>
+    </div>
+
+    <div class="shape circle-outline medium" style="left: 677px; top: 206px;">
+      <svg viewBox="0 0 144 144" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="72" cy="72" r="69.5" stroke="var(--color-primary-light)" stroke-width="5"/>
+      </svg>
+    </div>
+
+    <div class="shape rect-outline rotate-neg" style="left: 527px; top: 238px;">
+      <svg viewBox="0 0 129 129" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="2.5" y="2.5" width="124" height="124" rx="20" stroke="var(--color-primary-light)" stroke-width="5"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Group 2: Top-right shapes -->
+  <div class="shape-group top-right">
+    <div class="shape rect-outline small white rotate-pos" style="left: 872px; top: 335px;">
+      <svg viewBox="0 0 29 29" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="2.5" y="2.5" width="24" height="24" rx="2.5" stroke="white" stroke-width="5"/>
+      </svg>
+    </div>
+
+    <div class="shape rect-outline medium red rotate-neg" style="left: 935px; top: 357px;">
+      <svg viewBox="0 0 45 45" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="2.5" y="2.5" width="40" height="40" rx="2.5" stroke="var(--color-accent)" stroke-width="5"/>
+      </svg>
+    </div>
+
+    <div class="shape circle-outline small cyan" style="left: 1094px; top: 135px;">
+      <svg viewBox="0 0 51 51" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="25.5" cy="25.5" r="23" stroke="var(--color-secondary-light)" stroke-width="5"/>
+      </svg>
+    </div>
+
+    <div class="shape polygon red rotate-neg" style="left: 1174px; top: 119px;">
+      <svg viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="2.5" y="2.5" width="37" height="37" rx="5" stroke="var(--color-accent)" stroke-width="5"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Group 3: Bottom-left shapes -->
+  <div class="shape-group bottom-left">
+    <div class="shape circle-outline medium red" style="left: 399px; top: 572px;">
+      <svg viewBox="0 0 51 51" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="25.5" cy="25.5" r="23" stroke="var(--color-accent)" stroke-width="5"/>
+      </svg>
+    </div>
+
+    <div class="shape polygon cyan rotate-pos" style="left: 225px; top: 657px;">
+      <svg viewBox="0 0 56 55" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="2.5" y="2.5" width="51" height="50" rx="5" stroke="var(--color-secondary-light)" stroke-width="5"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Red accent lines -->
+  <svg class="accent-lines" viewBox="0 0 1437 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <line x1="1066" y1="296" x2="1086" y2="316" stroke="var(--color-line-accent)" stroke-width="5" stroke-linecap="round" transform="rotate(45 1076 306)"/>
+    <line x1="472.77" y1="421.15" x2="492.77" y2="441.15" stroke="var(--color-line-accent)" stroke-width="5" stroke-linecap="round" transform="rotate(22.63 482.77 431.15)"/>
+    <line x1="1189.79" y1="73.06" x2="1169.79" y2="53.06" stroke="var(--color-line-accent)" stroke-width="5" stroke-linecap="round" transform="rotate(-119.34 1179.79 63.06)"/>
+  </svg>
+
+  <!-- Floating shapes with animation -->
+  <div class="floating-shapes">
+    <div class="float-1">
+      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="16" cy="16" r="14" stroke="white" stroke-width="2" opacity="0.3"/>
+      </svg>
+    </div>
+    <div class="float-2">
+      <svg viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="2" y="2" width="38" height="38" rx="5" stroke="var(--color-secondary)" stroke-width="1" opacity="0.2"/>
+      </svg>
+    </div>
+    <div class="float-3">
+      <svg viewBox="0 0 56 55" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="2" y="2" width="52" height="51" rx="5" stroke="var(--color-accent)" stroke-width="2" opacity="0.15"/>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<style>
+  .geometric-shapes {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  .shape-group {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+  }
+
+  .shape {
+    position: absolute;
+    transition: all 0.3s ease;
+  }
+
+  /* Shape sizes */
+  .shape.large svg {
+    width: 180px;
+    height: 180px;
+  }
+
+  .shape.medium svg {
+    width: 144px;
+    height: 144px;
+  }
+
+  .shape.small svg {
+    width: 51px;
+    height: 51px;
+  }
+
+  .shape.rect-outline.small svg {
+    width: 29px;
+    height: 29px;
+  }
+
+  .shape.rect-outline.medium svg {
+    width: 45px;
+    height: 45px;
+  }
+
+  /* Rotations */
+  .shape.rotate-pos {
+    transform: rotate(22.77deg);
+  }
+
+  .shape.rotate-neg {
+    transform: rotate(-16.64deg);
+  }
+
+  /* Accent lines */
+  .accent-lines {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  /* Floating animation shapes */
+  .floating-shapes {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+  }
+
+  .floating-shapes > div {
+    position: absolute;
+  }
+
+  .float-1 {
+    left: 20%;
+    top: 30%;
+    animation: float1 20s infinite ease-in-out;
+  }
+
+  .float-2 {
+    right: 25%;
+    top: 60%;
+    animation: float2 25s infinite ease-in-out;
+  }
+
+  .float-3 {
+    left: 60%;
+    bottom: 20%;
+    animation: float3 30s infinite ease-in-out;
+  }
+
+  @keyframes float1 {
+    0%, 100% {
+      transform: translate(0, 0) rotate(0deg);
+    }
+    33% {
+      transform: translate(30px, -30px) rotate(120deg);
+    }
+    66% {
+      transform: translate(-20px, 20px) rotate(240deg);
+    }
+  }
+
+  @keyframes float2 {
+    0%, 100% {
+      transform: translate(0, 0) rotate(0deg);
+    }
+    33% {
+      transform: translate(-40px, 20px) rotate(-120deg);
+    }
+    66% {
+      transform: translate(20px, -40px) rotate(-240deg);
+    }
+  }
+
+  @keyframes float3 {
+    0%, 100% {
+      transform: translate(0, 0) rotate(0deg);
+    }
+    33% {
+      transform: translate(25px, 25px) rotate(90deg);
+    }
+    66% {
+      transform: translate(-25px, -25px) rotate(180deg);
+    }
+  }
+
+  /* Hover effects */
+  .shape:hover svg {
+    transform: scale(1.1);
+    filter: brightness(1.2);
+  }
+
+  /* Mobile adjustments */
+  @media (max-width: 767px) {
+    .shape {
+      transform: scale(0.7);
+    }
+
+    .shape-group.top-right {
+      right: -100px;
+    }
+
+    .floating-shapes {
+      display: none; /* Hide on mobile for performance */
+    }
+  }
+</style>

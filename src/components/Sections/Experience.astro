@@ -1,0 +1,369 @@
+---
+/**
+ * Experience Section - Figma Design
+ *
+ * Carousel showing one experience at a time with pagination
+ */
+
+import { getExperience } from '../../utils/data-loader';
+
+const experience = getExperience();
+const positions = experience.positions;
+
+// Helper to parse period dates
+function parsePeriod(period: string) {
+  const parts = period.split(' - ');
+  const startParts = parts[0].split(' ');
+  return {
+    month: startParts[0],
+    year: startParts[1],
+    isPresent: parts[1] === 'Present'
+  };
+}
+---
+
+<section class="experience-section" id="experience">
+  <!-- Section Title -->
+  <h2 class="section-title">Experience</h2>
+
+  <!-- Experience List (mobile: all visible, desktop: carousel) -->
+  <div class="experience-carousel">
+    {positions.map((position, index) => {
+      const startDate = parsePeriod(position.period);
+      return (
+        <div class="experience-item" data-experience-index={index}>
+          <div class="experience-content">
+            <!-- Date Badge (Left) -->
+            <div class="date-badge" data-present={startDate.isPresent ? 'true' : 'false'}>
+              {startDate.isPresent ? (
+                <>
+                  <div class="badge-present">Present</div>
+                </>
+              ) : (
+                <>
+                  <div class="badge-month">{startDate.month}</div>
+                  <div class="badge-year">{startDate.year}</div>
+                </>
+              )}
+            </div>
+
+            <!-- Company Info (Center-Left) -->
+            <div class="company-info">
+              <h3 class="job-title">{position.position}</h3>
+              <p class="company-details">
+                {position.company} · {position.location}
+              </p>
+            </div>
+
+            <!-- Skills List (Right) -->
+            <div class="skills-display">
+              <h4 class="skills-label">Skills:</h4>
+              <p class="skills-text">
+                {position.technologies.join(' · ')}
+              </p>
+            </div>
+          </div>
+        </div>
+      );
+    })}
+  </div>
+
+  <!-- Pagination Dots -->
+  <div class="pagination">
+    {positions.map((_, index) => (
+      <button class="pagination-dot" data-page={index} class:list={[{ active: index === 0 }]}>
+        {index + 1}
+      </button>
+    ))}
+  </div>
+</section>
+
+<style>
+  .experience-section {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: var(--space-12) var(--space-8);
+  }
+
+  /* Blurred and faded background overlay - full page coverage */
+  .experience-section::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(10, 58, 82, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* Ensure content is above overlay */
+  .experience-section > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Section Title - EXACT Figma: 70px, cyan */
+  .section-title {
+    font-family: var(--font-display);
+    font-style: normal;
+    font-weight: 600;
+    font-size: 70px;
+    line-height: 85px;
+    text-align: center;
+    color: var(--color-secondary-light);
+    margin: 0 0 var(--space-12) 0;
+    letter-spacing: -0.02em;
+  }
+
+  /* Mobile-first: All experience items visible, stacked vertically */
+  .experience-carousel {
+    width: 100%;
+    max-width: 900px;
+    margin-bottom: var(--space-8);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-8);
+  }
+
+  .experience-item {
+    width: 100%;
+    display: block;
+  }
+
+  /* Desktop: Carousel mode (768px and up) */
+  @media (min-width: 768px) {
+    .experience-carousel {
+      margin-bottom: var(--space-10);
+      gap: 0;
+    }
+
+    .experience-item {
+      display: none;
+    }
+
+    .experience-item[data-experience-index="0"] {
+      display: block;
+    }
+  }
+
+  .experience-content {
+    display: grid;
+    grid-template-columns: auto 1fr 2fr;
+    gap: var(--space-8);
+    align-items: start;
+  }
+
+  /* Date Badge - Figma specs */
+  .date-badge {
+    width: 46.57px;
+    height: 46px;
+    background: var(--color-white);
+    border: 3px solid var(--color-secondary-light);
+    border-radius: 10px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .badge-month {
+    width: 100%;
+    height: 50%;
+    background: var(--color-secondary-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-weight: var(--font-bold);
+    font-size: 14px;
+    line-height: 17px;
+    color: var(--color-white);
+  }
+
+  .badge-year {
+    width: 100%;
+    height: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-weight: var(--font-bold);
+    font-size: 10px;
+    line-height: 12px;
+    color: var(--color-secondary);
+  }
+
+  /* Present badge special styling */
+  .badge-present {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-weight: var(--font-bold);
+    font-size: 8px;
+    line-height: 10px;
+    text-align: center;
+    color: var(--color-secondary);
+  }
+
+  .date-badge[data-present="true"] {
+    background: var(--color-white);
+  }
+
+  /* Company Info */
+  .company-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .job-title {
+    font-family: var(--font-display);
+    font-weight: var(--font-semibold);
+    font-size: var(--text-base);
+    line-height: 1.19;
+    color: var(--color-white);
+    margin: 0;
+  }
+
+  .company-details {
+    font-family: var(--font-display);
+    font-weight: var(--font-semibold);
+    font-size: var(--text-base);
+    line-height: 1.19;
+    color: var(--color-white);
+    margin: 0;
+  }
+
+  /* Skills Display */
+  .skills-display {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .skills-label {
+    font-family: var(--font-display);
+    font-weight: var(--font-normal);
+    font-size: var(--text-sm);
+    line-height: 1.21;
+    color: var(--color-white);
+    margin: 0;
+  }
+
+  .skills-text {
+    font-family: var(--font-display);
+    font-weight: var(--font-normal);
+    font-size: var(--text-sm);
+    line-height: 1.21;
+    color: var(--color-white);
+    margin: 0;
+  }
+
+  /* Pagination - hidden on mobile, visible on desktop */
+  .pagination {
+    display: none;
+  }
+
+  @media (min-width: 768px) {
+    .pagination {
+      display: flex;
+      gap: var(--space-6);
+      align-items: center;
+      justify-content: center;
+    }
+  }
+
+  .pagination-dot {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 5px solid var(--color-secondary);
+    background: transparent;
+    color: var(--color-secondary);
+    font-family: var(--font-display);
+    font-weight: var(--font-bold);
+    font-size: var(--text-lg);
+    line-height: 1;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .pagination-dot.active {
+    background: var(--color-secondary-light);
+    border-color: var(--color-secondary-light);
+    color: var(--color-primary);
+  }
+
+  .pagination-dot:hover:not(.active) {
+    background: rgba(62, 159, 212, 0.1);
+  }
+
+  /* Mobile responsive */
+  @media (max-width: 767px) {
+    .section-title {
+      font-size: 2.5rem; /* 40px */
+      margin-bottom: var(--space-8);
+    }
+
+    .experience-content {
+      grid-template-columns: 1fr;
+      gap: var(--space-4);
+    }
+  }
+
+  @media print {
+    .experience-section {
+      padding: var(--space-4) 0;
+    }
+
+    .pagination {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  // Pagination functionality (desktop only)
+  document.addEventListener('DOMContentLoaded', () => {
+    // Only run pagination on desktop
+    const isDesktop = window.innerWidth >= 768;
+    if (!isDesktop) return;
+
+    const dots = document.querySelectorAll('.pagination-dot');
+    const items = document.querySelectorAll('.experience-item');
+
+    dots.forEach((dot, index) => {
+      dot.addEventListener('click', () => {
+        // Remove active class from all dots
+        dots.forEach(d => d.classList.remove('active'));
+
+        // Add active class to clicked dot
+        dot.classList.add('active');
+
+        // Hide all items
+        items.forEach(item => {
+          (item as HTMLElement).style.display = 'none';
+        });
+
+        // Show selected item
+        const targetItem = items[index] as HTMLElement;
+        if (targetItem) {
+          targetItem.style.display = 'block';
+        }
+      });
+    });
+  });
+</script>

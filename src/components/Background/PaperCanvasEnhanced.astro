@@ -1,0 +1,443 @@
+---
+/**
+ * PaperCanvasEnhanced Component
+ *
+ * Enhanced Paper.js-based geometric background with sophisticated animations
+ * Following the geometric philosophy with optimal performance
+ */
+---
+
+<div id="geometric-canvas-container" class="paper-canvas-container">
+  <canvas id="geometric-canvas" resize></canvas>
+</div>
+
+<style>
+  .paper-canvas-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  #geometric-canvas {
+    width: 100%;
+    height: 100%;
+    pointer-events: auto;
+  }
+</style>
+
+<script>
+  import paper from 'paper';
+
+  // Initialize Paper.js when the DOM is ready
+  document.addEventListener('DOMContentLoaded', () => {
+    const canvas = document.getElementById('geometric-canvas') as HTMLCanvasElement;
+    if (!canvas) return;
+
+    // Setup Paper.js
+    paper.setup(canvas);
+
+    // Configuration with enhanced parameters
+    const config = {
+      // Colors from Figma palette with alpha variations
+      colors: {
+        primary: '#0A3A52',
+        primaryLight: '#004B72',
+        secondary: '#3E9FD4',
+        secondaryLight: '#6ACBFF',
+        accent: '#F0000F',
+        accentLight: '#FF1322',
+        white: '#FFFFFF',
+        whiteTransparent: 'rgba(255, 255, 255, 0.1)',
+      },
+      // Enhanced animation parameters for smoother movement
+      animation: {
+        breathingMin: 0.97,
+        breathingMax: 1.03,
+        breathingSpeed: 0.0008,  // Slower for smoother effect
+        rotationSpeed: 0.0003,    // Gentler rotation
+        floatAmplitude: 8,        // Subtle floating
+        floatSpeed: 0.0006,       // Slower floating
+        hoverScale: 1.12,         // Less dramatic hover
+        hoverDuration: 450,       // Smoother transition
+        proximityRadius: 200,     // Larger interaction area
+        dampening: 0.08,          // Smooth transitions
+        parallaxFactor: 0.5,      // Parallax depth
+      },
+      // Enhanced sine curve parameters
+      sineCurve: {
+        amplitude: 120,           // More pronounced curve
+        frequency: 2.5,           // More waves
+        phase: 0,
+        verticalSpread: 0.7,      // Vertical distribution factor
+      },
+      // Performance settings
+      performance: {
+        maxShapes: 40,
+        cullingPadding: 100,
+        updateFrequency: 2,       // Update every 2 frames for performance
+        mobileMaxShapes: 25,      // Fewer shapes on mobile
+      },
+    };
+
+    // Viewport detection
+    const isMobile = window.innerWidth < 768;
+    const viewWidth = paper.view.bounds.width;
+    const viewHeight = paper.view.bounds.height;
+
+    // Enhanced shape catalog with semantic distribution
+    const shapeCatalog = [
+      // Core circles - representing continuous learning
+      { type: 'circle', radius: 90, filled: false, strokeWidth: 5, color: 'primaryLight', semantics: 'continuous', weight: 1.0 },
+      { type: 'circle', radius: 60, filled: true, color: 'secondary', semantics: 'complete', weight: 0.8 },
+      { type: 'circle', radius: 45, filled: false, strokeWidth: 3, color: 'secondaryLight', semantics: 'expanding', weight: 0.6 },
+      { type: 'circle', radius: 30, filled: true, color: 'accent', semantics: 'focus', weight: 0.9 },
+      { type: 'circle', radius: 75, filled: false, strokeWidth: 4, color: 'primary', semantics: 'boundary', weight: 0.7 },
+
+      // Rectangles - representing foundations
+      { type: 'rectangle', width: 120, height: 80, filled: false, strokeWidth: 5, color: 'secondary', semantics: 'platform', weight: 1.0 },
+      { type: 'rectangle', width: 90, height: 60, filled: true, color: 'primaryLight', semantics: 'base', weight: 0.8 },
+      { type: 'rectangle', width: 100, height: 100, filled: false, strokeWidth: 3, color: 'secondaryLight', semantics: 'framework', weight: 0.7 },
+
+      // Triangles - representing growth
+      { type: 'triangle', size: 80, filled: false, strokeWidth: 4, color: 'primary', semantics: 'ascent', weight: 1.0 },
+      { type: 'triangle', size: 60, filled: true, color: 'secondary', semantics: 'direction', weight: 0.8 },
+      { type: 'triangle', size: 50, filled: false, strokeWidth: 3, color: 'accentLight', semantics: 'momentum', weight: 0.6 },
+
+      // Hexagons - representing integration
+      { type: 'hexagon', size: 70, filled: false, strokeWidth: 4, color: 'secondaryLight', semantics: 'network', weight: 0.9 },
+      { type: 'hexagon', size: 50, filled: true, color: 'primary', semantics: 'hub', weight: 0.8 },
+      { type: 'hexagon', size: 40, filled: false, strokeWidth: 3, color: 'accent', semantics: 'connection', weight: 0.7 },
+
+      // Stars - representing achievements
+      { type: 'star', size: 60, points: 5, filled: false, strokeWidth: 3, color: 'secondaryLight', semantics: 'milestone', weight: 1.0 },
+      { type: 'star', size: 40, points: 6, filled: true, color: 'accent', semantics: 'excellence', weight: 0.9 },
+
+      // Additional varied shapes for richness
+      { type: 'circle', radius: 35, filled: false, strokeWidth: 2, color: 'white', semantics: 'clarity', weight: 0.5 },
+      { type: 'polygon', sides: 5, size: 55, filled: true, color: 'primaryLight', semantics: 'versatility', weight: 0.7 },
+      { type: 'polygon', sides: 8, size: 65, filled: false, strokeWidth: 3, color: 'secondary', semantics: 'complexity', weight: 0.8 },
+      { type: 'circle', radius: 25, filled: true, color: 'secondaryLight', semantics: 'precision', weight: 0.4 },
+      { type: 'rectangle', width: 110, height: 70, filled: false, strokeWidth: 4, color: 'primary', semantics: 'structure', weight: 0.9 },
+      { type: 'triangle', size: 45, filled: true, color: 'primaryLight', semantics: 'progress', weight: 0.6 },
+      { type: 'hexagon', size: 55, filled: false, strokeWidth: 2, color: 'white', semantics: 'integration', weight: 0.5 },
+      { type: 'star', size: 35, points: 4, filled: true, color: 'secondary', semantics: 'achievement', weight: 0.7 },
+      { type: 'circle', radius: 85, filled: false, strokeWidth: 6, color: 'accent', semantics: 'vision', weight: 1.0 },
+      { type: 'polygon', sides: 7, size: 60, filled: false, strokeWidth: 3, color: 'secondaryLight', semantics: 'innovation', weight: 0.8 },
+    ];
+
+    // Limit shapes based on device capabilities
+    const maxShapes = isMobile ? config.performance.mobileMaxShapes : config.performance.maxShapes;
+    const activeShapeCatalog = shapeCatalog.slice(0, maxShapes);
+
+    // Create shape based on type with enhanced properties
+    function createShape(shapeData: any): paper.Path | paper.Shape {
+      const color = config.colors[shapeData.color] || shapeData.color;
+      let shape: paper.Path | paper.Shape;
+
+      switch (shapeData.type) {
+        case 'circle':
+          shape = new paper.Path.Circle({
+            center: [0, 0],
+            radius: shapeData.radius,
+          });
+          break;
+
+        case 'rectangle':
+          shape = new paper.Path.Rectangle({
+            point: [-shapeData.width / 2, -shapeData.height / 2],
+            size: [shapeData.width, shapeData.height],
+            radius: 5, // Slight corner radius for softer look
+          });
+          break;
+
+        case 'triangle':
+          shape = new paper.Path.RegularPolygon({
+            center: [0, 0],
+            sides: 3,
+            radius: shapeData.size,
+          });
+          break;
+
+        case 'hexagon':
+          shape = new paper.Path.RegularPolygon({
+            center: [0, 0],
+            sides: 6,
+            radius: shapeData.size,
+          });
+          break;
+
+        case 'polygon':
+          shape = new paper.Path.RegularPolygon({
+            center: [0, 0],
+            sides: shapeData.sides || 5,
+            radius: shapeData.size,
+          });
+          break;
+
+        case 'star':
+          shape = new paper.Path.Star({
+            center: [0, 0],
+            points: shapeData.points || 5,
+            radius1: shapeData.size,
+            radius2: shapeData.size * 0.5,
+          });
+          break;
+
+        default:
+          shape = new paper.Path.Circle({
+            center: [0, 0],
+            radius: 50,
+          });
+      }
+
+      // Apply enhanced styling
+      if (shapeData.filled) {
+        shape.fillColor = new paper.Color(color);
+        shape.fillColor.alpha = 0.7 + Math.random() * 0.2; // Varied transparency
+      } else {
+        shape.strokeColor = new paper.Color(color);
+        shape.strokeWidth = shapeData.strokeWidth || 3;
+        shape.strokeCap = 'round';
+        shape.strokeJoin = 'round';
+        shape.opacity = 0.8 + Math.random() * 0.2;
+      }
+
+      // Add enhanced custom data
+      shape.data = {
+        originalScale: 1,
+        breathingPhase: Math.random() * Math.PI * 2,
+        rotationSpeed: (Math.random() - 0.5) * config.animation.rotationSpeed * shapeData.weight,
+        floatPhase: Math.random() * Math.PI * 2,
+        floatAmplitude: config.animation.floatAmplitude * (0.5 + Math.random() * 0.5) * shapeData.weight,
+        type: shapeData.type,
+        semantics: shapeData.semantics,
+        behavior: 'dormant',
+        targetScale: 1,
+        currentScale: 1,
+        weight: shapeData.weight,
+        parallaxDepth: Math.random() * 0.5 + 0.5, // For parallax effect
+        originalOpacity: shape.opacity,
+      };
+
+      return shape;
+    }
+
+    // Enhanced sine curve position calculation
+    function getSineCurvePosition(index: number, total: number): paper.Point {
+      const t = index / (total - 1); // Normalized position [0, 1]
+      let x, y;
+
+      if (isMobile) {
+        // Mobile: Top-left to bottom-right diagonal with sine modulation
+        x = t * viewWidth;
+        const baseY = t * viewHeight * config.sineCurve.verticalSpread;
+        const sineWaves = config.sineCurve.frequency;
+        const sineOffset = Math.sin(t * Math.PI * 2 * sineWaves + config.sineCurve.phase) * config.sineCurve.amplitude;
+        y = baseY + sineOffset + viewHeight * (1 - config.sineCurve.verticalSpread) * 0.5;
+      } else {
+        // Desktop: Bottom-left to top-right diagonal with sine modulation
+        x = t * viewWidth;
+        const baseY = viewHeight - (t * viewHeight * config.sineCurve.verticalSpread);
+        const sineWaves = config.sineCurve.frequency;
+        const sineOffset = Math.sin(t * Math.PI * 2 * sineWaves + config.sineCurve.phase) * config.sineCurve.amplitude;
+        y = baseY + sineOffset - viewHeight * (1 - config.sineCurve.verticalSpread) * 0.5;
+      }
+
+      // Add organic randomness with golden ratio distribution
+      const goldenRatio = 1.618033988749895;
+      const randomOffset = 40;
+      const angleOffset = (index * goldenRatio * 2 * Math.PI) % (2 * Math.PI);
+      x += Math.cos(angleOffset) * randomOffset;
+      y += Math.sin(angleOffset) * randomOffset;
+
+      // Ensure shapes stay within viewport with padding
+      const padding = 80;
+      x = Math.max(padding, Math.min(viewWidth - padding, x));
+      y = Math.max(padding, Math.min(viewHeight - padding, y));
+
+      return new paper.Point(x, y);
+    }
+
+    // Create all shapes with performance optimization
+    const shapes: paper.Path[] = [];
+    const shapeGroup = new paper.Group();
+
+    activeShapeCatalog.forEach((shapeData, index) => {
+      const shape = createShape(shapeData);
+      const position = getSineCurvePosition(index, activeShapeCatalog.length);
+      shape.position = position;
+      shape.data.originalPosition = position.clone();
+      shapes.push(shape);
+      shapeGroup.addChild(shape);
+    });
+
+    // Enhanced mouse interaction with smooth tracking
+    const tool = new paper.Tool();
+    let mousePos = new paper.Point(viewWidth / 2, viewHeight / 2);
+    let smoothMousePos = mousePos.clone();
+    let mouseVelocity = new paper.Point(0, 0);
+
+    tool.onMouseMove = (event: paper.ToolEvent) => {
+      mouseVelocity = event.point.subtract(mousePos);
+      mousePos = event.point;
+    };
+
+    tool.onMouseDown = (event: paper.ToolEvent) => {
+      // Enhanced click interaction with wave propagation
+      const clickPoint = event.point;
+      const waveSpeed = 5;
+      const maxDistance = 300;
+
+      shapes.forEach((shape, index) => {
+        const distance = shape.position.getDistance(clickPoint);
+        if (distance < maxDistance) {
+          // Delayed reaction based on distance (wave effect)
+          setTimeout(() => {
+            shape.data.behavior = 'engaged';
+            shape.data.targetScale = config.animation.hoverScale * (1 + (maxDistance - distance) / maxDistance * 0.2);
+
+            // Create ripple effect
+            const ripple = new paper.Path.Circle({
+              center: shape.position,
+              radius: 5,
+              strokeColor: new paper.Color(config.colors.secondaryLight),
+              strokeWidth: 2,
+              opacity: 0.8,
+            });
+
+            // Animate ripple
+            let rippleFrame = 0;
+            const rippleAnimation = setInterval(() => {
+              rippleFrame++;
+              ripple.scale(1.08);
+              ripple.opacity = Math.max(0, 0.8 - rippleFrame * 0.04);
+              ripple.strokeWidth = Math.max(0.5, 2 - rippleFrame * 0.1);
+
+              if (ripple.opacity <= 0) {
+                ripple.remove();
+                clearInterval(rippleAnimation);
+              }
+            }, 16);
+
+            // Return to normal after delay
+            setTimeout(() => {
+              shape.data.behavior = 'dormant';
+              shape.data.targetScale = 1;
+            }, 800);
+          }, Math.floor(distance / waveSpeed));
+        }
+      });
+    });
+
+    // Performance-optimized animation frame
+    let frameCount = 0;
+    paper.view.onFrame = (event: any) => {
+      frameCount++;
+      const time = event.count;
+
+      // Smooth mouse position interpolation
+      smoothMousePos = smoothMousePos.add(mousePos.subtract(smoothMousePos).multiply(config.animation.dampening));
+
+      // Update shapes with performance throttling
+      shapes.forEach((shape, index) => {
+        // Skip some updates for performance on mobile
+        if (isMobile && frameCount % 2 !== index % 2) return;
+
+        // Breathing animation with varied phases
+        const breathingScale = config.animation.breathingMin +
+          (config.animation.breathingMax - config.animation.breathingMin) *
+          (Math.sin(time * config.animation.breathingSpeed + shape.data.breathingPhase) * 0.5 + 0.5);
+
+        // Smooth rotation animation
+        shape.rotate(shape.data.rotationSpeed * 60);
+
+        // Floating animation with parallax
+        const floatOffset = Math.sin(time * config.animation.floatSpeed + shape.data.floatPhase) *
+                           shape.data.floatAmplitude * shape.data.parallaxDepth;
+        const parallaxOffset = mouseVelocity.multiply(shape.data.parallaxDepth * 0.1);
+
+        shape.position.y = shape.data.originalPosition.y + floatOffset;
+        shape.position.x = shape.data.originalPosition.x + parallaxOffset.x;
+
+        // Enhanced proximity detection with smooth transitions
+        const distance = shape.position.getDistance(smoothMousePos);
+        const proximityThreshold = config.animation.proximityRadius;
+
+        if (distance < proximityThreshold) {
+          // Shape is aware of cursor
+          if (shape.data.behavior !== 'engaged') {
+            shape.data.behavior = 'aware';
+            const influence = 1 - (distance / proximityThreshold);
+            const attractionForce = smoothMousePos.subtract(shape.position).multiply(influence * 0.05);
+
+            // Apply subtle attraction
+            shape.position = shape.position.add(attractionForce);
+
+            // Scale based on proximity
+            shape.data.targetScale = 1 + influence * 0.15 * shape.data.weight;
+
+            // Opacity changes
+            shape.opacity = shape.data.originalOpacity + influence * 0.2;
+
+            // Subtle orientation toward cursor
+            const angle = smoothMousePos.subtract(shape.position).angle;
+            shape.rotation += (angle * influence * 0.05 - shape.rotation) * config.animation.dampening;
+          }
+        } else if (shape.data.behavior === 'aware') {
+          // Return to dormant state
+          shape.data.behavior = 'dormant';
+          shape.data.targetScale = 1;
+          shape.opacity = shape.data.originalOpacity;
+        }
+
+        // Ultra-smooth scale transitions
+        const scaleDiff = shape.data.targetScale - shape.data.currentScale;
+        shape.data.currentScale += scaleDiff * config.animation.dampening;
+        shape.scaling = shape.data.currentScale * breathingScale * shape.data.originalScale;
+
+        // Return to original position gradually when not interacting
+        if (shape.data.behavior === 'dormant') {
+          const returnForce = shape.data.originalPosition.subtract(shape.position).multiply(0.02);
+          shape.position = shape.position.add(returnForce);
+        }
+      });
+    };
+
+    // Handle resize with debouncing
+    let resizeTimeout: any;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        paper.view.viewSize = new paper.Size(window.innerWidth, window.innerHeight);
+
+        // Recalculate positions on resize
+        const newViewWidth = paper.view.bounds.width;
+        const newViewHeight = paper.view.bounds.height;
+        const newIsMobile = window.innerWidth < 768;
+
+        shapes.forEach((shape, index) => {
+          const newPosition = getSineCurvePosition(index, shapes.length);
+          shape.data.originalPosition = newPosition;
+          shape.position = newPosition;
+        });
+      }, 250);
+    });
+
+    // Performance monitoring (development only)
+    if (window.location.hostname === 'localhost') {
+      setInterval(() => {
+        const fps = paper.view._project._frameRate || 0;
+        if (fps < 30) {
+          console.warn(`Low FPS detected: ${fps.toFixed(1)}`);
+        }
+      }, 5000);
+    }
+
+    // Activate Paper.js
+    paper.view.draw();
+  });
+</script>

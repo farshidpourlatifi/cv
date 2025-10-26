@@ -1,0 +1,32 @@
+{
+  "name": "Farshid Pourlatifi",
+  "title": "Senior Full Stack Developer | AI Integration Specialist",
+  "location": "Istanbul, Turkey",
+  "phone": "+905352296900",
+  "email": "farshid.pourlatifi@gmail.com",
+  "linkedin": "linkedin.com/in/farshidpourlatifi",
+  "education": {
+    "institution": "University of Tehran",
+    "degree": "Associate Degree",
+    "field": "Physics",
+    "period": "1999 – 2003"
+  },
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "Advanced (C1)"
+    },
+    {
+      "language": "Farsi",
+      "proficiency": "Native"
+    },
+    {
+      "language": "Turkish",
+      "proficiency": "Learning (A2)"
+    },
+    {
+      "language": "German",
+      "proficiency": "Learning (A1)"
+    }
+  ]
+}

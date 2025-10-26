@@ -1,0 +1,193 @@
+{
+  "core_competencies": {
+    "frontend_development": [
+      "React",
+      "Redux",
+      "Vue.js 3",
+      "TypeScript",
+      "JavaScript (ES6+)",
+      "Shadcn/ui",
+      "Tailwind CSS",
+      "BackboneJS"
+    ],
+    "backend_development": [
+      "Python",
+      "FastAPI",
+      "Node.js",
+      "PHP",
+      "HapiJS",
+      "RESTful APIs",
+      "Microservices Architecture"
+    ],
+    "ai_automation": [
+      "Vocode",
+      "Dify",
+      "n8n",
+      "ElevenLabs",
+      "AI Agent Development",
+      "Voice Agent Optimization",
+      "Claude.ai"
+    ],
+    "devops_cicd": [
+      "GitHub Actions",
+      "Jenkins",
+      "Docker",
+      "Continuous Integration/Continuous Deployment (CI/CD)",
+      "Automated Testing"
+    ],
+    "databases": [
+      "PostgreSQL",
+      "MySQL",
+      "MongoDB",
+      "Redis",
+      "Elasticsearch",
+      "Apache Solr"
+    ],
+    "ecommerce_platforms": [
+      "Magento 2",
+      "BigCommerce",
+      "Shopify",
+      "WordPress"
+    ],
+    "testing_frameworks": [
+      "Vitest",
+      "Playwright",
+      "Cypress",
+      "Jest",
+      "Nightwatch"
+    ],
+    "cloud_infrastructure": [
+      "Amazon Web Services (AWS)",
+      "Microsoft Azure",
+      "Nginx",
+      "Apache",
+      "Varnish"
+    ]
+  },
+  "technical_skills": {
+    "programming_languages": [
+      "JavaScript (ES6+)",
+      "TypeScript",
+      "Python",
+      "PHP",
+      "C#",
+      "Groovy"
+    ],
+    "frontend_frameworks": [
+      "React",
+      "Redux",
+      "Vue.js 3",
+      "BackboneJS",
+      "Mithril.js",
+      "jQuery"
+    ],
+    "css_frameworks_tools": [
+      "Tailwind CSS",
+      "Shadcn/ui",
+      "Bootstrap",
+      "SASS/SCSS",
+      "LESS"
+    ],
+    "backend_frameworks": [
+      "FastAPI",
+      "Node.js",
+      "HapiJS",
+      "ASP.NET MVC",
+      "Express.js"
+    ],
+    "ai_machine_learning": [
+      "Vocode",
+      "Dify",
+      "n8n",
+      "ElevenLabs",
+      "Claude.ai",
+      "AI Agent Development"
+    ],
+    "databases": [
+      "PostgreSQL",
+      "MySQL",
+      "MongoDB",
+      "Redis",
+      "Elasticsearch",
+      "Apache Solr",
+      "SQL Server"
+    ],
+    "devops_cicd": [
+      "GitHub Actions",
+      "Jenkins",
+      "Docker",
+      "TeamCity",
+      "Automated Testing"
+    ],
+    "cloud_platforms": [
+      "Amazon Web Services (AWS)",
+      "Microsoft Azure"
+    ],
+    "ecommerce_cms": [
+      "WordPress",
+      "Magento 2",
+      "BigCommerce",
+      "Shopify",
+      "Drupal",
+      "Orchard CMS"
+    ],
+    "testing_frameworks": [
+      "Vitest",
+      "Playwright",
+      "Cypress",
+      "Jest",
+      "Nightwatch"
+    ],
+    "build_tools": [
+      "Grunt",
+      "Webpack",
+      "RequireJS",
+      "Bun"
+    ],
+    "message_queues": [
+      "RabbitMQ",
+      "Redis Pub/Sub"
+    ],
+    "web_servers": [
+      "Nginx",
+      "Apache",
+      "Varnish"
+    ],
+    "version_control": [
+      "Git",
+      "SVN"
+    ],
+    "api_development": [
+      "RESTful APIs",
+      "GraphQL",
+      "OAuth 2.0",
+      "JSON Web Tokens (JWT)"
+    ],
+    "other": [
+      "Microservices Architecture",
+      "Single Page Applications (SPA)",
+      "Server-Side Rendering (SSR)",
+      "Web Workers",
+      "Headless Chrome",
+      "Hugo Static Site Generator"
+    ]
+  },
+  "key_achievements": [
+    {
+      "achievement": "Improved AI Voice Agent Performance by 30%",
+      "description": "Optimized LetzTalk SaaS platform through React/Redux architecture and AI integration (Elevenlabs, Dify, WP)"
+    },
+    {
+      "achievement": "Led Zero-Downtime E-commerce Migrations",
+      "description": "Successfully migrated multiple platforms from Magento 1 to Magento 2/BigCommerce, maintaining all integrations"
+    },
+    {
+      "achievement": "Increased User Engagement by 25%",
+      "description": "Redesigned 5 WordPress sites with custom design system, leading to increase in user engagement"
+    },
+    {
+      "achievement": "Architected Scalable SaaS Products",
+      "description": "Built modern applications using Vue.js 3, React, and FastAPI serving thousands of users"
+    }
+  ]
+}

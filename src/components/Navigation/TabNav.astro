@@ -1,0 +1,223 @@
+---
+/**
+ * TabNav Component
+ *
+ * Navigation tabs for switching between Home, Skills, and Experience sections
+ * Based on Figma design specifications
+ */
+---
+
+<nav class="tab-nav" id="tab-navigation">
+  <div class="container">
+    <ul class="nav-list">
+      <li>
+        <button class="nav-tab active" data-section="home">
+          Home
+        </button>
+      </li>
+      <li>
+        <button class="nav-tab" data-section="skills">
+          Skills
+        </button>
+      </li>
+      <li>
+        <button class="nav-tab" data-section="experience">
+          Experience
+        </button>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+<style>
+  /* Mobile-first: Hide tab navigation on mobile (scrolling instead) */
+  .tab-nav {
+    display: none;
+  }
+
+  /* Desktop styles (768px and up) */
+  @media (min-width: 768px) {
+    .tab-nav {
+      display: block;
+      position: fixed;
+      top: 95px;
+      left: 0;
+      z-index: 100;
+      background: transparent;
+      padding: 0;
+      width: 100%;
+    }
+
+    .nav-list {
+      display: flex;
+      gap: 0;
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      position: relative;
+    }
+
+    /* Exact Figma positioning for desktop */
+    .nav-list li:nth-child(1) {
+      position: absolute;
+      left: 103px;
+    }
+
+    .nav-list li:nth-child(2) {
+      position: absolute;
+      left: 210px;
+    }
+
+    .nav-list li:nth-child(3) {
+      position: absolute;
+      left: 316px;
+    }
+
+    .nav-tab {
+      background: none;
+      border: none;
+      padding: var(--space-2) 0;
+      font-family: var(--font-sans);
+      font-size: var(--text-xl);
+      font-weight: var(--font-semibold);
+      line-height: 1.2;
+      color: var(--color-white);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      position: relative;
+    }
+
+    .nav-tab::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--color-secondary-light);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform var(--transition-base);
+    }
+
+    .nav-tab:hover {
+      color: var(--color-secondary-light);
+    }
+
+    .nav-tab.active {
+      color: var(--color-white);
+    }
+
+    .nav-tab.active::after {
+      transform: scaleX(1);
+    }
+  }
+
+  @media print {
+    .tab-nav {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  // Tab navigation functionality with URL routing (desktop only)
+  document.addEventListener('DOMContentLoaded', () => {
+    // Only run tab navigation on desktop
+    const isDesktop = window.innerWidth >= 768;
+    if (!isDesktop) return;
+
+    const tabs = document.querySelectorAll('.nav-tab');
+    const sections = document.querySelectorAll('[data-page-section]');
+
+    // Function to show a specific section
+    function showSection(sectionName: string, updateHistory: boolean = true) {
+      // Remove active class from all tabs
+      tabs.forEach(t => t.classList.remove('active'));
+
+      // Add active class to target tab
+      const targetTab = document.querySelector(`[data-section="${sectionName}"]`);
+      if (targetTab) {
+        targetTab.classList.add('active');
+      }
+
+      // Hide all sections
+      sections.forEach(section => {
+        section.classList.remove('active');
+        section.style.display = 'none';
+      });
+
+      // Show target section with flex display to maintain centering
+      const target = document.querySelector(`[data-page-section="${sectionName}"]`);
+      if (target) {
+        target.style.display = 'flex';
+        target.classList.add('active');
+
+        // Update URL based on section
+        if (updateHistory) {
+          const url = sectionName === 'home' ? '/' : `/${sectionName}`;
+          window.history.pushState({ section: sectionName }, '', url);
+        }
+
+        // Smoothly scroll to top to maintain consistent view
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      }
+    }
+
+    // Handle tab clicks
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const targetSection = tab.dataset.section;
+        if (targetSection) {
+          showSection(targetSection, true);
+        }
+      });
+    });
+
+    // Handle browser back/forward navigation
+    window.addEventListener('popstate', (event) => {
+      const section = event.state?.section || getSectionFromPath();
+      showSection(section, false);
+    });
+
+    // Get section from current URL path
+    function getSectionFromPath() {
+      const path = window.location.pathname;
+      if (path === '/skills' || path === '/skills/') return 'skills';
+      if (path === '/experience' || path === '/experience/') return 'experience';
+      return 'home';
+    }
+
+    // Get initially active section from DOM
+    function getInitialActiveSection() {
+      const activeSection = document.querySelector('[data-page-section].active');
+      if (activeSection) {
+        return activeSection.getAttribute('data-page-section') || 'home';
+      }
+      return 'home';
+    }
+
+    // Initialize correct section based on URL and DOM state
+    const initialSection = getInitialActiveSection();
+    const pathSection = getSectionFromPath();
+
+    // Update tab state to match the active section
+    tabs.forEach(tab => {
+      if (tab.dataset.section === initialSection) {
+        tab.classList.add('active');
+      } else {
+        tab.classList.remove('active');
+      }
+    });
+
+    // Set initial history state
+    window.history.replaceState(
+      { section: initialSection },
+      '',
+      initialSection === 'home' ? '/' : `/${initialSection}`
+    );
+  });
+</script>

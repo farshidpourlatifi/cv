@@ -1,0 +1,47 @@
+{
+  "site": {
+    "title": "Farshid Pourlatifi - CV",
+    "description": "Senior Full Stack Developer with 15+ years building scalable web applications and architecting AI-powered SaaS solutions",
+    "url": "https://farshid.pourlatifi.com",
+    "author": "Farshid Pourlatifi",
+    "lang": "en"
+  },
+  "professional_summary": "Senior Full Stack Developer with 15+ years building scalable web applications and architecting AI-powered SaaS solutions. Expert in React, Vue.js, FastAPI, and AI integration technologies (Vocode, Dify, ElevenLabs). Proven track record improving application performance by 30% through AI voice agent optimization and modern architecture implementation. Specialized in transforming legacy systems into high-performance platforms while leading technical architecture decisions for international teams.",
+  "metadata": {
+    "total_experience_years": 15,
+    "current_role": "Senior Web Developer",
+    "current_company": "Younea S.à r.l.",
+    "work_preferences": {
+      "remote": true,
+      "location_preference": "Remote, Europe",
+      "job_types": [
+        "Full-time",
+        "Contract"
+      ]
+    },
+    "specializations": [
+      "AI Integration",
+      "SaaS Platforms",
+      "E-commerce",
+      "Full Stack Development",
+      "Frontend Architecture",
+      "Performance Optimization"
+    ]
+  },
+  "theme": {
+    "primary_color": "#0A3A52",
+    "secondary_color": "#006BA5",
+    "accent_color": "#F0000F",
+    "background_gradient": {
+      "from": "#0A3A52",
+      "to": "#004B72"
+    }
+  },
+  "features": {
+    "show_achievements": true,
+    "show_technologies": true,
+    "show_timeline": true,
+    "enable_pdf_download": true,
+    "enable_geometric_background": true
+  }
+}
