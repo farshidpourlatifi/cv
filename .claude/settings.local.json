@@ -21,7 +21,8 @@
       "Bash(rm:*)",
       "Bash(npm install:*)",
       "Bash(bun install:*)",
-      "Bash(open http://localhost:4322)"
+      "Bash(open http://localhost:4322)",
+      "mcp__ide__getDiagnostics"
     ],
     "deny": [],
     "ask": []

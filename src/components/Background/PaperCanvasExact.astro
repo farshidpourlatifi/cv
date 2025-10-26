@@ -432,12 +432,139 @@
         baseX: shapeData.x, // Original X for respawn
         baseY: shapeData.y, // Original Y for respawn
         shapeType: shapeData.type,
+        // Firing properties
+        isFiring: false,
+        fireIntensity: 0,
+        fireDecay: 0.05, // How fast the glow fades
+        originalStrokeWidth: shapeData.strokeWidth,
+        originalStrokeColor: shapeData.strokeColor,
+        lastFireTime: -1000, // Last time this shape fired (frame number)
+        fireCooldown: 180, // Minimum frames between fires (3 seconds at 60fps)
+        lifespanExtension: 100, // Frames added to lifespan when firing (~1.7 seconds)
       };
 
       shapes.push(shape);
     });
 
     console.log(`Created ${shapes.length} shapes`);
+
+    // Create neuron-like connections between nearby shapes
+    const connections: any[] = [];
+    const maxConnectionDistance = 150; // Maximum distance to connect shapes
+    const connectionProbability = 0.3; // Probability of creating a connection
+
+    const createConnections = () => {
+      shapes.forEach((shape, i) => {
+        shapes.forEach((otherShape, j) => {
+          if (i >= j) return; // Avoid duplicate connections and self-connections
+
+          const dx = otherShape.position.x - shape.position.x;
+          const dy = otherShape.position.y - shape.position.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+
+          // Only connect if within range and moving towards top-right direction
+          // (target shape should be to the right and/or above)
+          if (distance < maxConnectionDistance &&
+              (dx > 0 || dy < 0) && // Right or up
+              Math.random() < connectionProbability) {
+
+            const line = new paper.Path.Line({
+              from: shape.position,
+              to: otherShape.position,
+              strokeColor: new paper.Color(colors.secondary),
+              strokeWidth: 0.5,
+              opacity: 0.2,
+              dashArray: [2, 4],
+            });
+
+            // Store connection data
+            line.data = {
+              startShape: shape,
+              endShape: otherShape,
+              age: Math.random() * 60, // Random starting age for staggered animation
+              pulseSpeed: 0.05 + Math.random() * 0.05,
+              travelingPulses: [], // Array of pulses traveling along this connection
+            };
+
+            connections.push(line);
+          }
+        });
+      });
+    };
+
+    createConnections();
+    console.log(`Created ${connections.length} neuron connections`);
+
+    // Regenerate connections for a specific shape
+    const regenerateConnectionsForShape = (shape: paper.Path, index: number) => {
+      // Create new connections FROM this shape to nearby shapes (outgoing)
+      shapes.forEach((otherShape, j) => {
+        if (index === j) return; // Skip self
+
+        const dx = otherShape.position.x - shape.position.x;
+        const dy = otherShape.position.y - shape.position.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        // Only connect if within range and moving towards top-right direction
+        if (distance < maxConnectionDistance &&
+            (dx > 0 || dy < 0) && // Right or up
+            Math.random() < connectionProbability) {
+
+          const line = new paper.Path.Line({
+            from: shape.position,
+            to: otherShape.position,
+            strokeColor: new paper.Color(colors.secondary),
+            strokeWidth: 0.5,
+            opacity: 0.2,
+            dashArray: [2, 4],
+          });
+
+          line.data = {
+            startShape: shape,
+            endShape: otherShape,
+            age: Math.random() * 60,
+            pulseSpeed: 0.05 + Math.random() * 0.05,
+            travelingPulses: [],
+          };
+
+          connections.push(line);
+        }
+      });
+
+      // Create new connections TO this shape from nearby shapes (incoming)
+      shapes.forEach((otherShape, j) => {
+        if (index === j) return; // Skip self
+
+        const dx = shape.position.x - otherShape.position.x;
+        const dy = shape.position.y - otherShape.position.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        // Only connect if within range and moving towards top-right direction
+        if (distance < maxConnectionDistance &&
+            (dx > 0 || dy < 0) && // Right or up
+            Math.random() < connectionProbability) {
+
+          const line = new paper.Path.Line({
+            from: otherShape.position,
+            to: shape.position,
+            strokeColor: new paper.Color(colors.secondary),
+            strokeWidth: 0.5,
+            opacity: 0.2,
+            dashArray: [2, 4],
+          });
+
+          line.data = {
+            startShape: otherShape,
+            endShape: shape,
+            age: Math.random() * 60,
+            pulseSpeed: 0.05 + Math.random() * 0.05,
+            travelingPulses: [],
+          };
+
+          connections.push(line);
+        }
+      });
+    };
 
     // Counters for equal distribution of shapes, colors, and stroke widths
     let shapeTypeCounter = 0;
@@ -452,6 +579,22 @@
     // Helper function to regenerate a shape with equal distribution
     const regenerateShape = (shape: paper.Path, index: number) => {
       const data = shape.data;
+      const oldShape = shape; // Store reference to old shape before removal
+
+      // Remove all connections that reference this old shape
+      for (let i = connections.length - 1; i >= 0; i--) {
+        const conn = connections[i];
+        if (conn.data.startShape === oldShape || conn.data.endShape === oldShape) {
+          // Clean up any traveling pulses
+          conn.data.travelingPulses.forEach((pulse: any) => {
+            if (pulse.segment) {
+              pulse.segment.remove();
+            }
+          });
+          conn.remove();
+          connections.splice(i, 1);
+        }
+      }
 
       // Position jitter (within ±30px of original position)
       const jitterX = (Math.random() - 0.5) * 60;
@@ -542,22 +685,82 @@
         baseX: data.baseX, // Keep original base position
         baseY: data.baseY,
         shapeType: newType,
+        // Firing properties
+        isFiring: false,
+        fireIntensity: 0,
+        fireDecay: 0.05,
+        originalStrokeWidth: newStrokeWidth,
+        originalStrokeColor: newColor,
+        lastFireTime: -1000,
+        fireCooldown: 180,
+        lifespanExtension: 100,
       };
 
       // Replace in shapes array
       shapes[index] = newShape;
+
+      // Regenerate connections for this new shape
+      regenerateConnectionsForShape(newShape, index);
     };
+
+    // Helper function to trigger a shape to fire
+    const fireShape = (shape: paper.Path, currentFrame: number) => {
+      // Safety check: ensure shape is still valid and in the shapes array
+      if (!shape || !shape.data || !shapes.includes(shape)) {
+        return;
+      }
+
+      // Check cooldown: prevent firing too frequently
+      const timeSinceLastFire = currentFrame - shape.data.lastFireTime;
+      if (timeSinceLastFire < shape.data.fireCooldown) {
+        return; // Still in cooldown, don't fire
+      }
+
+      if (!shape.data.isFiring) {
+        shape.data.isFiring = true;
+        shape.data.fireIntensity = 1.0;
+        shape.data.lastFireTime = currentFrame; // Update last fire time
+
+        // Extend lifespan - active neurons live longer
+        shape.data.lifespan += shape.data.lifespanExtension;
+
+        // Send pulses along all outgoing connections
+        connections.forEach((connection) => {
+          if (connection.data.startShape === shape) {
+            // Add a traveling pulse
+            connection.data.travelingPulses.push({
+              progress: 0, // 0 = start, 1 = end
+              speed: 0.02, // Speed of pulse travel (0.02 = 2% per frame)
+            });
+          }
+        });
+      }
+    };
+
+    // Track current frame for mouse interaction
+    let currentFrameCount = 0;
 
     // Organic floating animations - each shape moves independently in X and Y with easing
     paper.view.onFrame = (event: any) => {
       const time = event.count;
+      currentFrameCount = time;
+
+      // Randomly trigger fires from shapes (neural activity) - reduced frequency
+      if (Math.random() < 0.003) { // 0.3% chance per frame = ~0.18 fires per second
+        const randomShape = shapes[Math.floor(Math.random() * shapes.length)];
+        if (randomShape) {
+          fireShape(randomShape, time);
+        }
+      }
 
       shapes.forEach((shape, index) => {
         // Regenerate before incrementing age if lifecycle is complete
         if (shape.data.age >= shape.data.lifespan) {
           regenerateShape(shape, index);
           // Get the newly regenerated shape
-          shape = shapes[index];
+          const regeneratedShape = shapes[index];
+          if (!regeneratedShape) return;
+          shape = regeneratedShape;
         }
 
         // Increment age
@@ -581,6 +784,30 @@
         }
 
         shape.opacity = opacity;
+
+        // Handle firing state (glow effect)
+        if (shape.data.isFiring) {
+          shape.data.fireIntensity -= shape.data.fireDecay;
+          if (shape.data.fireIntensity <= 0) {
+            shape.data.isFiring = false;
+            shape.data.fireIntensity = 0;
+          }
+        }
+
+        // Apply glow effect when firing, or restore to normal
+        if (shape.data.fireIntensity > 0) {
+          // Increase stroke width to create glow
+          shape.strokeWidth = shape.data.originalStrokeWidth + shape.data.fireIntensity * 3;
+
+          // Brighten the color
+          const glowColor = new paper.Color(shape.data.originalStrokeColor);
+          glowColor.brightness += shape.data.fireIntensity * 0.3;
+          shape.strokeColor = glowColor;
+        } else {
+          // Restore to original appearance when not firing
+          shape.strokeWidth = shape.data.originalStrokeWidth;
+          shape.strokeColor = new paper.Color(shape.data.originalStrokeColor);
+        }
 
         // Raw sine wave values (oscillating between -1 and 1)
         const rawSinY = Math.sin(time * shape.data.floatSpeedY + shape.data.floatPhaseY);
@@ -606,9 +833,121 @@
         const rotationEase = easeInOutSine(normalizedY);
         shape.rotate(shape.data.rotationSpeed * 60 * (rotationEase * 2 - 1));
       });
+
+      // Animate neuron connections
+      for (let i = connections.length - 1; i >= 0; i--) {
+        const connection = connections[i];
+
+        // Safety check: ensure both shapes are still valid
+        const startShape = connection.data.startShape;
+        const endShape = connection.data.endShape;
+
+        if (!startShape || !endShape || !shapes.includes(startShape) || !shapes.includes(endShape)) {
+          // Clean up invalid connection
+          connection.data.travelingPulses.forEach((pulse: any) => {
+            if (pulse.segment) pulse.segment.remove();
+          });
+          connection.remove();
+          connections.splice(i, 1);
+          continue;
+        }
+
+        // Update connection positions to follow shapes
+        const startPos = startShape.position;
+        const endPos = endShape.position;
+        connection.segments[0].point = startPos;
+        connection.segments[1].point = endPos;
+
+        // Pulsing opacity animation (like neurons firing)
+        connection.data.age += connection.data.pulseSpeed;
+        const pulseValue = Math.sin(connection.data.age);
+        const baseOpacity = 0.15;
+        const pulseAmount = 0.15;
+        connection.opacity = baseOpacity + (pulseValue * 0.5 + 0.5) * pulseAmount;
+
+        // Make connections fade with their connected shapes
+        const startOpacity = connection.data.startShape.opacity;
+        const endOpacity = connection.data.endShape.opacity;
+        const minShapeOpacity = Math.min(startOpacity, endOpacity);
+        connection.opacity *= minShapeOpacity;
+
+        // Animate traveling pulses
+        const pulses = connection.data.travelingPulses;
+        for (let i = pulses.length - 1; i >= 0; i--) {
+          const pulse = pulses[i];
+          pulse.progress += pulse.speed;
+
+          // Create a highlighted segment of the connection line for the pulse
+          const pulseLength = 0.15; // Length of the pulse segment (15% of line)
+          const pulseStart = Math.max(0, pulse.progress - pulseLength);
+          const pulseEnd = Math.min(1, pulse.progress);
+
+          // Interpolate color from start shape to end shape based on progress
+          const startColor = new paper.Color(startShape.strokeColor);
+          const endColor = new paper.Color(endShape.strokeColor);
+          const pulseColor = startColor.clone();
+
+          // Lerp between start and end color based on pulse progress
+          pulseColor.red = startColor.red + (endColor.red - startColor.red) * pulse.progress;
+          pulseColor.green = startColor.green + (endColor.green - startColor.green) * pulse.progress;
+          pulseColor.blue = startColor.blue + (endColor.blue - startColor.blue) * pulse.progress;
+
+          if (!pulse.segment) {
+            pulse.segment = new paper.Path.Line({
+              from: startPos.add(endPos.subtract(startPos).multiply(pulseStart)),
+              to: startPos.add(endPos.subtract(startPos).multiply(pulseEnd)),
+              strokeColor: pulseColor,
+              strokeWidth: 2,
+              strokeCap: 'round',
+            });
+          } else {
+            // Update segment position and color
+            pulse.segment.segments[0].point = startPos.add(endPos.subtract(startPos).multiply(pulseStart));
+            pulse.segment.segments[1].point = startPos.add(endPos.subtract(startPos).multiply(pulseEnd));
+            pulse.segment.strokeColor = pulseColor;
+          }
+
+          // Fade as it travels
+          pulse.segment.opacity = 0.9 * (1 - pulse.progress * 0.3);
+
+          // If pulse reached the end, trigger the next shape to fire
+          if (pulse.progress >= 1) {
+            fireShape(connection.data.endShape, time);
+            if (pulse.segment) {
+              pulse.segment.remove(); // Clean up the pulse segment
+            }
+            pulses.splice(i, 1); // Remove completed pulse
+          }
+        }
+      }
     };
 
     console.log('Animation loop started');
+
+    // Mouse interaction - fire nodes on hover
+    let lastHoveredShape: paper.Path | null = null;
+
+    paper.view.onMouseMove = (event: any) => {
+      const hitResult = paper.project.hitTest(event.point, {
+        fill: true,
+        stroke: true,
+        tolerance: 5
+      });
+
+      if (hitResult && hitResult.item) {
+        // Check if the hit item is one of our shapes
+        const hoveredShape = shapes.find(s => s === hitResult.item);
+
+        if (hoveredShape && hoveredShape !== lastHoveredShape) {
+          // Fire the shape when mouse enters it
+          fireShape(hoveredShape, currentFrameCount);
+          lastHoveredShape = hoveredShape;
+        }
+      } else {
+        // Mouse is not over any shape
+        lastHoveredShape = null;
+      }
+    };
 
     // Handle resize
     window.addEventListener('resize', () => {
