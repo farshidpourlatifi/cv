@@ -20,7 +20,8 @@
       "Bash(npm run dev:*)",
       "Bash(rm:*)",
       "Bash(npm install:*)",
-      "Bash(bun install:*)"
+      "Bash(bun install:*)",
+      "Bash(open http://localhost:4322)"
     ],
     "deny": [],
     "ask": []

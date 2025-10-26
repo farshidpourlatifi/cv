@@ -32,13 +32,20 @@
 <script>
   import paper from 'paper';
 
-  // Initialize Paper.js when DOM is ready
-  document.addEventListener('DOMContentLoaded', () => {
+  // Initialize Paper.js - run immediately since Astro scripts are deferred by default
+  function initPaperCanvas() {
     const canvas = document.getElementById('geometric-canvas') as HTMLCanvasElement;
-    if (!canvas) return;
+    if (!canvas) {
+      console.error('Canvas not found!');
+      return;
+    }
+
+    console.log('Initializing Paper.js...');
 
     // Setup Paper.js
     paper.setup(canvas);
+
+    console.log('Paper.js setup complete');
 
     // Colors from the SVG design
     const colors = {
@@ -50,8 +57,214 @@
       white: '#FFFFFF',
     };
 
-    // Exact shapes from bg.svg with their positions, types, and properties
-    const shapesData = [
+    // Generate shapes within a diagonal sine wave band (bottom-left to top-right)
+    const generateShapesInDiagonalBand = () => {
+      const generatedShapes: any[] = [];
+      const minDistance = 80; // Minimum distance between shapes to avoid overlap
+
+      // Band parameters
+      const bandWidth = 300; // Width of the band (perpendicular to diagonal)
+      const sineAmplitude = 100; // Amplitude of sine wave oscillation
+      const sineFrequency = 0.004; // Frequency of sine wave
+
+      // Diagonal line from bottom-left to top-right
+      const startPoint = { x: 0, y: paper.view.size.height };
+      const endPoint = { x: paper.view.size.width, y: 0 };
+
+      // Calculate diagonal distance
+      const diagonalLength = Math.sqrt(
+        Math.pow(endPoint.x - startPoint.x, 2) +
+        Math.pow(endPoint.y - startPoint.y, 2)
+      );
+
+      // Unit vector along diagonal
+      const directionX = (endPoint.x - startPoint.x) / diagonalLength;
+      const directionY = (endPoint.y - startPoint.y) / diagonalLength;
+
+      // Perpendicular vector (for band width)
+      const perpX = -directionY;
+      const perpY = directionX;
+
+      // Shape types to randomly select from
+      const shapeTypes = ['circle', 'rect', 'triangle'];
+      const sizes = { circle: [15, 20, 10], rect: [15, 25, 20], triangle: [20, 15, 25] };
+
+      // Check if position is too close to existing shapes
+      const isTooClose = (x: number, y: number, existing: any[]) => {
+        return existing.some(shape => {
+          const dx = shape.x - x;
+          const dy = shape.y - y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          return distance < minDistance;
+        });
+      };
+
+      // Generate shapes along the diagonal band
+      const spacing = 1; // Spacing along the diagonal
+
+      for (let t = 100; t < diagonalLength - 100; t += spacing + Math.random() * 5) {
+        // Position along the diagonal
+        const baseX = startPoint.x + directionX * t;
+        const baseY = startPoint.y + directionY * t;
+
+        // Sine wave offset (oscillates perpendicular to diagonal)
+        const sineOffset = Math.sin(t * sineFrequency) * sineAmplitude;
+
+        // Random offset within band width
+        const bandOffset = (Math.random() - 0.5) * bandWidth + sineOffset;
+
+        // Final position
+        const x = baseX + perpX * bandOffset;
+        const y = baseY + perpY * bandOffset;
+
+        // Check bounds and overlap
+        if (x >= 50 && x <= paper.view.size.width - 50 &&
+            y >= 50 && y <= paper.view.size.height - 50 &&
+            !isTooClose(x, y, generatedShapes)) {
+
+          // Randomly select shape type and size
+          const type = shapeTypes[Math.floor(Math.random() * shapeTypes.length)];
+          const sizeOptions = sizes[type as keyof typeof sizes];
+          const size = sizeOptions[Math.floor(Math.random() * sizeOptions.length)];
+
+          // Random color selection
+          const colorOptions = [colors.primaryLight, colors.secondary, colors.accent, colors.tertiary, colors.white];
+          const strokeColor = colorOptions[Math.floor(Math.random() * colorOptions.length)];
+
+          // Random stroke width
+          const strokeWidth = Math.random() > 0.7 ? 5 : Math.random() > 0.4 ? 2 : 1;
+
+          // Random rotation
+          const rotation = Math.random() * 360;
+
+          // Add shape
+          if (type === 'circle') {
+            generatedShapes.push({
+              type: 'circle',
+              x, y,
+              radius: size,
+              strokeColor,
+              strokeWidth
+            });
+          } else if (type === 'rect') {
+            generatedShapes.push({
+              type: 'rect',
+              x, y,
+              width: size,
+              height: size,
+              radius: Math.random() > 0.5 ? 2.5 : 4.5,
+              rotation,
+              strokeColor,
+              strokeWidth
+            });
+          } else if (type === 'triangle') {
+            generatedShapes.push({
+              type: 'triangle',
+              x, y,
+              size,
+              rotation,
+              strokeColor,
+              strokeWidth
+            });
+          }
+        }
+      }
+
+      return generatedShapes;
+    };
+
+    const shapesData = generateShapesInDiagonalBand();
+
+    // Draw visible sine wave band for debugging/visualization
+    const drawSineWaveBand = () => {
+      // Band parameters (must match generation parameters)
+      const bandWidth = 300;
+      const sineAmplitude = 100;
+      const sineFrequency = 0.004;
+
+      // Diagonal line from bottom-left to top-right
+      const startPoint = { x: 0, y: paper.view.size.height };
+      const endPoint = { x: paper.view.size.width, y: 0 };
+
+      // Calculate diagonal distance
+      const diagonalLength = Math.sqrt(
+        Math.pow(endPoint.x - startPoint.x, 2) +
+        Math.pow(endPoint.y - startPoint.y, 2)
+      );
+
+      // Unit vector along diagonal
+      const directionX = (endPoint.x - startPoint.x) / diagonalLength;
+      const directionY = (endPoint.y - startPoint.y) / diagonalLength;
+
+      // Perpendicular vector (for band width)
+      const perpX = -directionY;
+      const perpY = directionX;
+
+      // Draw center sine wave line
+      const centerLine = new paper.Path();
+      centerLine.strokeColor = new paper.Color('#FF0000');
+      centerLine.strokeWidth = 2;
+      centerLine.opacity = 0.3;
+      centerLine.dashArray = [10, 5];
+
+      // Draw upper boundary
+      const upperBoundary = new paper.Path();
+      upperBoundary.strokeColor = new paper.Color('#00FF00');
+      upperBoundary.strokeWidth = 1;
+      upperBoundary.opacity = 0.2;
+      upperBoundary.dashArray = [5, 5];
+
+      // Draw lower boundary
+      const lowerBoundary = new paper.Path();
+      lowerBoundary.strokeColor = new paper.Color('#00FF00');
+      lowerBoundary.strokeWidth = 1;
+      lowerBoundary.opacity = 0.2;
+      lowerBoundary.dashArray = [5, 5];
+
+      // Generate points along the diagonal
+      for (let t = 0; t <= diagonalLength; t += 5) {
+        // Position along the diagonal
+        const baseX = startPoint.x + directionX * t;
+        const baseY = startPoint.y + directionY * t;
+
+        // Sine wave offset
+        const sineOffset = Math.sin(t * sineFrequency) * sineAmplitude;
+
+        // Center line point
+        const centerX = baseX + perpX * sineOffset;
+        const centerY = baseY + perpY * sineOffset;
+        centerLine.add(new paper.Point(centerX, centerY));
+
+        // Upper boundary point
+        const upperOffset = sineOffset + bandWidth / 2;
+        const upperX = baseX + perpX * upperOffset;
+        const upperY = baseY + perpY * upperOffset;
+        upperBoundary.add(new paper.Point(upperX, upperY));
+
+        // Lower boundary point
+        const lowerOffset = sineOffset - bandWidth / 2;
+        const lowerX = baseX + perpX * lowerOffset;
+        const lowerY = baseY + perpY * lowerOffset;
+        lowerBoundary.add(new paper.Point(lowerX, lowerY));
+      }
+
+      // Return paths so they can be toggled later
+      return { centerLine, upperBoundary, lowerBoundary };
+    };
+
+    // Draw the sine wave visualization
+    const sineWaveGuides = drawSineWaveBand();
+
+    // TOGGLE GUIDE VISIBILITY: Set to false to hide the sine wave guides
+    const showGuides = true;
+    if (!showGuides) {
+      sineWaveGuides.centerLine.visible = false;
+      sineWaveGuides.upperBoundary.visible = false;
+      sineWaveGuides.lowerBoundary.visible = false;
+    }
+
+    // Fallback to original shapes if generation fails
+    const originalShapesData = [
       // CENTER SHAPES - positioned around viewport center (683, 386)
       // Top circle
       { type: 'circle', x: 712.738, y: 271.64, radius: 69.5, strokeColor: colors.primaryLight, strokeWidth: 5 },
@@ -192,37 +405,208 @@
           return;
       }
 
-      // Store original position
+      // Store original position and lifecycle data
       shape.data = {
         originalPosition: shape.position.clone(),
         originalRotation: shapeData.rotation || 0,
-        floatPhase: Math.random() * Math.PI * 2,
-        rotationSpeed: (Math.random() - 0.5) * 0.0001, // Very subtle rotation
+        floatPhaseY: Math.random() * Math.PI * 2, // Y-axis phase
+        floatPhaseX: Math.random() * Math.PI * 2, // X-axis phase (different)
+        rotationSpeed: (Math.random() - 0.5) * 0.02, // Slightly more visible rotation
+        floatSpeedY: 0.02 + Math.random() * 0.02, // Increased Y speed
+        floatSpeedX: 0.01 + Math.random() * 0.01, // Increased X speed
+        amplitudeY: 1 + Math.random() * 3, // Random Y amplitude (5-8px)
+        amplitudeX: 1 + Math.random() * .03, // Random X amplitude (6-10px)
+        // Lifecycle properties
+        age: 0,
+        lifespan: 300 + Math.random() * 500, // Random lifespan (300-800 frames, ~5-13 seconds at 60fps)
+        baseX: shapeData.x, // Original X for respawn
+        baseY: shapeData.y, // Original Y for respawn
+        shapeType: shapeData.type,
       };
 
       shapes.push(shape);
     });
 
-    // Very subtle animations - only gentle floating and minimal rotation
+    console.log(`Created ${shapes.length} shapes`);
+
+    // Easing functions for smoother motion
+    const easeInOutSine = (t: number) => -(Math.cos(Math.PI * t) - 1) / 2;
+    const easeInOutQuad = (t: number) => t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+    const easeInOutCubic = (t: number) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+    // Helper function to regenerate a shape with random properties
+    const regenerateShape = (shape: paper.Path, index: number) => {
+      const data = shape.data;
+
+      // Position jitter (within ±30px of original position)
+      const jitterX = (Math.random() - 0.5) * 60;
+      const jitterY = (Math.random() - 0.5) * 60;
+      const newX = data.baseX + jitterX;
+      const newY = data.baseY + jitterY;
+
+      // Random shape type
+      const shapeTypes = ['circle', 'rect', 'triangle'];
+      const newType = shapeTypes[Math.floor(Math.random() * shapeTypes.length)];
+
+      // Random size based on type
+      const sizes = { circle: [15, 20, 10], rect: [15, 25, 20], triangle: [20, 15, 25] };
+      const sizeOptions = sizes[newType as keyof typeof sizes];
+      const newSize = sizeOptions[Math.floor(Math.random() * sizeOptions.length)] || 20;
+
+      // Random color
+      const colorOptions = [colors.primaryLight, colors.secondary, colors.accent, colors.tertiary, colors.white];
+      const newColor = colorOptions[Math.floor(Math.random() * colorOptions.length)];
+
+      // Random stroke width
+      const newStrokeWidth = Math.random() > 0.7 ? 5 : Math.random() > 0.4 ? 2 : 1;
+
+      // Random rotation
+      const newRotation = Math.random() * 360;
+
+      // Remove old shape
+      shape.remove();
+
+      // Create new shape
+      let newShape: paper.Path | paper.Shape;
+
+      switch(newType) {
+        case 'circle':
+          newShape = new paper.Path.Circle({
+            center: [newX, newY],
+            radius: newSize,
+            strokeColor: newColor,
+            strokeWidth: newStrokeWidth,
+          });
+          break;
+
+        case 'rect':
+          newShape = new paper.Path.Rectangle({
+            point: [newX - newSize/2, newY - newSize/2],
+            size: [newSize, newSize],
+            radius: Math.random() > 0.5 ? 2.5 : 4.5,
+            strokeColor: newColor,
+            strokeWidth: newStrokeWidth,
+          });
+          newShape.position = new paper.Point(newX, newY);
+          newShape.rotate(newRotation, newShape.position);
+          break;
+
+        case 'triangle':
+          newShape = new paper.Path.RegularPolygon({
+            center: [newX, newY],
+            sides: 3,
+            radius: newSize,
+            strokeColor: newColor,
+            strokeWidth: newStrokeWidth,
+          });
+          newShape.rotate(newRotation);
+          break;
+
+        default:
+          return;
+      }
+
+      // Reset lifecycle data with new randomized values
+      newShape.data = {
+        originalPosition: newShape.position.clone(),
+        originalRotation: newRotation,
+        floatPhaseY: Math.random() * Math.PI * 2,
+        floatPhaseX: Math.random() * Math.PI * 2,
+        rotationSpeed: (Math.random() - 0.5) * 0.02,
+        floatSpeedY: 0.02 + Math.random() * 0.02,
+        floatSpeedX: 0.01 + Math.random() * 0.01,
+        amplitudeY: 1 + Math.random() * 3,
+        amplitudeX: 1 + Math.random() * .03,
+        age: 0,
+        lifespan: 300 + Math.random() * 500, // New random lifespan
+        baseX: data.baseX, // Keep original base position
+        baseY: data.baseY,
+        shapeType: newType,
+      };
+
+      // Replace in shapes array
+      shapes[index] = newShape;
+    };
+
+    // Organic floating animations - each shape moves independently in X and Y with easing
     paper.view.onFrame = (event: any) => {
       const time = event.count;
 
-      shapes.forEach(shape => {
-        // Very subtle floating (2-3 pixels max)
-        const floatOffset = Math.sin(time * 0.0004 + shape.data.floatPhase) * 2;
-        shape.position.y = shape.data.originalPosition.y + floatOffset;
+      shapes.forEach((shape, index) => {
+        // Regenerate before incrementing age if lifecycle is complete
+        if (shape.data.age >= shape.data.lifespan) {
+          regenerateShape(shape, index);
+          // Get the newly regenerated shape
+          shape = shapes[index];
+        }
 
-        // Extremely subtle rotation
-        shape.rotate(shape.data.rotationSpeed * 60);
+        // Increment age
+        shape.data.age++;
+
+        // Calculate fade in/out opacity based on lifecycle (linear)
+        const fadeInDuration = 30; // Fade in over 30 frames (~0.5 second at 60fps)
+        const fadeOutDuration = 30; // Fade out over 30 frames
+        const age = shape.data.age;
+        const lifespan = shape.data.lifespan;
+
+        let opacity = 1;
+
+        // Fade in at the beginning (linear)
+        if (age <= fadeInDuration) {
+          opacity = age / fadeInDuration;
+        }
+        // Fade out at the end (linear)
+        else if (age >= lifespan - fadeOutDuration) {
+          opacity = Math.max(0, (lifespan - age) / fadeOutDuration);
+        }
+
+        shape.opacity = opacity;
+
+        // Raw sine wave values (oscillating between -1 and 1)
+        const rawSinY = Math.sin(time * shape.data.floatSpeedY + shape.data.floatPhaseY);
+        const rawSinX = Math.sin(time * shape.data.floatSpeedX + shape.data.floatPhaseX);
+
+        // Normalize to 0-1 range for easing function
+        const normalizedY = (rawSinY + 1) / 2; // Convert -1..1 to 0..1
+        const normalizedX = (rawSinX + 1) / 2;
+
+        // Apply easing (creates smoother acceleration/deceleration)
+        const easedY = easeInOutSine(normalizedY);
+        const easedX = easeInOutSine(normalizedX);
+
+        // Convert back to -1..1 range and apply amplitude
+        const floatOffsetY = (easedY * 2 - 1) * shape.data.amplitudeY;
+        const floatOffsetX = (easedX * 2 - 1) * shape.data.amplitudeX;
+
+        // Apply both movements
+        shape.position.x = shape.data.originalPosition.x + floatOffsetX;
+        shape.position.y = shape.data.originalPosition.y + floatOffsetY;
+
+        // Gentle rotation with easing
+        const rotationEase = easeInOutSine(normalizedY);
+        shape.rotate(shape.data.rotationSpeed * 60 * (rotationEase * 2 - 1));
       });
     };
+
+    console.log('Animation loop started');
 
     // Handle resize
     window.addEventListener('resize', () => {
       paper.view.viewSize = new paper.Size(window.innerWidth, window.innerHeight);
     });
+  }
 
-    // Activate Paper.js
-    paper.view.draw();
-  });
+  // Run when DOM is ready
+  console.log('Script loaded! readyState:', document.readyState);
+
+  if (document.readyState === 'loading') {
+    console.log('Waiting for DOMContentLoaded...');
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('DOMContentLoaded fired!');
+      initPaperCanvas();
+    });
+  } else {
+    console.log('DOM already ready, initializing immediately');
+    initPaperCanvas();
+  }
 </script>
