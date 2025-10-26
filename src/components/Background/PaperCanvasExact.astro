@@ -60,7 +60,7 @@
     // Generate shapes within a diagonal sine wave band (bottom-left to top-right)
     const generateShapesInDiagonalBand = () => {
       const generatedShapes: any[] = [];
-      const minDistance = 80; // Minimum distance between shapes to avoid overlap
+      const minDistance = 50; // Minimum distance between shapes (lower = more dense)
 
       // Band parameters
       const bandWidth = 300; // Width of the band (perpendicular to diagonal)
@@ -85,9 +85,16 @@
       const perpX = -directionY;
       const perpY = directionX;
 
-      // Shape types to randomly select from
+      // Shape types to cycle through for equal distribution
       const shapeTypes = ['circle', 'rect', 'triangle'];
       const sizes = { circle: [15, 20, 10], rect: [15, 25, 20], triangle: [20, 15, 25] };
+      const colorOptions = [colors.primaryLight, colors.secondary, colors.accent, colors.tertiary, colors.white];
+      const strokeWidthOptions = [1, 2, 5];
+
+      // Counters for equal distribution
+      let shapeCounter = 0;
+      let colorCounter = 0;
+      let strokeCounter = 0;
 
       // Check if position is too close to existing shapes
       const isTooClose = (x: number, y: number, existing: any[]) => {
@@ -100,9 +107,9 @@
       };
 
       // Generate shapes along the diagonal band
-      const spacing = 1; // Spacing along the diagonal
+      const spacing = 5; // Spacing along the diagonal (lower = more attempts = more dense)
 
-      for (let t = 100; t < diagonalLength - 100; t += spacing + Math.random() * 5) {
+      for (let t = 50; t < diagonalLength - 50; t += spacing + Math.random() * 3) {
         // Position along the diagonal
         const baseX = startPoint.x + directionX * t;
         const baseY = startPoint.y + directionY * t;
@@ -117,22 +124,25 @@
         const x = baseX + perpX * bandOffset;
         const y = baseY + perpY * bandOffset;
 
-        // Check bounds and overlap
-        if (x >= 50 && x <= paper.view.size.width - 50 &&
-            y >= 50 && y <= paper.view.size.height - 50 &&
+        // Check bounds and overlap (reduced padding for more density)
+        if (x >= 30 && x <= paper.view.size.width - 30 &&
+            y >= 30 && y <= paper.view.size.height - 30 &&
             !isTooClose(x, y, generatedShapes)) {
 
-          // Randomly select shape type and size
-          const type = shapeTypes[Math.floor(Math.random() * shapeTypes.length)];
+          // Equal distribution: cycle through shape types
+          const type = shapeTypes[shapeCounter % shapeTypes.length];
+          shapeCounter++;
+
           const sizeOptions = sizes[type as keyof typeof sizes];
           const size = sizeOptions[Math.floor(Math.random() * sizeOptions.length)];
 
-          // Random color selection
-          const colorOptions = [colors.primaryLight, colors.secondary, colors.accent, colors.tertiary, colors.white];
-          const strokeColor = colorOptions[Math.floor(Math.random() * colorOptions.length)];
+          // Equal distribution: cycle through colors
+          const strokeColor = colorOptions[colorCounter % colorOptions.length];
+          colorCounter++;
 
-          // Random stroke width
-          const strokeWidth = Math.random() > 0.7 ? 5 : Math.random() > 0.4 ? 2 : 1;
+          // Equal distribution: cycle through stroke widths
+          const strokeWidth = strokeWidthOptions[strokeCounter % strokeWidthOptions.length];
+          strokeCounter++;
 
           // Random rotation
           const rotation = Math.random() * 360;
@@ -429,12 +439,17 @@
 
     console.log(`Created ${shapes.length} shapes`);
 
+    // Counters for equal distribution of shapes, colors, and stroke widths
+    let shapeTypeCounter = 0;
+    let colorCounter = 0;
+    let strokeWidthCounter = 0;
+
     // Easing functions for smoother motion
     const easeInOutSine = (t: number) => -(Math.cos(Math.PI * t) - 1) / 2;
     const easeInOutQuad = (t: number) => t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
     const easeInOutCubic = (t: number) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
-    // Helper function to regenerate a shape with random properties
+    // Helper function to regenerate a shape with equal distribution
     const regenerateShape = (shape: paper.Path, index: number) => {
       const data = shape.data;
 
@@ -444,21 +459,26 @@
       const newX = data.baseX + jitterX;
       const newY = data.baseY + jitterY;
 
-      // Random shape type
+      // Equal distribution of shape types (cycle through)
       const shapeTypes = ['circle', 'rect', 'triangle'];
-      const newType = shapeTypes[Math.floor(Math.random() * shapeTypes.length)];
+      const newType = shapeTypes[shapeTypeCounter % shapeTypes.length];
+      shapeTypeCounter++;
 
-      // Random size based on type
+      // Equal distribution of sizes for each type
       const sizes = { circle: [15, 20, 10], rect: [15, 25, 20], triangle: [20, 15, 25] };
       const sizeOptions = sizes[newType as keyof typeof sizes];
-      const newSize = sizeOptions[Math.floor(Math.random() * sizeOptions.length)] || 20;
+      const sizeIndex = Math.floor(Math.random() * sizeOptions.length); // Keep size random within type
+      const newSize = sizeOptions[sizeIndex] || 20;
 
-      // Random color
+      // Equal distribution of colors (cycle through)
       const colorOptions = [colors.primaryLight, colors.secondary, colors.accent, colors.tertiary, colors.white];
-      const newColor = colorOptions[Math.floor(Math.random() * colorOptions.length)];
+      const newColor = colorOptions[colorCounter % colorOptions.length];
+      colorCounter++;
 
-      // Random stroke width
-      const newStrokeWidth = Math.random() > 0.7 ? 5 : Math.random() > 0.4 ? 2 : 1;
+      // Equal distribution of stroke widths (cycle through)
+      const strokeWidthOptions = [1, 2, 5];
+      const newStrokeWidth = strokeWidthOptions[strokeWidthCounter % strokeWidthOptions.length];
+      strokeWidthCounter++;
 
       // Random rotation
       const newRotation = Math.random() * 360;
