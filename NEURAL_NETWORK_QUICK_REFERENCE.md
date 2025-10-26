@@ -241,6 +241,23 @@ if (Math.random() < 0.003) {
 lifespan: 999999,  // Essentially infinite
 ```
 
+### Disable Mouse Interaction
+```typescript
+// Lines 926-948, comment out the entire block
+/*
+paper.view.onMouseMove = (event: any) => {
+  // ... entire handler
+};
+*/
+```
+
+### Adjust Mouse Detection Sensitivity
+```typescript
+// Line 930
+tolerance: 10    // Easier to hover (default: 5)
+tolerance: 2     // Harder to hover (more precise)
+```
+
 ---
 
 ## Performance Tuning
@@ -355,6 +372,8 @@ console.log(`🔥 Shape fired at frame ${currentFrame}`);
 | Fire cooldown | 442 |
 | Connection distance | 444 |
 | Pulse speed | 728 |
+| Mouse interaction | 926-948 |
+| Mouse sensitivity | 930 |
 | Colors | 51-58 |
 | Shape sizes | 90 |
 | Jitter amount | 572-573 |
@@ -388,6 +407,9 @@ cv-astro/
 | Animation too fast | Reduce `floatSpeed` values (lines 425-426) |
 | Shapes overlap too much | Increase `minDistance` (line 63) |
 | Pulses not visible | Check colors aren't identical, increase `strokeWidth` (line 876) |
+| Mouse hover not firing shapes | Increase `tolerance` (line 930), check console for errors |
+| Mouse firing too sensitive | Decrease `tolerance` to 2-3 (line 930) |
+| Mouse interaction laggy | Disable mouse handler or reduce shape count |
 
 ---
 

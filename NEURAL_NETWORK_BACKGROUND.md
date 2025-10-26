@@ -41,6 +41,12 @@ An animated neural network visualization system built with Paper.js that creates
 - Color morphing (source color → target color)
 - Cooldown system prevents over-firing
 
+### 6. Mouse Interaction
+- Hover over any shape to make it fire immediately
+- Interactive chain reactions triggered by mouse movement
+- Respects cooldown system to prevent spam
+- Seamless integration with random firing
+
 ---
 
 ## Architecture
@@ -367,6 +373,60 @@ speed: 0.02               // Change travel speed
 pulseLength: 0.15         // Change visual length
 strokeWidth: 2            // Change thickness
 opacity: 0.9 * (1 - progress * 0.3)  // Adjust fade
+```
+
+---
+
+### 6. Mouse Interaction
+
+**Purpose:** Allows users to interact with the neural network by hovering over shapes.
+
+**Location:** Lines 923-948
+
+#### How It Works:
+
+1. **Mouse Tracking:**
+   - `paper.view.onMouseMove` event listener
+   - Tracks current frame count for cooldown checks
+   - Maintains `lastHoveredShape` to prevent repeated firing
+
+2. **Hit Detection:**
+   ```typescript
+   paper.project.hitTest(event.point, {
+     fill: true,      // Detect filled shapes
+     stroke: true,    // Detect strokes
+     tolerance: 5     // 5px detection radius
+   })
+   ```
+
+3. **Fire Trigger:**
+   - Finds which shape in `shapes` array was hit
+   - Checks if it's different from last hovered shape
+   - Calls `fireShape(hoveredShape, currentFrameCount)`
+   - Respects cooldown system (won't fire if recently fired)
+
+4. **Reset:**
+   - When mouse moves away from all shapes
+   - Sets `lastHoveredShape = null`
+   - Next hover will trigger fire again
+
+#### User Experience:
+- Hover over any shape (circle, rectangle, triangle) to make it fire
+- Shape glows and sends pulses to connected neighbors
+- Creates interactive chain reactions
+- Cooldown prevents spam (3 second minimum between fires)
+- Seamlessly integrates with random automatic firing
+
+**Customizing Interaction:**
+```typescript
+// Adjust detection sensitivity
+tolerance: 10        // Easier to trigger (default: 5)
+
+// Disable mouse interaction
+// Comment out the entire onMouseMove handler
+
+// Bypass cooldown for mouse (not recommended)
+// Remove cooldown check in fireShape() for mouse events
 ```
 
 ---
