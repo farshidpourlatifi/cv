@@ -596,9 +596,9 @@
         }
       }
 
-      // Position jitter (within ±30px of original position)
-      const jitterX = (Math.random() - 0.5) * 60;
-      const jitterY = (Math.random() - 0.5) * 60;
+      // Use exact original position (no jitter)
+      const jitterX = 0;
+      const jitterY = 0;
       const newX = data.baseX + jitterX;
       const newY = data.baseY + jitterY;
 
