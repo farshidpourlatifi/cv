@@ -47,25 +47,176 @@
 
     console.log('Paper.js setup complete');
 
-    // Colors from the SVG design
+    // Helper function to get CSS variable value
+    const getCSSVariable = (variableName: string): string => {
+      return getComputedStyle(document.documentElement)
+        .getPropertyValue(variableName)
+        .trim();
+    };
+
+    // Colors - using your Figma Design System from BaseLayout.astro
     const colors = {
-      primaryLight: '#004B72',
-      secondary: '#3E9FD4',
-      accent: '#F0000F',
-      accentDark: '#E00514',
-      tertiary: '#006BA5',
-      white: '#FFFFFF',
+      primary: getCSSVariable('--color-primary') || '#0A3A52',              // Darkest Blue - Primary BG
+      primaryLight: getCSSVariable('--color-primary-light') || '#004B72',   // Dark Blue
+      secondary: getCSSVariable('--color-secondary') || '#006BA5',          // Medium Blue - Interactive
+      secondaryLight: getCSSVariable('--color-secondary-light') || '#3E9FD4', // Cyan - Highlights & Titles
+      tertiary: getCSSVariable('--color-secondary') || '#006BA5',           // Alias for secondary (backward compatibility)
+      accent: getCSSVariable('--color-accent') || '#F0000F',                // Primary Red - CTA
+      accentDark: getCSSVariable('--color-accent-dark') || '#BF0B16',       // Dark Red
+      lineAccent: getCSSVariable('--color-line-accent') || '#E00514',       // Line accents
+      white: getCSSVariable('--color-white') || '#FFFFFF',
+      background: getCSSVariable('--color-primary') || '#0A3A52',           // Use primary color as background (matches page bg)
+    };
+
+    // Shape animation configuration - adjust shape movement and behavior here
+    const shapeConfig = {
+      // Rotation
+      rotationSpeed: {
+        min: -0.005,               // Minimum rotation speed (counter-clockwise)
+        max: 0.005,                // Maximum rotation speed (clockwise)
+      },
+
+      // Floating movement
+      floatSpeed: {
+        yMin: 0.01,               // Minimum Y-axis float speed
+        yMax: 0.03,               // Maximum Y-axis float speed (0.02 + 0.02)
+        xMin: 0.0,               // Minimum X-axis float speed
+        xMax: 0.0,               // Maximum X-axis float speed (0.01 + 0.01)
+      },
+
+      // Float amplitude (movement distance)
+      amplitude: {
+        yMin: 1,                  // Minimum Y amplitude
+        yMax: 4,                  // Maximum Y amplitude (1 + 3)
+        xMin: 1,                  // Minimum X amplitude
+        xMax: 1.03,               // Maximum X amplitude (1 + 0.03)
+      },
+
+      // Blur effect
+      blur: {
+        enabled: false,            // Enable blur on some shapes
+        probability: 0.3,         // 30% chance a shape will have blur
+        amount: 8,                // Blur radius in pixels
+      },
+
+      // Lifecycle
+      lifespan: {
+        min: 300,                 // Minimum lifespan in frames (~5 seconds at 60fps)
+        max: 800,                 // Maximum lifespan in frames (300 + 500, ~13 seconds)
+      },
+
+      // Firing behavior
+      firing: {
+        decay: 0.08,              // How fast the glow fades
+        cooldown: 180,            // Minimum frames between fires (3 seconds at 60fps)
+        lifespanExtension: 100,   // Frames added to lifespan when firing (~1.7 seconds)
+      },
+
+      // Shape sizes (three variants per shape type)
+      sizes: {
+        circle: [14, 18, 12],     // Circle radius variants
+        rect: [15, 22, 18],       // Rectangle size variants
+        triangle: [17, 14, 20],   // Triangle size variants
+      },
+
+      // Shape distribution and positioning
+      distribution: {
+        minDistance: 50,          // Minimum distance between shapes (lower = more dense)
+        bandWidth: 300,           // Width of the band (perpendicular to diagonal)
+        sineAmplitude: 100,       // Amplitude of sine wave oscillation
+        sineFrequency: 0.004,     // Frequency of sine wave
+        spacing: 5,               // Spacing along diagonal (lower = more dense)
+        spacingRandomness: 3,     // Random variation in spacing (0-3)
+        edgeMargin: 50,           // Margin from viewport edges at start/end
+        boundsInset: 30,          // Minimum distance from viewport edges for shapes
+      },
+
+      // Shape appearance
+      appearance: {
+        strokeWidthOptions: [2, 3, 5], // Available stroke width variants
+        initialRotation: 360,     // Random rotation range (0-360 degrees)
+      },
+
+      // Shape lifecycle and fading
+      fade: {
+        fadeInDuration: 30,       // Fade in duration in frames (~0.5s at 60fps)
+        fadeOutDuration: 30,      // Fade out duration in frames (~0.5s at 60fps)
+      },
+
+      // Firing effects
+      fireEffects: {
+        randomFireProbability: 0.003,  // Chance per frame for random firing (0.003 = 0.3%)
+        glowStrokeMultiplier: 3,       // How much stroke width increases when glowing
+        glowBrightnessMultiplier: 0.3, // How much brightness increases when glowing
+      },
+
+      // Regeneration
+      regeneration: {
+        jitterX: 0,               // Position jitter on X axis when regenerating (±pixels)
+        jitterY: 0,               // Position jitter on Y axis when regenerating (±pixels)
+        defaultSizeFallback: 20,  // Default size if no size variant found
+      },
+    };
+
+    // Connection line configuration - adjust all connection properties here
+    const connectionConfig = {
+      // Connection creation
+      maxDistance: 130,          // Maximum distance to connect shapes
+      probability: 0.5,          // Probability of creating a connection (0-1)
+
+      // Static connection line appearance
+      staticOpacity: 0.4,        // Base opacity of connection lines (0-1)
+      staticStrokeWidth: .5,     // Line thickness
+      staticDashArray: [2, 4],    // Dash pattern [dash, gap]
+
+      // Pulsing animation for connection lines
+      pulseBaseOpacity: 0.7,     // Minimum opacity during pulse
+      pulseAmount: 0.3,           // How much the pulse adds to opacity
+
+      // Traveling pulse animation
+      pulseSpeed: {
+        min: 0.02,               // Minimum pulse travel speed (slower)
+        max: 0.05,                // Maximum pulse travel speed (faster)
+      },
+
+      // Traveling pulse stroke width animation
+      pulseStrokeWidth: {
+        start: 0.1,               // Starting width (thin)
+        peak: 2,                  // Peak width (thick)
+        end: .1,                   // Ending width (medium)
+      },
+
+      // Pulse blur effect
+      pulseBlur: {
+        enabled: false,            // Enable blur on traveling pulses
+        amount: 10,               // Blur radius in pixels
+      },
+
+      // Phase durations for pulse animation
+      pulseGrowthPhase: 0.5,      // Duration of growth phase (0-1)
+      pulseFadePhase: 0.5,        // Duration of fade/shrink phase (0-1)
+
+      // Pulse visual effects
+      pulseVisuals: {
+        opacityMultiplier: 0.5,   // How much base pulse opacity affects final value (0-1)
+        opacityOffset: 0.5,       // Offset added to pulse opacity calculation (0-1)
+      },
+
+      // Connection data initialization
+      initialization: {
+        maxAge: 60,               // Maximum initial age for staggered animation
+        initialFireTime: -1000,   // Initial lastFireTime value (frame number)
+      },
     };
 
     // Generate shapes within a diagonal sine wave band (bottom-left to top-right)
     const generateShapesInDiagonalBand = () => {
       const generatedShapes: any[] = [];
-      const minDistance = 50; // Minimum distance between shapes (lower = more dense)
-
-      // Band parameters
-      const bandWidth = 300; // Width of the band (perpendicular to diagonal)
-      const sineAmplitude = 100; // Amplitude of sine wave oscillation
-      const sineFrequency = 0.004; // Frequency of sine wave
+      // Shape distribution parameters from config
+      const minDistance = shapeConfig.distribution.minDistance;
+      const bandWidth = shapeConfig.distribution.bandWidth;
+      const sineAmplitude = shapeConfig.distribution.sineAmplitude;
+      const sineFrequency = shapeConfig.distribution.sineFrequency;
 
       // Diagonal line from bottom-left to top-right
       const startPoint = { x: 0, y: paper.view.size.height };
@@ -87,9 +238,9 @@
 
       // Shape types to cycle through for equal distribution
       const shapeTypes = ['circle', 'rect', 'triangle'];
-      const sizes = { circle: [15, 20, 10], rect: [15, 25, 20], triangle: [20, 15, 25] };
+      const sizes = shapeConfig.sizes;
       const colorOptions = [colors.primaryLight, colors.secondary, colors.accent, colors.tertiary, colors.white];
-      const strokeWidthOptions = [1, 2, 5];
+      const strokeWidthOptions = shapeConfig.appearance.strokeWidthOptions;
 
       // Counters for equal distribution
       let shapeCounter = 0;
@@ -107,9 +258,11 @@
       };
 
       // Generate shapes along the diagonal band
-      const spacing = 5; // Spacing along the diagonal (lower = more attempts = more dense)
+      const spacing = shapeConfig.distribution.spacing;
+      const edgeMargin = shapeConfig.distribution.edgeMargin;
+      const spacingRandomness = shapeConfig.distribution.spacingRandomness;
 
-      for (let t = 50; t < diagonalLength - 50; t += spacing + Math.random() * 3) {
+      for (let t = edgeMargin; t < diagonalLength - edgeMargin; t += spacing + Math.random() * spacingRandomness) {
         // Position along the diagonal
         const baseX = startPoint.x + directionX * t;
         const baseY = startPoint.y + directionY * t;
@@ -125,8 +278,9 @@
         const y = baseY + perpY * bandOffset;
 
         // Check bounds and overlap (reduced padding for more density)
-        if (x >= 30 && x <= paper.view.size.width - 30 &&
-            y >= 30 && y <= paper.view.size.height - 30 &&
+        const boundsInset = shapeConfig.distribution.boundsInset;
+        if (x >= boundsInset && x <= paper.view.size.width - boundsInset &&
+            y >= boundsInset && y <= paper.view.size.height - boundsInset &&
             !isTooClose(x, y, generatedShapes)) {
 
           // Equal distribution: cycle through shape types
@@ -145,7 +299,7 @@
           strokeCounter++;
 
           // Random rotation
-          const rotation = Math.random() * 360;
+          const rotation = Math.random() * shapeConfig.appearance.initialRotation;
 
           // Add shape
           if (type === 'circle') {
@@ -219,14 +373,14 @@
 
       // Draw upper boundary
       const upperBoundary = new paper.Path();
-      upperBoundary.strokeColor = new paper.Color('#00FF00');
+      upperBoundary.strokeColor = new paper.Color('#FFFFFF');
       upperBoundary.strokeWidth = 1;
       upperBoundary.opacity = 0.2;
       upperBoundary.dashArray = [5, 5];
 
       // Draw lower boundary
       const lowerBoundary = new paper.Path();
-      lowerBoundary.strokeColor = new paper.Color('#00FF00');
+      lowerBoundary.strokeColor = new paper.Color('#FFFFFF');
       lowerBoundary.strokeWidth = 1;
       lowerBoundary.opacity = 0.2;
       lowerBoundary.dashArray = [5, 5];
@@ -273,90 +427,6 @@
       sineWaveGuides.lowerBoundary.visible = false;
     }
 
-    // Fallback to original shapes if generation fails
-    const originalShapesData = [
-      // CENTER SHAPES - positioned around viewport center (683, 386)
-      // Top circle
-      { type: 'circle', x: 712.738, y: 271.64, radius: 69.5, strokeColor: colors.primaryLight, strokeWidth: 5 },
-      // Bottom circle
-      { type: 'circle', x: 670.738, y: 524.64, radius: 69.5, strokeColor: colors.primaryLight, strokeWidth: 5 },
-      // Rectangle (square)
-      { type: 'rect', x: 493.849 + 62, y: 270.26 + 62, width: 124, height: 124, radius: 17.5, rotation: -16.6403, strokeColor: colors.primaryLight, strokeWidth: 5 },
-      { type: 'rect', x: 848.255, y: 331.91, width: 24, height: 24, radius: 2.5, rotation: 22.6612, strokeColor: colors.white, strokeWidth: 5 },
-      { type: 'rect', x: 902.214, y: 376.752, width: 40, height: 40, radius: 2.5, rotation: -34.4661, strokeColor: colors.accent, strokeWidth: 5 },
-
-      // More circles
-      { type: 'circle', x: 1083.24, y: 154.14, radius: 23, strokeColor: colors.secondary, strokeWidth: 5 },
-      { type: 'circle', x: 1043.74, y: 239.64, radius: 15, strokeColor: colors.white, strokeWidth: 2 },
-      { type: 'circle', x: 854.738, y: 418.64, radius: 15, strokeColor: colors.white, strokeWidth: 2 },
-
-      // CENTER SHAPE - Triangle
-      { type: 'triangle', x: 811.616, y: 439.128, size: 40, rotation: 15, strokeColor: colors.primaryLight, strokeWidth: 5 },
-      { type: 'triangle', x: 1155.61, y: 135.053, size: 20, rotation: 0, strokeColor: colors.accent, strokeWidth: 5 },
-      { type: 'triangle', x: 839.168, y: 259.237, size: 25, rotation: 45, strokeColor: colors.accent, strokeWidth: 5 },
-
-      // More rectangles
-      { type: 'rect', x: 866.216, y: 233.772, width: 24, height: 24, radius: 2.5, rotation: -34.6751, strokeColor: colors.tertiary, strokeWidth: 5 },
-      { type: 'rect', x: 980.53, y: 168.411, width: 40, height: 40, radius: 2.5, rotation: -7.1514, strokeColor: colors.white, strokeWidth: 5 },
-
-      // More circles
-      { type: 'circle', x: 981.238, y: 309.14, radius: 23, strokeColor: colors.white, strokeWidth: 5 },
-      { type: 'circle', x: 898.738, y: 303.64, radius: 15.5, strokeColor: colors.accent, strokeWidth: 1 },
-
-      // Bottom left shapes
-      { type: 'rect', x: 396.18, y: 505.294, width: 28, height: 28, radius: 4.5, rotation: 22.6612, strokeColor: colors.tertiary, strokeWidth: 1 },
-      { type: 'rect', x: 271.433, y: 610.235, width: 44, height: 44, radius: 4.5, rotation: -34.4661, strokeColor: colors.white, strokeWidth: 1 },
-      { type: 'circle', x: 388.238, y: 591.14, radius: 23, strokeColor: colors.accent, strokeWidth: 5 },
-      { type: 'circle', x: 301.738, y: 681.64, radius: 13.5, strokeColor: colors.accent, strokeWidth: 5 },
-
-      // Middle shapes
-      { type: 'triangle', x: 515.168, y: 375.237, size: 30, rotation: 30, strokeColor: colors.accent, strokeWidth: 5 },
-      { type: 'rect', x: 527.216, y: 521.772, width: 24, height: 24, radius: 2.5, rotation: -34.6751, strokeColor: colors.white, strokeWidth: 5 },
-      { type: 'rect', x: 466.855, y: 552.109, width: 43, height: 43, radius: 4, rotation: -7.1514, strokeColor: colors.accent, strokeWidth: 2 },
-      { type: 'circle', x: 506.238, y: 460.14, radius: 24.5, strokeColor: colors.tertiary, strokeWidth: 2 },
-      { type: 'circle', x: 429.738, y: 463.64, radius: 13.5, strokeColor: colors.white, strokeWidth: 5 },
-
-      // Right side shapes
-      { type: 'rect', x: 1349.49, y: 92.4186, width: 24, height: 24, radius: 2.5, rotation: -141.68, strokeColor: colors.white, strokeWidth: 5 },
-      { type: 'rect', x: 1332.67, y: 39.6765, width: 40, height: 40, radius: 2.5, rotation: 161.193, strokeColor: colors.accent, strokeWidth: 5 },
-      { type: 'circle', x: 1120.17, y: 252.076, radius: 23, strokeColor: colors.secondary, strokeWidth: 5 },
-      { type: 'circle', x: 1132.46, y: 100.364, radius: 15, strokeColor: colors.white, strokeWidth: 2 },
-
-      // Lines
-      { type: 'line', x1: 1033.27, y1: 289.64, x2: 1043.88, y2: 300.246, strokeColor: colors.accentDark, strokeWidth: 5 },
-      { type: 'line', x1: 1159.92, y1: 83.182, x2: 1152.57, y2: 70.1062, strokeColor: colors.accentDark, strokeWidth: 5 },
-      { type: 'line', x1: 439.777, y1: 413.447, x2: 453.622, y2: 419.218, strokeColor: colors.accentDark, strokeWidth: 5 },
-
-      // Bottom shapes
-      { type: 'rect', x: 175.891, y: 772.016, width: 28, height: 28, radius: 4.5, rotation: -103.529, strokeColor: colors.tertiary, strokeWidth: 1 },
-      { type: 'rect', x: 139.997, y: 637.01, width: 44, height: 44, radius: 4.5, rotation: 174.929, strokeColor: colors.white, strokeWidth: 1 },
-      { type: 'circle', x: 117.317, y: 718.219, radius: 23, strokeColor: colors.accent, strokeWidth: 5 },
-      { type: 'circle', x: 171.788, y: 667.689, radius: 13.5, strokeColor: colors.accent, strokeWidth: 5 },
-      { type: 'rect', x: 37.1284, y: 665.948, width: 43, height: 43, radius: 4, rotation: -150.891, strokeColor: colors.accent, strokeWidth: 2 },
-      { type: 'circle', x: 40.7876, y: 756.689, radius: 13.5, strokeColor: colors.white, strokeWidth: 5 },
-
-      // Additional middle triangles
-      { type: 'triangle', x: 924.924, y: 158.046, size: 20, rotation: 60, strokeColor: colors.accent, strokeWidth: 1 },
-      { type: 'triangle', x: 952.3, y: 217.749, size: 25, rotation: -30, strokeColor: colors.tertiary, strokeWidth: 2 },
-      { type: 'triangle', x: 355.151, y: 653.265, size: 20, rotation: 90, strokeColor: colors.white, strokeWidth: 5 },
-      { type: 'triangle', x: 475.147, y: 503.033, size: 22, rotation: 120, strokeColor: colors.accent, strokeWidth: 5 },
-      { type: 'triangle', x: 217.204, y: 662.321, size: 28, rotation: -45, strokeColor: colors.secondary, strokeWidth: 5 },
-      { type: 'triangle', x: 226.481, y: 612.15, size: 18, rotation: 180, strokeColor: colors.white, strokeWidth: 5 },
-      { type: 'triangle', x: 17.1423, y: 703.352, size: 25, rotation: 270, strokeColor: colors.accent, strokeWidth: 5 },
-      { type: 'triangle', x: 289.913, y: 555.278, size: 30, rotation: 15, strokeColor: colors.secondary, strokeWidth: 5 },
-      { type: 'triangle', x: 1087.4, y: 222.868, size: 22, rotation: -60, strokeColor: colors.accent, strokeWidth: 5 },
-      { type: 'triangle', x: 1228.73, y: 239.136, size: 26, rotation: 45, strokeColor: colors.accent, strokeWidth: 1 },
-      { type: 'triangle', x: 1218.49, y: 174.26, size: 24, rotation: 135, strokeColor: colors.tertiary, strokeWidth: 2 },
-
-      // More rectangles
-      { type: 'rect', x: 1323.43, y: 178.508, width: 24, height: 24, radius: 2.5, rotation: 160.984, strokeColor: colors.tertiary, strokeWidth: 5 },
-      { type: 'rect', x: 1177.99, y: 214.147, width: 40, height: 40, radius: 2.5, rotation: -171.493, strokeColor: colors.white, strokeWidth: 5 },
-
-      // Final circles
-      { type: 'circle', x: 1215.29, y: 78.4505, radius: 23, strokeColor: colors.white, strokeWidth: 5 },
-      { type: 'circle', x: 1293.25, y: 106.014, radius: 15.5, strokeColor: colors.accent, strokeWidth: 1 },
-    ];
-
     // Create shapes
     const shapes: paper.Path[] = [];
 
@@ -399,6 +469,10 @@
           if (shapeData.rotation) {
             shape.rotate(shapeData.rotation);
           }
+          // shape.smooth();
+          shape.segments.forEach(segment => {
+            segment.smooth();
+          });
           break;
 
         case 'line':
@@ -415,32 +489,44 @@
           return;
       }
 
+      // Add background fill to hide connection lines behind shapes
+      // (except for line shapes which don't need fills)
+      if (shapeData.type !== 'line') {
+        shape.fillColor = new paper.Color(colors.background);
+      }
+
+      // Apply blur effect to some shapes randomly
+      if (shapeConfig.blur.enabled && Math.random() < shapeConfig.blur.probability) {
+        shape.shadowBlur = shapeConfig.blur.amount;
+        shape.shadowColor = shape.strokeColor;
+      }
+
       // Store original position and lifecycle data
       shape.data = {
         originalPosition: shape.position.clone(),
         originalRotation: shapeData.rotation || 0,
         floatPhaseY: Math.random() * Math.PI * 2, // Y-axis phase
         floatPhaseX: Math.random() * Math.PI * 2, // X-axis phase (different)
-        rotationSpeed: (Math.random() - 0.5) * 0.02, // Slightly more visible rotation
-        floatSpeedY: 0.02 + Math.random() * 0.02, // Increased Y speed
-        floatSpeedX: 0.01 + Math.random() * 0.01, // Increased X speed
-        amplitudeY: 1 + Math.random() * 3, // Random Y amplitude (5-8px)
-        amplitudeX: 1 + Math.random() * .03, // Random X amplitude (6-10px)
+        rotationSpeed: shapeConfig.rotationSpeed.min + Math.random() * (shapeConfig.rotationSpeed.max - shapeConfig.rotationSpeed.min),
+        floatSpeedY: shapeConfig.floatSpeed.yMin + Math.random() * (shapeConfig.floatSpeed.yMax - shapeConfig.floatSpeed.yMin),
+        floatSpeedX: shapeConfig.floatSpeed.xMin + Math.random() * (shapeConfig.floatSpeed.xMax - shapeConfig.floatSpeed.xMin),
+        amplitudeY: shapeConfig.amplitude.yMin + Math.random() * (shapeConfig.amplitude.yMax - shapeConfig.amplitude.yMin),
+        amplitudeX: shapeConfig.amplitude.xMin + Math.random() * (shapeConfig.amplitude.xMax - shapeConfig.amplitude.xMin),
         // Lifecycle properties
         age: 0,
-        lifespan: 300 + Math.random() * 500, // Random lifespan (300-800 frames, ~5-13 seconds at 60fps)
+        lifespan: shapeConfig.lifespan.min + Math.random() * (shapeConfig.lifespan.max - shapeConfig.lifespan.min),
         baseX: shapeData.x, // Original X for respawn
         baseY: shapeData.y, // Original Y for respawn
         shapeType: shapeData.type,
         // Firing properties
         isFiring: false,
         fireIntensity: 0,
-        fireDecay: 0.05, // How fast the glow fades
+        fireDecay: shapeConfig.firing.decay,
         originalStrokeWidth: shapeData.strokeWidth,
         originalStrokeColor: shapeData.strokeColor,
-        lastFireTime: -1000, // Last time this shape fired (frame number)
-        fireCooldown: 180, // Minimum frames between fires (3 seconds at 60fps)
-        lifespanExtension: 100, // Frames added to lifespan when firing (~1.7 seconds)
+        lastFireTime: connectionConfig.initialization.initialFireTime, // Last time this shape fired (frame number)
+        fireCooldown: shapeConfig.firing.cooldown,
+        lifespanExtension: shapeConfig.firing.lifespanExtension,
       };
 
       shapes.push(shape);
@@ -450,8 +536,6 @@
 
     // Create neuron-like connections between nearby shapes
     const connections: any[] = [];
-    const maxConnectionDistance = 150; // Maximum distance to connect shapes
-    const connectionProbability = 0.3; // Probability of creating a connection
 
     const createConnections = () => {
       shapes.forEach((shape, i) => {
@@ -464,25 +548,26 @@
 
           // Only connect if within range and moving towards top-right direction
           // (target shape should be to the right and/or above)
-          if (distance < maxConnectionDistance &&
+          if (distance < connectionConfig.maxDistance &&
               (dx > 0 || dy < 0) && // Right or up
-              Math.random() < connectionProbability) {
+              Math.random() < connectionConfig.probability) {
 
+            // Create line with gradient-like color effect
             const line = new paper.Path.Line({
               from: shape.position,
               to: otherShape.position,
-              strokeColor: new paper.Color(colors.secondary),
-              strokeWidth: 0.5,
-              opacity: 0.2,
-              dashArray: [2, 4],
+              strokeColor: new paper.Color(colors.secondary), // Will be updated in animation loop
+              strokeWidth: connectionConfig.staticStrokeWidth,
+              opacity: connectionConfig.staticOpacity,
+              dashArray: connectionConfig.staticDashArray,
             });
 
             // Store connection data
             line.data = {
               startShape: shape,
               endShape: otherShape,
-              age: Math.random() * 60, // Random starting age for staggered animation
-              pulseSpeed: 0.05 + Math.random() * 0.05,
+              age: Math.random() * connectionConfig.initialization.maxAge, // Random starting age for staggered animation
+              pulseSpeed: connectionConfig.pulseSpeed.min + Math.random() * (connectionConfig.pulseSpeed.max - connectionConfig.pulseSpeed.min),
               travelingPulses: [], // Array of pulses traveling along this connection
             };
 
@@ -495,6 +580,11 @@
     createConnections();
     console.log(`Created ${connections.length} neuron connections`);
 
+    // Send all connection lines to the back so shapes are drawn on top
+    connections.forEach(connection => {
+      connection.sendToBack();
+    });
+
     // Regenerate connections for a specific shape
     const regenerateConnectionsForShape = (shape: paper.Path, index: number) => {
       // Create new connections FROM this shape to nearby shapes (outgoing)
@@ -506,27 +596,28 @@
         const distance = Math.sqrt(dx * dx + dy * dy);
 
         // Only connect if within range and moving towards top-right direction
-        if (distance < maxConnectionDistance &&
+        if (distance < connectionConfig.maxDistance &&
             (dx > 0 || dy < 0) && // Right or up
-            Math.random() < connectionProbability) {
+            Math.random() < connectionConfig.probability) {
 
           const line = new paper.Path.Line({
             from: shape.position,
             to: otherShape.position,
-            strokeColor: new paper.Color(colors.secondary),
-            strokeWidth: 0.5,
-            opacity: 0.2,
-            dashArray: [2, 4],
+            strokeColor: new paper.Color(colors.secondary), // Will be updated in animation loop
+            strokeWidth: connectionConfig.staticStrokeWidth,
+            opacity: connectionConfig.staticOpacity,
+            dashArray: connectionConfig.staticDashArray,
           });
 
           line.data = {
             startShape: shape,
             endShape: otherShape,
-            age: Math.random() * 60,
-            pulseSpeed: 0.05 + Math.random() * 0.05,
+            age: Math.random() * connectionConfig.initialization.maxAge,
+            pulseSpeed: connectionConfig.pulseSpeed.min + Math.random() * (connectionConfig.pulseSpeed.max - connectionConfig.pulseSpeed.min),
             travelingPulses: [],
           };
 
+          line.sendToBack(); // Keep connection behind shapes
           connections.push(line);
         }
       });
@@ -540,27 +631,28 @@
         const distance = Math.sqrt(dx * dx + dy * dy);
 
         // Only connect if within range and moving towards top-right direction
-        if (distance < maxConnectionDistance &&
+        if (distance < connectionConfig.maxDistance &&
             (dx > 0 || dy < 0) && // Right or up
-            Math.random() < connectionProbability) {
+            Math.random() < connectionConfig.probability) {
 
           const line = new paper.Path.Line({
             from: otherShape.position,
             to: shape.position,
-            strokeColor: new paper.Color(colors.secondary),
-            strokeWidth: 0.5,
-            opacity: 0.2,
-            dashArray: [2, 4],
+            strokeColor: new paper.Color(colors.secondary), // Will be updated in animation loop
+            strokeWidth: connectionConfig.staticStrokeWidth,
+            opacity: connectionConfig.staticOpacity,
+            dashArray: connectionConfig.staticDashArray,
           });
 
           line.data = {
             startShape: otherShape,
             endShape: shape,
-            age: Math.random() * 60,
-            pulseSpeed: 0.05 + Math.random() * 0.05,
+            age: Math.random() * connectionConfig.initialization.maxAge,
+            pulseSpeed: connectionConfig.pulseSpeed.min + Math.random() * (connectionConfig.pulseSpeed.max - connectionConfig.pulseSpeed.min),
             travelingPulses: [],
           };
 
+          line.sendToBack(); // Keep connection behind shapes
           connections.push(line);
         }
       });
@@ -597,8 +689,8 @@
       }
 
       // Use exact original position (no jitter)
-      const jitterX = 0;
-      const jitterY = 0;
+      const jitterX = (Math.random() - 0.5) * 2 * shapeConfig.regeneration.jitterX;
+      const jitterY = (Math.random() - 0.5) * 2 * shapeConfig.regeneration.jitterY;
       const newX = data.baseX + jitterX;
       const newY = data.baseY + jitterY;
 
@@ -608,10 +700,10 @@
       shapeTypeCounter++;
 
       // Equal distribution of sizes for each type
-      const sizes = { circle: [15, 20, 10], rect: [15, 25, 20], triangle: [20, 15, 25] };
+      const sizes = shapeConfig.sizes;
       const sizeOptions = sizes[newType as keyof typeof sizes];
       const sizeIndex = Math.floor(Math.random() * sizeOptions.length); // Keep size random within type
-      const newSize = sizeOptions[sizeIndex] || 20;
+      const newSize = sizeOptions[sizeIndex] || shapeConfig.regeneration.defaultSizeFallback;
 
       // Equal distribution of colors (cycle through)
       const colorOptions = [colors.primaryLight, colors.secondary, colors.accent, colors.tertiary, colors.white];
@@ -619,12 +711,12 @@
       colorCounter++;
 
       // Equal distribution of stroke widths (cycle through)
-      const strokeWidthOptions = [1, 2, 5];
+      const strokeWidthOptions = shapeConfig.appearance.strokeWidthOptions;
       const newStrokeWidth = strokeWidthOptions[strokeWidthCounter % strokeWidthOptions.length];
       strokeWidthCounter++;
 
       // Random rotation
-      const newRotation = Math.random() * 360;
+      const newRotation = Math.random() * shapeConfig.appearance.initialRotation;
 
       // Remove old shape
       shape.remove();
@@ -663,10 +755,23 @@
             strokeWidth: newStrokeWidth,
           });
           newShape.rotate(newRotation);
+          // newShape.smooth();
+          newShape.segments.forEach(segment => {
+          segment.smooth();
+        });
           break;
 
         default:
           return;
+      }
+
+      // Add background fill to hide connection lines behind shapes
+      newShape.fillColor = new paper.Color(colors.background);
+
+      // Apply blur effect to some shapes randomly
+      if (shapeConfig.blur.enabled && Math.random() < shapeConfig.blur.probability) {
+        newShape.shadowBlur = shapeConfig.blur.amount;
+        newShape.shadowColor = newShape.strokeColor;
       }
 
       // Reset lifecycle data with new randomized values
@@ -675,25 +780,25 @@
         originalRotation: newRotation,
         floatPhaseY: Math.random() * Math.PI * 2,
         floatPhaseX: Math.random() * Math.PI * 2,
-        rotationSpeed: (Math.random() - 0.5) * 0.02,
-        floatSpeedY: 0.02 + Math.random() * 0.02,
-        floatSpeedX: 0.01 + Math.random() * 0.01,
-        amplitudeY: 1 + Math.random() * 3,
-        amplitudeX: 1 + Math.random() * .03,
+        rotationSpeed: shapeConfig.rotationSpeed.min + Math.random() * (shapeConfig.rotationSpeed.max - shapeConfig.rotationSpeed.min),
+        floatSpeedY: shapeConfig.floatSpeed.yMin + Math.random() * (shapeConfig.floatSpeed.yMax - shapeConfig.floatSpeed.yMin),
+        floatSpeedX: shapeConfig.floatSpeed.xMin + Math.random() * (shapeConfig.floatSpeed.xMax - shapeConfig.floatSpeed.xMin),
+        amplitudeY: shapeConfig.amplitude.yMin + Math.random() * (shapeConfig.amplitude.yMax - shapeConfig.amplitude.yMin),
+        amplitudeX: shapeConfig.amplitude.xMin + Math.random() * (shapeConfig.amplitude.xMax - shapeConfig.amplitude.xMin),
         age: 0,
-        lifespan: 300 + Math.random() * 500, // New random lifespan
+        lifespan: shapeConfig.lifespan.min + Math.random() * (shapeConfig.lifespan.max - shapeConfig.lifespan.min),
         baseX: data.baseX, // Keep original base position
         baseY: data.baseY,
         shapeType: newType,
         // Firing properties
         isFiring: false,
         fireIntensity: 0,
-        fireDecay: 0.05,
+        fireDecay: shapeConfig.firing.decay,
         originalStrokeWidth: newStrokeWidth,
         originalStrokeColor: newColor,
-        lastFireTime: -1000,
-        fireCooldown: 180,
-        lifespanExtension: 100,
+        lastFireTime: connectionConfig.initialization.initialFireTime,
+        fireCooldown: shapeConfig.firing.cooldown,
+        lifespanExtension: shapeConfig.firing.lifespanExtension,
       };
 
       // Replace in shapes array
@@ -727,10 +832,12 @@
         // Send pulses along all outgoing connections
         connections.forEach((connection) => {
           if (connection.data.startShape === shape) {
-            // Add a traveling pulse
+            // Add a traveling pulse with random speed for organic variation
+            const speedRange = connectionConfig.pulseSpeed.max - connectionConfig.pulseSpeed.min;
             connection.data.travelingPulses.push({
               progress: 0, // 0 = start, 1 = end
-              speed: 0.02, // Speed of pulse travel (0.02 = 2% per frame)
+              speed: connectionConfig.pulseSpeed.min + Math.random() * speedRange,
+              hasFired: false, // Track if target neuron has been fired
             });
           }
         });
@@ -746,7 +853,7 @@
       currentFrameCount = time;
 
       // Randomly trigger fires from shapes (neural activity) - reduced frequency
-      if (Math.random() < 0.003) { // 0.3% chance per frame = ~0.18 fires per second
+      if (Math.random() < shapeConfig.fireEffects.randomFireProbability) {
         const randomShape = shapes[Math.floor(Math.random() * shapes.length)];
         if (randomShape) {
           fireShape(randomShape, time);
@@ -767,8 +874,8 @@
         shape.data.age++;
 
         // Calculate fade in/out opacity based on lifecycle (linear)
-        const fadeInDuration = 30; // Fade in over 30 frames (~0.5 second at 60fps)
-        const fadeOutDuration = 30; // Fade out over 30 frames
+        const fadeInDuration = shapeConfig.fade.fadeInDuration;
+        const fadeOutDuration = shapeConfig.fade.fadeOutDuration;
         const age = shape.data.age;
         const lifespan = shape.data.lifespan;
 
@@ -797,11 +904,11 @@
         // Apply glow effect when firing, or restore to normal
         if (shape.data.fireIntensity > 0) {
           // Increase stroke width to create glow
-          shape.strokeWidth = shape.data.originalStrokeWidth + shape.data.fireIntensity * 3;
+          shape.strokeWidth = shape.data.originalStrokeWidth + shape.data.fireIntensity * shapeConfig.fireEffects.glowStrokeMultiplier;
 
           // Brighten the color
           const glowColor = new paper.Color(shape.data.originalStrokeColor);
-          glowColor.brightness += shape.data.fireIntensity * 0.3;
+          glowColor.brightness += shape.data.fireIntensity * shapeConfig.fireEffects.glowBrightnessMultiplier;
           shape.strokeColor = glowColor;
         } else {
           // Restore to original appearance when not firing
@@ -858,12 +965,29 @@
         connection.segments[0].point = startPos;
         connection.segments[1].point = endPos;
 
+        // Create gradient color from start node to end node
+        const startNodeColor = new paper.Color(startShape.strokeColor);
+        const endNodeColor = new paper.Color(endShape.strokeColor);
+
+        // Create a linear gradient from start to end position
+        const gradient = new paper.Color({
+          gradient: {
+            stops: [
+              [startNodeColor, 0],
+              [endNodeColor, 1]
+            ]
+          },
+          origin: startPos,
+          destination: endPos
+        });
+
+        connection.strokeColor = gradient;
+
         // Pulsing opacity animation (like neurons firing)
         connection.data.age += connection.data.pulseSpeed;
         const pulseValue = Math.sin(connection.data.age);
-        const baseOpacity = 0.15;
-        const pulseAmount = 0.15;
-        connection.opacity = baseOpacity + (pulseValue * 0.5 + 0.5) * pulseAmount;
+        connection.opacity = connectionConfig.pulseBaseOpacity +
+          (pulseValue * connectionConfig.pulseVisuals.opacityMultiplier + connectionConfig.pulseVisuals.opacityOffset) * connectionConfig.pulseAmount;
 
         // Make connections fade with their connected shapes
         const startOpacity = connection.data.startShape.opacity;
@@ -877,42 +1001,100 @@
           const pulse = pulses[i];
           pulse.progress += pulse.speed;
 
-          // Create a highlighted segment of the connection line for the pulse
-          const pulseLength = 0.15; // Length of the pulse segment (15% of line)
-          const pulseStart = Math.max(0, pulse.progress - pulseLength);
-          const pulseEnd = Math.min(1, pulse.progress);
+          // Two-phase animation:
+          // Phase 1: Line grows from A to B with easing
+          // Phase 2: Line fades and shrinks from A side with easing
+          const phase1Duration = connectionConfig.pulseGrowthPhase;
+          const phase2Duration = connectionConfig.pulseFadePhase;
 
-          // Interpolate color from start shape to end shape based on progress
+          let pulseStart = 0;
+          let pulseEnd = 0;
+          let opacity = 0.9;
+          let strokeWidth = connectionConfig.pulseStrokeWidth.start;
+
+          // Track if we've fired the target neuron yet
+          if (!pulse.hasFired && pulse.progress >= phase1Duration) {
+            // Fire the target neuron as soon as the pulse reaches it
+            fireShape(connection.data.endShape, time);
+            pulse.hasFired = true;
+          }
+
+          if (pulse.progress <= phase1Duration) {
+            // Phase 1: Growing from A to B
+            const t = pulse.progress / phase1Duration; // Normalize to 0-1
+            const easedProgress = easeInOutCubic(t); // Apply easing
+
+            pulseStart = 0;
+            pulseEnd = easedProgress; // Grows from 0 to 1
+            opacity = 0.9; // Full opacity during growth
+
+            // Stroke width grows from start to peak
+            strokeWidth = connectionConfig.pulseStrokeWidth.start +
+              (connectionConfig.pulseStrokeWidth.peak - connectionConfig.pulseStrokeWidth.start) * easedProgress;
+          } else {
+            // Phase 2: Shrinking from start while fading
+            const t = (pulse.progress - phase1Duration) / phase2Duration; // Normalize to 0-1
+            const easedProgress = easeInOutCubic(t); // Apply easing
+
+            pulseStart = easedProgress; // Shrinks from 0 to 1
+            pulseEnd = 1; // Stays at end
+            opacity = 0.9 * (1 - easedProgress); // Fade out as it shrinks
+
+            // Stroke width shrinks from peak to end
+            strokeWidth = connectionConfig.pulseStrokeWidth.peak +
+              (connectionConfig.pulseStrokeWidth.end - connectionConfig.pulseStrokeWidth.peak) * easedProgress;
+          }
+
+          // Create gradient effect: interpolate color from start to end along the pulse
           const startColor = new paper.Color(startShape.strokeColor);
           const endColor = new paper.Color(endShape.strokeColor);
+
+          // For gradient effect, we need to create a path with gradient stroke
+          // Since Paper.js doesn't support gradient strokes directly, we'll use the average color
+          // weighted by the pulse position for a smooth transition
+          const averagePosition = (pulseStart + pulseEnd) / 2; // Midpoint of the pulse
           const pulseColor = startColor.clone();
 
-          // Lerp between start and end color based on pulse progress
-          pulseColor.red = startColor.red + (endColor.red - startColor.red) * pulse.progress;
-          pulseColor.green = startColor.green + (endColor.green - startColor.green) * pulse.progress;
-          pulseColor.blue = startColor.blue + (endColor.blue - startColor.blue) * pulse.progress;
+          // Lerp between start and end color based on the pulse's average position
+          pulseColor.red = startColor.red + (endColor.red - startColor.red) * averagePosition;
+          pulseColor.green = startColor.green + (endColor.green - startColor.green) * averagePosition;
+          pulseColor.blue = startColor.blue + (endColor.blue - startColor.blue) * averagePosition;
 
           if (!pulse.segment) {
             pulse.segment = new paper.Path.Line({
               from: startPos.add(endPos.subtract(startPos).multiply(pulseStart)),
               to: startPos.add(endPos.subtract(startPos).multiply(pulseEnd)),
               strokeColor: pulseColor,
-              strokeWidth: 2,
+              strokeWidth: strokeWidth,
               strokeCap: 'round',
             });
+
+            // Apply blur effect to traveling pulse
+            if (connectionConfig.pulseBlur.enabled) {
+              pulse.segment.shadowBlur = connectionConfig.pulseBlur.amount;
+              pulse.segment.shadowColor = pulseColor;
+            }
+
+            // Send pulse to back so it appears behind shapes
+            pulse.segment.sendToBack();
           } else {
-            // Update segment position and color
+            // Update segment position, color, and stroke width
             pulse.segment.segments[0].point = startPos.add(endPos.subtract(startPos).multiply(pulseStart));
             pulse.segment.segments[1].point = startPos.add(endPos.subtract(startPos).multiply(pulseEnd));
             pulse.segment.strokeColor = pulseColor;
+            pulse.segment.strokeWidth = strokeWidth;
+
+            // Update shadow color to match pulse color
+            if (connectionConfig.pulseBlur.enabled) {
+              pulse.segment.shadowColor = pulseColor;
+            }
           }
 
-          // Fade as it travels
-          pulse.segment.opacity = 0.9 * (1 - pulse.progress * 0.3);
+          // Apply the calculated opacity
+          pulse.segment.opacity = opacity;
 
-          // If pulse reached the end, trigger the next shape to fire
+          // If pulse completed both phases, clean up
           if (pulse.progress >= 1) {
-            fireShape(connection.data.endShape, time);
             if (pulse.segment) {
               pulse.segment.remove(); // Clean up the pulse segment
             }

@@ -11,6 +11,7 @@ const personal = getPersonalInfo();
 const nameParts = personal.name.split(' ');
 const firstName = nameParts[0];
 const lastName = nameParts.slice(1).join(' ');
+const titleLines = personal.title.split(' | ');
 ---
 
 <section class="hero-section" id="hero">
@@ -27,9 +28,11 @@ const lastName = nameParts.slice(1).join(' ');
     </h2>
 
     <!-- Title/Role -->
-    <p class="hero-title">
-      {personal.title}
-    </p>
+    <div class="hero-title">
+      {titleLines.map((line) => (
+        <div class="hero-title-line">{line}</div>
+      ))}
+    </div>
   </div>
 </section>
 
@@ -75,13 +78,16 @@ const lastName = nameParts.slice(1).join(' ');
 
   /* Title - EXACT Figma: 25px, line-height 30px */
   .hero-title {
+    margin: 9px 0 0 0; /* Slight spacing as per Figma */
+  }
+
+  .hero-title-line {
     font-family: var(--font-display);
     font-style: normal;
     font-weight: 600;
     font-size: 25px; /* Exact value from Figma */
     line-height: 30px; /* Exact value from Figma */
     color: var(--color-secondary-light);
-    margin: 9px 0 0 0; /* Slight spacing as per Figma */
     letter-spacing: -0.01em;
   }
 
@@ -95,7 +101,7 @@ const lastName = nameParts.slice(1).join(' ');
       font-size: 2rem; /* 32px */
     }
 
-    .hero-title {
+    .hero-title-line {
       font-size: 1.125rem; /* 18px */
     }
   }
