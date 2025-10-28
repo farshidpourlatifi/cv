@@ -11,19 +11,19 @@
   <div class="container">
     <ul class="nav-list">
       <li>
-        <button class="nav-tab active" data-section="home">
+        <a href="#home" class="nav-tab active" data-section="home">
           Home
-        </button>
+        </a>
       </li>
       <li>
-        <button class="nav-tab" data-section="skills">
+        <a href="#skills" class="nav-tab" data-section="skills">
           Skills
-        </button>
+        </a>
       </li>
       <li>
-        <button class="nav-tab" data-section="experience">
+        <a href="#experience" class="nav-tab" data-section="experience">
           Experience
-        </button>
+        </a>
       </li>
     </ul>
   </div>
@@ -74,8 +74,8 @@
     }
 
     .nav-tab {
-      background: none;
-      border: none;
+      display: inline-block;
+      text-decoration: none;
       padding: var(--space-2) 0;
       font-family: var(--font-sans);
       font-size: var(--text-xl);
@@ -121,103 +121,66 @@
 </style>
 
 <script>
-  // Tab navigation functionality with URL routing (desktop only)
+  // Scroll spy navigation - highlights active section based on scroll position
   document.addEventListener('DOMContentLoaded', () => {
-    // Only run tab navigation on desktop
+    // Only run on desktop
     const isDesktop = window.innerWidth >= 768;
     if (!isDesktop) return;
 
-    const tabs = document.querySelectorAll('.nav-tab');
+    const navLinks = document.querySelectorAll('.nav-tab');
     const sections = document.querySelectorAll('[data-page-section]');
 
-    // Function to show a specific section
-    function showSection(sectionName: string, updateHistory: boolean = true) {
-      // Remove active class from all tabs
-      tabs.forEach(t => t.classList.remove('active'));
+    // Smooth scroll to section on click
+    navLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const targetId = link.getAttribute('href')?.substring(1);
+        const targetSection = document.getElementById(targetId || '');
 
-      // Add active class to target tab
-      const targetTab = document.querySelector(`[data-section="${sectionName}"]`);
-      if (targetTab) {
-        targetTab.classList.add('active');
-      }
-
-      // Hide all sections
-      sections.forEach(section => {
-        section.classList.remove('active');
-        section.style.display = 'none';
-      });
-
-      // Show target section with flex display to maintain centering
-      const target = document.querySelector(`[data-page-section="${sectionName}"]`);
-      if (target) {
-        target.style.display = 'flex';
-        target.classList.add('active');
-
-        // Update URL based on section
-        if (updateHistory) {
-          const url = sectionName === 'home' ? '/' : `/${sectionName}`;
-          window.history.pushState({ section: sectionName }, '', url);
-        }
-
-        // Smoothly scroll to top to maintain consistent view
-        window.scrollTo({
-          top: 0,
-          behavior: 'smooth'
-        });
-      }
-    }
-
-    // Handle tab clicks
-    tabs.forEach(tab => {
-      tab.addEventListener('click', () => {
-        const targetSection = tab.dataset.section;
         if (targetSection) {
-          showSection(targetSection, true);
+          targetSection.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
         }
       });
     });
 
-    // Handle browser back/forward navigation
-    window.addEventListener('popstate', (event) => {
-      const section = event.state?.section || getSectionFromPath();
-      showSection(section, false);
-    });
+    // Update active tab based on scroll position
+    const observerOptions = {
+      root: null,
+      rootMargin: '-20% 0px -60% 0px', // Trigger when section is 20% from top
+      threshold: 0
+    };
 
-    // Get section from current URL path
-    function getSectionFromPath() {
-      const path = window.location.pathname;
-      if (path === '/skills' || path === '/skills/') return 'skills';
-      if (path === '/experience' || path === '/experience/') return 'experience';
-      return 'home';
-    }
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const sectionId = entry.target.id;
 
-    // Get initially active section from DOM
-    function getInitialActiveSection() {
-      const activeSection = document.querySelector('[data-page-section].active');
-      if (activeSection) {
-        return activeSection.getAttribute('data-page-section') || 'home';
+          // Remove active class from all tabs
+          navLinks.forEach(link => link.classList.remove('active'));
+
+          // Add active class to corresponding tab
+          const activeLink = document.querySelector(`.nav-tab[data-section="${sectionId}"]`);
+          if (activeLink) {
+            activeLink.classList.add('active');
+          }
+        }
+      });
+    }, observerOptions);
+
+    // Observe all sections
+    sections.forEach(section => observer.observe(section));
+
+    // Handle initial hash in URL
+    if (window.location.hash) {
+      const targetSection = document.querySelector(window.location.hash);
+      if (targetSection) {
+        setTimeout(() => {
+          targetSection.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
       }
-      return 'home';
     }
-
-    // Initialize correct section based on URL and DOM state
-    const initialSection = getInitialActiveSection();
-    const pathSection = getSectionFromPath();
-
-    // Update tab state to match the active section
-    tabs.forEach(tab => {
-      if (tab.dataset.section === initialSection) {
-        tab.classList.add('active');
-      } else {
-        tab.classList.remove('active');
-      }
-    });
-
-    // Set initial history state
-    window.history.replaceState(
-      { section: initialSection },
-      '',
-      initialSection === 'home' ? '/' : `/${initialSection}`
-    );
   });
 </script>

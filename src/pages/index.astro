@@ -13,40 +13,86 @@ import Contact from '../components/Sections/Contact.astro';
 ---
 
 <CVLayout>
-  <!-- Mobile: All sections visible and scrollable -->
-  <!-- Desktop: Tab-based switching -->
+  <!-- All sections visible and scrollable on both mobile and desktop -->
 
   <!-- Home Section -->
-  <div data-page-section="home" class="page-section active">
-    <Hero />
-  </div>
+  <section id="home" data-page-section="home" class="page-section">
+    <div class="section-content">
+      <Hero />
+    </div>
+  </section>
 
   <!-- Skills Section -->
-  <div data-page-section="skills" class="page-section">
-    <Skills />
-  </div>
+  <section id="skills" data-page-section="skills" class="page-section">
+    <div class="section-content">
+      <Skills />
+    </div>
+  </section>
 
   <!-- Experience Section -->
-  <div data-page-section="experience" class="page-section">
-    <Experience />
-  </div>
+  <section id="experience" data-page-section="experience" class="page-section">
+    <div class="section-content">
+      <Experience />
+    </div>
+  </section>
 </CVLayout>
 
 <style>
-  /* Mobile-first: All sections visible, scrollable */
+  /* Scroll-based sections for both mobile and desktop */
   .page-section {
     min-height: 100vh;
+    height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
     width: 100%;
     position: relative;
-    padding: 60px 20px 80px;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
   }
 
-  /* Skills section overlay (always active on mobile) */
+  .page-section.in-view {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .section-content {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 100px 20px 60px;
+    position: relative;
+    z-index: 2;
+    animation: fadeIn 0.8s ease-out forwards;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  /* Home section - Full viewport and initially visible */
+  [data-page-section="home"] {
+    min-height: 100vh;
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Skills section with overlay */
   [data-page-section="skills"] {
     position: relative;
+    min-height: 100vh;
   }
 
   [data-page-section="skills"]::after {
@@ -57,24 +103,103 @@ import Contact from '../components/Sections/Contact.astro';
     width: 100%;
     height: 100%;
     background: rgba(10, 58, 82, 0.7);
+    backdrop-filter: blur(2px);
     z-index: 1;
     pointer-events: none;
   }
 
-  [data-page-section="skills"] > * {
-    position: relative;
-    z-index: 2;
+  /* Experience section */
+  [data-page-section="experience"] {
+    min-height: 100vh;
   }
 
-  /* Desktop: Tab-based switching (768px and up) */
+  /* Desktop adjustments */
   @media (min-width: 768px) {
-    .page-section {
-      display: none;
-      padding: 0;
+    .section-content {
+      padding: 140px 40px 80px;
+      max-width: 1437px;
+      margin: 0 auto;
     }
 
-    .page-section.active {
-      display: flex;
+    .page-section {
+      min-height: 800px; /* Minimum pixel height for desktop */
+    }
+  }
+
+  /* Mobile adjustments */
+  @media (max-width: 767px) {
+    .page-section {
+      min-height: 600px; /* Minimum pixel height for mobile */
+    }
+
+    .section-content {
+      padding: 80px 20px 60px;
+    }
+  }
+
+  /* Print styles */
+  @media print {
+    .page-section {
+      height: auto;
+      min-height: auto;
+      page-break-inside: avoid;
     }
   }
 </style>
+
+<script>
+  // Smooth scroll behavior and scroll animations
+  document.addEventListener('DOMContentLoaded', () => {
+    // Enable smooth scrolling
+    document.documentElement.style.scrollBehavior = 'smooth';
+
+    // Track current active section
+    let currentSection = 'home';
+
+    // Intersection Observer for scroll animations
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: [0.1, 0.5, 0.9]
+    };
+
+    const sections = document.querySelectorAll('.page-section');
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          // Add animation class when section comes into view
+          entry.target.classList.add('in-view');
+
+          // Update active section in URL and notify background
+          if (entry.intersectionRatio > 0.5) {
+            const sectionId = entry.target.id;
+            if (history.pushState && sectionId) {
+              history.replaceState(null, '', `#${sectionId}`);
+            }
+
+            // Notify background component about section change
+            if (sectionId && sectionId !== currentSection) {
+              currentSection = sectionId;
+              window.postMessage({
+                type: 'section-change',
+                section: sectionId
+              }, '*');
+              console.log(`Section changed to: ${sectionId}`);
+            }
+          }
+        }
+      });
+    }, observerOptions);
+
+    sections.forEach(section => observer.observe(section));
+
+    // Initialize with home section
+    setTimeout(() => {
+      window.postMessage({
+        type: 'section-change',
+        section: 'home'
+      }, '*');
+    }, 100);
+  });
+</script>

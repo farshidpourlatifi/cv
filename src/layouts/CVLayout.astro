@@ -69,9 +69,11 @@ const {
   .main-content {
     flex: 1;
     width: 100%;
-    max-width: 1437px;
     margin: 0 auto;
     padding: 0;
+    scroll-snap-type: y mandatory;
+    overflow-y: auto;
+    overflow-x: hidden;
   }
 
   /* Print styles */
