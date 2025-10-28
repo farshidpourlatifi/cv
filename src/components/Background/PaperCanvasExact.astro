@@ -86,34 +86,46 @@
         appearance: { strokeWidthOptions: [2, 3, 5] },
       },
       skills: {
-        pattern: 'vertical',  // Straight vertical line from bottom to top (center)
-        sizes: { circle: [14, 18, 12], rect: [15, 22, 18], triangle: [17, 14, 20] },
+        pattern: 'curve',  // Bezier curve using control points
+        sizes: { circle: [1], rect: [1], triangle: [1] },
         distribution: {
-          minDistance: 50,
-          bandWidth: 200,     // Width of vertical band
-          sineAmplitude: 0,   // No sine wave - straight line
-          sineFrequency: 0,
-          spacing: 5,
+          minDistance: 10,
+          bandWidth: 300,     // Width of curve band
+          spacing: 20,
           spacingRandomness: 3,
-          edgeMargin: 50,
+          edgeMargin: 10,
           boundsInset: 30,
+          // Control points for smooth arc (as fractions of screen: 0-1)
+          // Arc from bottom-right to top-right with gentle leftward curve
+          // curveControlPoints: [
+          //   { x: 0.85, y: 1.0 },   // Start: bottom-right
+          //   { x: 0.65, y: 0.75 },  // Control: pull left in middle-lower
+          //   { x: 0.70, y: 0.25 },  // Control: slight left in middle-upper
+          //   { x: 0.85, y: 0.0 }    // End: top-right
+          // ]
+          curveControlPoints: [
+            { x: 0.95, y: 1.0 },   // Start: bottom-right
+            { x: 0.75, y: 0.55 },  // Control: pull left in middle-lower
+            { x: 0.70, y: 0.25 },  // Control: slight left in middle-upper
+            { x: 0, y: 0 }    // End: top-right
+          ]
         },
-        appearance: { strokeWidthOptions: [2, 3, 5] },
+        appearance: { strokeWidthOptions: [2, 3, 4] },
       },
       experience: {
         pattern: 'circle',    // Large circular arrangement touching bottom
-        sizes: { circle: [14, 18, 12], rect: [15, 22, 18], triangle: [17, 14, 20] },
+        sizes: { circle: [7, 8, 6], rect: [7, 9, 8], triangle: [8, 7, 9] },
         distribution: {
           minDistance: 50,
-          bandWidth: 300,     // Wide band for space in center
+          bandWidth: 200,     // Wide band for space in center
           sineAmplitude: 0,
           sineFrequency: 0,
           spacing: 5,
           spacingRandomness: 3,
           edgeMargin: 50,
           boundsInset: 30,
-          circleRadius: 500,  // Large radius
-          circleOffsetY: 100, // Offset down so circle touches bottom
+          circleRadius: 600,  // Large radius
+          circleOffsetY: 500, // Offset down so circle touches bottom
         },
         appearance: { strokeWidthOptions: [2, 3, 5] },
       },
@@ -135,7 +147,7 @@
       sizes: preset.sizes,
       distribution: preset.distribution,
       appearance: { ...preset.appearance, initialRotation: 360 },
-      fade: { fadeInDuration: 30, fadeOutDuration: 30 },
+      fade: { fadeInDuration: 10, fadeOutDuration: 10 },
       fireEffects: { randomFireProbability: 0.003, glowStrokeMultiplier: 3, glowBrightnessMultiplier: 0.3 },
       regeneration: { jitterX: 0, jitterY: 0, defaultSizeFallback: 20 },
     });
@@ -193,6 +205,55 @@
         initialFireTime: -300,   // Initial lastFireTime value (frame number)
       },
     };
+
+    // ==================== BEZIER CURVE FUNCTIONS ====================
+
+    // Cubic Bezier curve function: B(t) = (1-t)³P0 + 3(1-t)²tP1 + 3(1-t)t²P2 + t³P3
+    const bezierPoint = (t: number, p0: {x: number, y: number}, p1: {x: number, y: number},
+                         p2: {x: number, y: number}, p3: {x: number, y: number}) => {
+      const mt = 1 - t;
+      const mt2 = mt * mt;
+      const mt3 = mt2 * mt;
+      const t2 = t * t;
+      const t3 = t2 * t;
+
+      return {
+        x: mt3 * p0.x + 3 * mt2 * t * p1.x + 3 * mt * t2 * p2.x + t3 * p3.x,
+        y: mt3 * p0.y + 3 * mt2 * t * p1.y + 3 * mt * t2 * p2.y + t3 * p3.y
+      };
+    };
+
+    // Calculate tangent (derivative) of Bezier curve at parameter t
+    const bezierTangent = (t: number, p0: {x: number, y: number}, p1: {x: number, y: number},
+                           p2: {x: number, y: number}, p3: {x: number, y: number}) => {
+      const mt = 1 - t;
+      const mt2 = mt * mt;
+      const t2 = t * t;
+
+      const dx = -3 * mt2 * p0.x + 3 * mt2 * p1.x - 6 * mt * t * p1.x + 6 * mt * t * p2.x - 3 * t2 * p2.x + 3 * t2 * p3.x;
+      const dy = -3 * mt2 * p0.y + 3 * mt2 * p1.y - 6 * mt * t * p1.y + 6 * mt * t * p2.y - 3 * t2 * p2.y + 3 * t2 * p3.y;
+
+      return { dx, dy };
+    };
+
+    // Get perpendicular direction (normalized) at a point on the Bezier curve
+    const bezierPerpendicular = (t: number, p0: {x: number, y: number}, p1: {x: number, y: number},
+                                 p2: {x: number, y: number}, p3: {x: number, y: number}) => {
+      const tangent = bezierTangent(t, p0, p1, p2, p3);
+
+      // Perpendicular is (-dy, dx) rotated 90° counter-clockwise
+      const perpX = -tangent.dy;
+      const perpY = tangent.dx;
+
+      // Normalize
+      const length = Math.sqrt(perpX * perpX + perpY * perpY);
+      return {
+        x: perpX / length,
+        y: perpY / length
+      };
+    };
+
+    // ==================== SHAPE GENERATION FUNCTIONS ====================
 
     // Generate shapes within a diagonal sine wave band (bottom-left to top-right)
     const generateShapesInDiagonalBand = () => {
@@ -328,8 +389,32 @@
       const minDistance = shapeConfig.distribution.minDistance;
       const bandWidth = shapeConfig.distribution.bandWidth;
 
-      // Center the vertical line
-      const centerX = paper.view.size.width / 2;
+      // Get positioning parameters (with defaults)
+      const horizontalPosition = (shapeConfig.distribution as any).horizontalPosition || 0.5;
+      const angleDegrees = (shapeConfig.distribution as any).angle || 0;
+
+      // Convert angle to radians
+      const angleRadians = (angleDegrees * Math.PI) / 180;
+
+      // Calculate base X position
+      const baseX = paper.view.size.width * horizontalPosition;
+
+      // Calculate horizontal offset based on angle
+      const height = paper.view.size.height;
+      const horizontalOffset = Math.tan(angleRadians) * height;
+
+      // Calculate the actual line direction vector (from bottom to top)
+      const lineDirX = horizontalOffset;
+      const lineDirY = -height;
+
+      // Calculate perpendicular vector (rotate 90° counter-clockwise)
+      const perpDirX = -lineDirY; // = height
+      const perpDirY = lineDirX; // = horizontalOffset
+
+      // Normalize the perpendicular vector
+      const perpLength = Math.sqrt(perpDirX * perpDirX + perpDirY * perpDirY);
+      const perpX = perpDirX / perpLength;
+      const perpY = perpDirY / perpLength;
 
       // Shape types for equal distribution
       const shapeTypes = ['circle', 'rect', 'triangle'];
@@ -352,21 +437,28 @@
         });
       };
 
-      // Generate shapes along vertical line from bottom to top
+      // Generate shapes along angled line from bottom to top
       const spacing = shapeConfig.distribution.spacing;
       const edgeMargin = shapeConfig.distribution.edgeMargin;
       const spacingRandomness = shapeConfig.distribution.spacingRandomness;
       const boundsInset = shapeConfig.distribution.boundsInset;
 
-      for (let y = edgeMargin; y < paper.view.size.height - edgeMargin; y += spacing + Math.random() * spacingRandomness) {
-        // Random offset within band width (horizontal variation around center)
-        const xOffset = (Math.random() - 0.5) * bandWidth;
-        const x = centerX + xOffset;
+      for (let y = edgeMargin; y < height - edgeMargin; y += spacing + Math.random() * spacingRandomness) {
+        // Progress along the line (0 at bottom, 1 at top)
+        const progress = y / height;
+
+        // X position along the angled line
+        const lineX = baseX + horizontalOffset * (0.5 - progress);
+
+        // Random offset within band width (perpendicular to the line)
+        const bandOffset = (Math.random() - 0.5) * bandWidth;
+        const x = lineX + perpX * bandOffset;
+        const yAdjusted = y + perpY * bandOffset;
 
         // Check bounds and overlap
         if (x >= boundsInset && x <= paper.view.size.width - boundsInset &&
-            y >= boundsInset && y <= paper.view.size.height - boundsInset &&
-            !isTooClose(x, y, generatedShapes)) {
+            yAdjusted >= boundsInset && yAdjusted <= height - boundsInset &&
+            !isTooClose(x, yAdjusted, generatedShapes)) {
 
           // Equal distribution: cycle through shape types
           const type = shapeTypes[shapeCounter % shapeTypes.length];
@@ -390,7 +482,7 @@
           if (type === 'circle') {
             generatedShapes.push({
               type: 'circle',
-              x, y,
+              x, y: yAdjusted,
               radius: size,
               strokeColor,
               strokeWidth
@@ -398,7 +490,7 @@
           } else if (type === 'rect') {
             generatedShapes.push({
               type: 'rect',
-              x, y,
+              x, y: yAdjusted,
               width: size,
               height: size,
               radius: Math.random() > 0.5 ? 2.5 : 4.5,
@@ -409,7 +501,7 @@
           } else if (type === 'triangle') {
             generatedShapes.push({
               type: 'triangle',
-              x, y,
+              x, y: yAdjusted,
               size,
               rotation,
               strokeColor,
@@ -531,12 +623,139 @@
       return generatedShapes;
     };
 
+    // Generate shapes along a Bezier curve
+    const generateShapesAlongCurve = () => {
+      const generatedShapes: any[] = [];
+      const minDistance = shapeConfig.distribution.minDistance;
+      const bandWidth = shapeConfig.distribution.bandWidth;
+
+      // Get control points from config (as screen fractions 0-1)
+      const controlPoints = (shapeConfig.distribution as any).curveControlPoints;
+      if (!controlPoints || controlPoints.length !== 4) {
+        console.error('Curve pattern requires exactly 4 control points');
+        return [];
+      }
+
+      // Convert control points to pixel coordinates
+      const p0 = { x: controlPoints[0].x * paper.view.size.width, y: controlPoints[0].y * paper.view.size.height };
+      const p1 = { x: controlPoints[1].x * paper.view.size.width, y: controlPoints[1].y * paper.view.size.height };
+      const p2 = { x: controlPoints[2].x * paper.view.size.width, y: controlPoints[2].y * paper.view.size.height };
+      const p3 = { x: controlPoints[3].x * paper.view.size.width, y: controlPoints[3].y * paper.view.size.height };
+
+      // Shape types for equal distribution
+      const shapeTypes = ['circle', 'rect', 'triangle'];
+      const sizes = shapeConfig.sizes;
+      const colorOptions = [colors.primaryLight, colors.secondary, colors.accent, colors.tertiary, colors.white];
+      const strokeWidthOptions = shapeConfig.appearance.strokeWidthOptions;
+
+      // Counters for equal distribution
+      let shapeCounter = 0;
+      let colorCounter = 0;
+      let strokeCounter = 0;
+
+      // Check if position is too close to existing shapes
+      const isTooClose = (x: number, y: number, existing: any[]) => {
+        return existing.some(shape => {
+          const dx = shape.x - x;
+          const dy = shape.y - y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          return distance < minDistance;
+        });
+      };
+
+      // Generate shapes along the curve
+      const spacing = shapeConfig.distribution.spacing;
+      const spacingRandomness = shapeConfig.distribution.spacingRandomness;
+      const boundsInset = shapeConfig.distribution.boundsInset;
+
+      // Sample points along the curve (t from 0 to 1)
+      for (let t = 0; t <= 1; t += 0.01) { // Sample every 1% along curve
+        // Get point on curve
+        const curvePoint = bezierPoint(t, p0, p1, p2, p3);
+
+        // Get perpendicular direction
+        const tangent = bezierTangent(t, p0, p1, p2, p3);
+        const perpX = -tangent.dy;
+        const perpY = tangent.dx;
+        const perpLength = Math.sqrt(perpX * perpX + perpY * perpY);
+        const perpNormX = perpX / perpLength;
+        const perpNormY = perpY / perpLength;
+
+        // Random offset within band width (perpendicular to curve)
+        const bandOffset = (Math.random() - 0.5) * bandWidth;
+        const x = curvePoint.x + perpNormX * bandOffset;
+        const y = curvePoint.y + perpNormY * bandOffset;
+
+        // Check bounds and overlap
+        if (x >= boundsInset && x <= paper.view.size.width - boundsInset &&
+            y >= boundsInset && y <= paper.view.size.height - boundsInset &&
+            !isTooClose(x, y, generatedShapes)) {
+
+          // Random spacing check
+          if (Math.random() < spacing / 100) {
+            // Equal distribution: cycle through shape types
+            const type = shapeTypes[shapeCounter % shapeTypes.length];
+            shapeCounter++;
+
+            const sizeOptions = sizes[type as keyof typeof sizes];
+            const size = sizeOptions[Math.floor(Math.random() * sizeOptions.length)];
+
+            // Equal distribution: cycle through colors
+            const strokeColor = colorOptions[colorCounter % colorOptions.length];
+            colorCounter++;
+
+            // Equal distribution: cycle through stroke widths
+            const strokeWidth = strokeWidthOptions[strokeCounter % strokeWidthOptions.length];
+            strokeCounter++;
+
+            // Random rotation
+            const rotation = Math.random() * shapeConfig.appearance.initialRotation;
+
+            // Add shape
+            if (type === 'circle') {
+              generatedShapes.push({
+                type: 'circle',
+                x, y,
+                radius: size,
+                strokeColor,
+                strokeWidth
+              });
+            } else if (type === 'rect') {
+              generatedShapes.push({
+                type: 'rect',
+                x, y,
+                width: size,
+                height: size,
+                radius: Math.random() > 0.5 ? 2.5 : 4.5,
+                rotation,
+                strokeColor,
+                strokeWidth
+              });
+            } else if (type === 'triangle') {
+              generatedShapes.push({
+                type: 'triangle',
+                x, y,
+                size,
+                rotation,
+                strokeColor,
+                strokeWidth
+              });
+            }
+          }
+        }
+      }
+
+      return generatedShapes;
+    };
+
     // Generate shapes based on current pattern
     const generateShapes = () => {
       const currentPreset = configPresets[currentPresetName as keyof typeof configPresets];
       const pattern = currentPreset.pattern;
 
-      if (pattern === 'vertical') {
+      if (pattern === 'curve') {
+        return generateShapesAlongCurve();
+      } else if (pattern === 'vertical') {
         return generateShapesInVerticalLine();
       } else if (pattern === 'circle') {
         return generateShapesInCircle();
@@ -568,15 +787,70 @@
       while (attempts < maxAttempts) {
         let x: number, y: number;
 
-        if (pattern === 'vertical') {
-          // Vertical line pattern (centered)
-          const centerX = paper.view.size.width / 2;
+        if (pattern === 'curve') {
+          // Bezier curve pattern
+          const bandWidth = shapeConfig.distribution.bandWidth;
+          const controlPoints = (shapeConfig.distribution as any).curveControlPoints;
+
+          if (!controlPoints || controlPoints.length !== 4) {
+            // Fallback to center if no control points
+            x = paper.view.size.width * 0.5;
+            y = paper.view.size.height * 0.5;
+          } else {
+            // Convert control points to pixel coordinates
+            const p0 = { x: controlPoints[0].x * paper.view.size.width, y: controlPoints[0].y * paper.view.size.height };
+            const p1 = { x: controlPoints[1].x * paper.view.size.width, y: controlPoints[1].y * paper.view.size.height };
+            const p2 = { x: controlPoints[2].x * paper.view.size.width, y: controlPoints[2].y * paper.view.size.height };
+            const p3 = { x: controlPoints[3].x * paper.view.size.width, y: controlPoints[3].y * paper.view.size.height };
+
+            // Random point along curve (t from 0 to 1)
+            const t = Math.random();
+            const curvePoint = bezierPoint(t, p0, p1, p2, p3);
+
+            // Get perpendicular direction
+            const tangent = bezierTangent(t, p0, p1, p2, p3);
+            const perpX = -tangent.dy;
+            const perpY = tangent.dx;
+            const perpLength = Math.sqrt(perpX * perpX + perpY * perpY);
+            const perpNormX = perpX / perpLength;
+            const perpNormY = perpY / perpLength;
+
+            // Random offset within band width
+            const bandOffset = (Math.random() - 0.5) * bandWidth;
+            x = curvePoint.x + perpNormX * bandOffset;
+            y = curvePoint.y + perpNormY * bandOffset;
+          }
+
+        } else if (pattern === 'vertical') {
+          // Vertical line pattern with positioning and angle
+          const horizontalPosition = (shapeConfig.distribution as any).horizontalPosition || 0.5;
+          const angleDegrees = (shapeConfig.distribution as any).angle || 0;
           const bandWidth = shapeConfig.distribution.bandWidth;
           const edgeMargin = shapeConfig.distribution.edgeMargin;
 
-          y = edgeMargin + Math.random() * (paper.view.size.height - 2 * edgeMargin);
-          const xOffset = (Math.random() - 0.5) * bandWidth;
-          x = centerX + xOffset;
+          // Convert angle to radians
+          const angleRadians = (angleDegrees * Math.PI) / 180;
+          const baseX = paper.view.size.width * horizontalPosition;
+          const height = paper.view.size.height;
+          const horizontalOffset = Math.tan(angleRadians) * height;
+
+          // Calculate the actual line direction vector and perpendicular
+          const lineDirX = horizontalOffset;
+          const lineDirY = -height;
+          const perpDirX = -lineDirY; // = height
+          const perpDirY = lineDirX; // = horizontalOffset
+          const perpLength = Math.sqrt(perpDirX * perpDirX + perpDirY * perpDirY);
+          const perpX = perpDirX / perpLength;
+          const perpY = perpDirY / perpLength;
+
+          y = edgeMargin + Math.random() * (height - 2 * edgeMargin);
+          const progress = y / height;
+          const lineX = baseX + horizontalOffset * (0.5 - progress);
+
+          // Random offset within band width (perpendicular to line)
+          const bandOffset = (Math.random() - 0.5) * bandWidth;
+          x = lineX + perpX * bandOffset;
+          y = y + perpY * bandOffset;
 
         } else if (pattern === 'circle') {
           // Circular pattern (touching bottom)
@@ -641,12 +915,13 @@
 
     const shapesData = generateShapes();
 
-    // Draw visible sine wave band for debugging/visualization
-    const drawSineWaveBand = () => {
-      // Band parameters (must match generation parameters)
-      const bandWidth = 300;
-      const sineAmplitude = 100;
-      const sineFrequency = 0.004;
+    // Dynamic guide drawing functions for all patterns
+    const drawDiagonalGuides = (centerLine: paper.Path, upperBoundary: paper.Path, lowerBoundary: paper.Path) => {
+      // Get current preset config
+      const preset = configPresets[targetPresetName as keyof typeof configPresets];
+      const bandWidth = preset.distribution.bandWidth;
+      const sineAmplitude = preset.distribution.sineAmplitude;
+      const sineFrequency = preset.distribution.sineFrequency;
 
       // Diagonal line from bottom-left to top-right
       const startPoint = { x: 0, y: paper.view.size.height };
@@ -666,26 +941,15 @@
       const perpX = -directionY;
       const perpY = directionX;
 
-      // Draw center sine wave line
-      const centerLine = new paper.Path();
-      centerLine.strokeColor = new paper.Color('#FF0000');
-      centerLine.strokeWidth = 2;
-      centerLine.opacity = 0.3;
-      centerLine.dashArray = [10, 5];
+      // Clear existing segments
+      centerLine.removeSegments();
+      upperBoundary.removeSegments();
+      lowerBoundary.removeSegments();
 
-      // Draw upper boundary
-      const upperBoundary = new paper.Path();
-      upperBoundary.strokeColor = new paper.Color('#FFFFFF');
-      upperBoundary.strokeWidth = 1;
-      upperBoundary.opacity = 0.2;
-      upperBoundary.dashArray = [5, 5];
-
-      // Draw lower boundary
-      const lowerBoundary = new paper.Path();
-      lowerBoundary.strokeColor = new paper.Color('#FFFFFF');
-      lowerBoundary.strokeWidth = 1;
-      lowerBoundary.opacity = 0.2;
-      lowerBoundary.dashArray = [5, 5];
+      // Ensure paths are not closed
+      centerLine.closed = false;
+      upperBoundary.closed = false;
+      lowerBoundary.closed = false;
 
       // Generate points along the diagonal
       for (let t = 0; t <= diagonalLength; t += 5) {
@@ -713,20 +977,222 @@
         const lowerY = baseY + perpY * lowerOffset;
         lowerBoundary.add(new paper.Point(lowerX, lowerY));
       }
-
-      // Return paths so they can be toggled later
-      return { centerLine, upperBoundary, lowerBoundary };
     };
 
-    // Draw the sine wave visualization
-    const sineWaveGuides = drawSineWaveBand();
+    const drawVerticalGuides = (centerLine: paper.Path, upperBoundary: paper.Path, lowerBoundary: paper.Path) => {
+      // Get current preset config
+      const preset = configPresets[targetPresetName as keyof typeof configPresets];
+      const bandWidth = preset.distribution.bandWidth;
 
-    // TOGGLE GUIDE VISIBILITY: Set to false to hide the sine wave guides
+      // Get positioning parameters (with defaults for backward compatibility)
+      const horizontalPosition = (preset.distribution as any).horizontalPosition || 0.5;
+      const angleDegrees = (preset.distribution as any).angle || 0;
+
+      // Convert angle to radians
+      const angleRadians = (angleDegrees * Math.PI) / 180;
+
+      // Calculate base X position from horizontal position (0-1 fraction of screen width)
+      const baseX = paper.view.size.width * horizontalPosition;
+
+      // Calculate horizontal offset per vertical unit based on angle
+      // Negative angle tilts left (top moves left), positive tilts right (top moves right)
+      const height = paper.view.size.height;
+      const horizontalOffset = Math.tan(angleRadians) * height;
+
+      // Calculate the actual line direction vector (from bottom to top)
+      // Bottom point: (baseX - horizontalOffset/2, height)
+      // Top point: (baseX + horizontalOffset/2, 0)
+      const lineDirX = horizontalOffset; // Change in X from bottom to top
+      const lineDirY = -height; // Change in Y from bottom to top (negative because y decreases)
+
+      // Calculate perpendicular vector (rotate line direction 90° counter-clockwise)
+      // Perpendicular of (dx, dy) is (-dy, dx)
+      const perpDirX = -lineDirY; // = height
+      const perpDirY = lineDirX; // = horizontalOffset
+
+      // Normalize the perpendicular vector
+      const perpLength = Math.sqrt(perpDirX * perpDirX + perpDirY * perpDirY);
+      const perpX = perpDirX / perpLength;
+      const perpY = perpDirY / perpLength;
+
+      // Clear existing segments
+      centerLine.removeSegments();
+      upperBoundary.removeSegments();
+      lowerBoundary.removeSegments();
+
+      // Ensure paths are not closed
+      centerLine.closed = false;
+      upperBoundary.closed = false;
+      lowerBoundary.closed = false;
+
+      // Generate points along angled line from bottom to top
+      for (let y = 0; y <= height; y += 5) {
+        // Progress along the line (0 at bottom, 1 at top)
+        const progress = y / height;
+
+        // X position along the angled line
+        // At bottom (y=height): baseX - horizontalOffset/2
+        // At top (y=0): baseX + horizontalOffset/2
+        const x = baseX + horizontalOffset * (0.5 - progress);
+
+        // Center line
+        centerLine.add(new paper.Point(x, y));
+
+        // Upper and lower boundaries (perpendicular to the line)
+        const upperX = x + perpX * (bandWidth / 2);
+        const upperY = y + perpY * (bandWidth / 2);
+        upperBoundary.add(new paper.Point(upperX, upperY));
+
+        const lowerX = x - perpX * (bandWidth / 2);
+        const lowerY = y - perpY * (bandWidth / 2);
+        lowerBoundary.add(new paper.Point(lowerX, lowerY));
+      }
+    };
+
+    const drawCircularGuides = (centerLine: paper.Path, upperBoundary: paper.Path, lowerBoundary: paper.Path) => {
+      // Get current preset config
+      const preset = configPresets[targetPresetName as keyof typeof configPresets];
+      const bandWidth = preset.distribution.bandWidth;
+      const circleRadius = (preset.distribution as any).circleRadius || 500;
+      const circleOffsetY = (preset.distribution as any).circleOffsetY || 0;
+
+      // Center of the circle (offset vertically to touch bottom)
+      const centerX = paper.view.size.width / 2;
+      const centerY = paper.view.size.height - circleRadius + circleOffsetY;
+
+      // Clear existing segments
+      centerLine.removeSegments();
+      upperBoundary.removeSegments();
+      lowerBoundary.removeSegments();
+
+      // Generate points around the circle
+      const angleStep = 0.02; // Smaller step for smoother circle
+      for (let angle = 0; angle <= Math.PI * 2; angle += angleStep) {
+        // Center line point
+        const centerPointX = centerX + circleRadius * Math.cos(angle);
+        const centerPointY = centerY + circleRadius * Math.sin(angle);
+        centerLine.add(new paper.Point(centerPointX, centerPointY));
+
+        // Upper boundary (outer circle)
+        const outerX = centerX + (circleRadius + bandWidth / 2) * Math.cos(angle);
+        const outerY = centerY + (circleRadius + bandWidth / 2) * Math.sin(angle);
+        upperBoundary.add(new paper.Point(outerX, outerY));
+
+        // Lower boundary (inner circle)
+        const innerX = centerX + (circleRadius - bandWidth / 2) * Math.cos(angle);
+        const innerY = centerY + (circleRadius - bandWidth / 2) * Math.sin(angle);
+        lowerBoundary.add(new paper.Point(innerX, innerY));
+      }
+
+      // Close the paths to complete the circle
+      centerLine.closed = true;
+      upperBoundary.closed = true;
+      lowerBoundary.closed = true;
+    };
+
+    const drawCurveGuides = (centerLine: paper.Path, upperBoundary: paper.Path, lowerBoundary: paper.Path) => {
+      // Get current preset config
+      const preset = configPresets[targetPresetName as keyof typeof configPresets];
+      const bandWidth = preset.distribution.bandWidth;
+      const controlPoints = (preset.distribution as any).curveControlPoints;
+
+      if (!controlPoints || controlPoints.length !== 4) {
+        console.error('Curve pattern requires exactly 4 control points for guides');
+        return;
+      }
+
+      // Convert control points to pixel coordinates
+      const p0 = { x: controlPoints[0].x * paper.view.size.width, y: controlPoints[0].y * paper.view.size.height };
+      const p1 = { x: controlPoints[1].x * paper.view.size.width, y: controlPoints[1].y * paper.view.size.height };
+      const p2 = { x: controlPoints[2].x * paper.view.size.width, y: controlPoints[2].y * paper.view.size.height };
+      const p3 = { x: controlPoints[3].x * paper.view.size.width, y: controlPoints[3].y * paper.view.size.height };
+
+      // Clear existing segments
+      centerLine.removeSegments();
+      upperBoundary.removeSegments();
+      lowerBoundary.removeSegments();
+
+      // Ensure paths are not closed
+      centerLine.closed = false;
+      upperBoundary.closed = false;
+      lowerBoundary.closed = false;
+
+      // Sample points along the Bezier curve
+      for (let t = 0; t <= 1; t += 0.01) { // Sample every 1%
+        // Get point on curve
+        const curvePoint = bezierPoint(t, p0, p1, p2, p3);
+
+        // Get perpendicular direction at this point
+        const tangent = bezierTangent(t, p0, p1, p2, p3);
+        const perpX = -tangent.dy;
+        const perpY = tangent.dx;
+        const perpLength = Math.sqrt(perpX * perpX + perpY * perpY);
+        const perpNormX = perpX / perpLength;
+        const perpNormY = perpY / perpLength;
+
+        // Center line
+        centerLine.add(new paper.Point(curvePoint.x, curvePoint.y));
+
+        // Upper boundary (offset perpendicular)
+        const upperX = curvePoint.x + perpNormX * (bandWidth / 2);
+        const upperY = curvePoint.y + perpNormY * (bandWidth / 2);
+        upperBoundary.add(new paper.Point(upperX, upperY));
+
+        // Lower boundary (offset perpendicular)
+        const lowerX = curvePoint.x - perpNormX * (bandWidth / 2);
+        const lowerY = curvePoint.y - perpNormY * (bandWidth / 2);
+        lowerBoundary.add(new paper.Point(lowerX, lowerY));
+      }
+    };
+
+    // Create guide paths (will be dynamically updated)
+    const guidePaths = {
+      centerLine: new paper.Path(),
+      upperBoundary: new paper.Path(),
+      lowerBoundary: new paper.Path()
+    };
+
+    // Configure guide appearance
+    guidePaths.centerLine.strokeColor = new paper.Color('#FF0000');
+    guidePaths.centerLine.strokeWidth = 2;
+    guidePaths.centerLine.opacity = 0.3;
+    guidePaths.centerLine.dashArray = [10, 5];
+
+    guidePaths.upperBoundary.strokeColor = new paper.Color('#FFFFFF');
+    guidePaths.upperBoundary.strokeWidth = 1;
+    guidePaths.upperBoundary.opacity = 0.2;
+    guidePaths.upperBoundary.dashArray = [5, 5];
+
+    guidePaths.lowerBoundary.strokeColor = new paper.Color('#FFFFFF');
+    guidePaths.lowerBoundary.strokeWidth = 1;
+    guidePaths.lowerBoundary.opacity = 0.2;
+    guidePaths.lowerBoundary.dashArray = [5, 5];
+
+    // Function to update guides based on current pattern
+    const updateGuides = () => {
+      const currentPreset = configPresets[targetPresetName as keyof typeof configPresets];
+      const pattern = currentPreset.pattern;
+
+      if (pattern === 'curve') {
+        drawCurveGuides(guidePaths.centerLine, guidePaths.upperBoundary, guidePaths.lowerBoundary);
+      } else if (pattern === 'vertical') {
+        drawVerticalGuides(guidePaths.centerLine, guidePaths.upperBoundary, guidePaths.lowerBoundary);
+      } else if (pattern === 'circle') {
+        drawCircularGuides(guidePaths.centerLine, guidePaths.upperBoundary, guidePaths.lowerBoundary);
+      } else {
+        drawDiagonalGuides(guidePaths.centerLine, guidePaths.upperBoundary, guidePaths.lowerBoundary);
+      }
+    };
+
+    // Initialize guides with current pattern
+    updateGuides();
+
+    // TOGGLE GUIDE VISIBILITY: Set to false to hide the guides
     const showGuides = true;
     if (!showGuides) {
-      sineWaveGuides.centerLine.visible = false;
-      sineWaveGuides.upperBoundary.visible = false;
-      sineWaveGuides.lowerBoundary.visible = false;
+      guidePaths.centerLine.visible = false;
+      guidePaths.upperBoundary.visible = false;
+      guidePaths.lowerBoundary.visible = false;
     }
 
     // Create shapes
@@ -804,6 +1270,7 @@
       }
 
       // Store original position and lifecycle data
+      const initialLifespan = shapeConfig.lifespan.min + Math.random() * (shapeConfig.lifespan.max - shapeConfig.lifespan.min);
       shape.data = {
         originalPosition: shape.position.clone(),
         originalRotation: shapeData.rotation || 0,
@@ -816,7 +1283,8 @@
         amplitudeX: shapeConfig.amplitude.xMin + Math.random() * (shapeConfig.amplitude.xMax - shapeConfig.amplitude.xMin),
         // Lifecycle properties
         age: 0,
-        lifespan: shapeConfig.lifespan.min + Math.random() * (shapeConfig.lifespan.max - shapeConfig.lifespan.min),
+        lifespan: initialLifespan,
+        originalLifespan: initialLifespan, // Track original lifespan to detect extensions
         baseX: shapeData.x, // Original X for respawn
         baseY: shapeData.y, // Original Y for respawn
         shapeType: shapeData.type,
@@ -1074,6 +1542,7 @@
       }
 
       // Reset lifecycle data with new randomized values
+      const regeneratedLifespan = shapeConfig.lifespan.min + Math.random() * (shapeConfig.lifespan.max - shapeConfig.lifespan.min);
       newShape.data = {
         originalPosition: newShape.position.clone(),
         originalRotation: newRotation,
@@ -1085,7 +1554,8 @@
         amplitudeY: shapeConfig.amplitude.yMin + Math.random() * (shapeConfig.amplitude.yMax - shapeConfig.amplitude.yMin),
         amplitudeX: shapeConfig.amplitude.xMin + Math.random() * (shapeConfig.amplitude.xMax - shapeConfig.amplitude.xMin),
         age: 0,
-        lifespan: shapeConfig.lifespan.min + Math.random() * (shapeConfig.lifespan.max - shapeConfig.lifespan.min),
+        lifespan: regeneratedLifespan,
+        originalLifespan: regeneratedLifespan, // Track original lifespan
         baseX: newX, // Store new position as base
         baseY: newY,
         shapeType: newType,
@@ -1150,6 +1620,12 @@
     let isTransitioning = false;
     let acceleratedDeathRate = 1.0; // 1.0 = normal, higher = faster death
 
+    // Guide transition state
+    let guideMorphProgress = 1.0; // 1.0 = fully morphed, 0.0 = start of morph
+    let guideFadeOut = false;
+    let guideFadeIn = false;
+    const guideTransitionSpeed = 0.05; // Speed of guide morphing
+
     // Listen for scroll section changes
     window.addEventListener('message', (event) => {
       if (event.data.type === 'section-change') {
@@ -1166,6 +1642,11 @@
             console.log(`Pattern changing from ${oldPattern} to ${newPattern} - accelerating death rate`);
             isTransitioning = true;
             acceleratedDeathRate = 5.0; // Shapes die 5x faster during transition
+
+            // Start guide morphing sequence: fade out -> update -> fade in
+            guideMorphProgress = 0.0;
+            guideFadeOut = true;
+            guideFadeIn = false;
           }
 
           console.log(`Background transitioning to ${section} preset`);
@@ -1210,6 +1691,45 @@
         }
       }
 
+      // Handle guide morphing animation
+      if (guideFadeOut || guideFadeIn) {
+        guideMorphProgress += guideTransitionSpeed;
+
+        if (guideFadeOut) {
+          // Fade out phase (0.0 to 0.5)
+          if (guideMorphProgress >= 0.5) {
+            // Fade out complete - update the guide shapes
+            updateGuides();
+            guideFadeOut = false;
+            guideFadeIn = true;
+            console.log('Guides updated - starting fade in');
+          } else {
+            // Fade out in progress (opacity: 1.0 -> 0.0)
+            const fadeOutOpacity = 1.0 - (guideMorphProgress / 0.5);
+            guidePaths.centerLine.opacity = 0.3 * fadeOutOpacity;
+            guidePaths.upperBoundary.opacity = 0.2 * fadeOutOpacity;
+            guidePaths.lowerBoundary.opacity = 0.2 * fadeOutOpacity;
+          }
+        } else if (guideFadeIn) {
+          // Fade in phase (0.5 to 1.0)
+          if (guideMorphProgress >= 1.0) {
+            // Fade in complete - finish morphing
+            guideMorphProgress = 1.0;
+            guideFadeIn = false;
+            guidePaths.centerLine.opacity = 0.3;
+            guidePaths.upperBoundary.opacity = 0.2;
+            guidePaths.lowerBoundary.opacity = 0.2;
+            console.log('Guide morphing complete');
+          } else {
+            // Fade in in progress (opacity: 0.0 -> 1.0)
+            const fadeInOpacity = (guideMorphProgress - 0.5) / 0.5;
+            guidePaths.centerLine.opacity = 0.3 * fadeInOpacity;
+            guidePaths.upperBoundary.opacity = 0.2 * fadeInOpacity;
+            guidePaths.lowerBoundary.opacity = 0.2 * fadeInOpacity;
+          }
+        }
+      }
+
       // Randomly trigger fires from shapes (neural activity) - reduced frequency
       if (Math.random() < shapeConfig.fireEffects.randomFireProbability) {
         const randomShape = shapes[Math.floor(Math.random() * shapes.length)];
@@ -1237,18 +1757,29 @@
         const age = shape.data.age;
         const lifespan = shape.data.lifespan;
 
-        let opacity = 1;
+        let baseOpacity = 1;
 
         // Fade in at the beginning (linear)
         if (age <= fadeInDuration) {
-          opacity = age / fadeInDuration;
+          baseOpacity = age / fadeInDuration;
         }
         // Fade out at the end (linear)
         else if (age >= lifespan - fadeOutDuration) {
-          opacity = Math.max(0, (lifespan - age) / fadeOutDuration);
+          baseOpacity = Math.max(0, (lifespan - age) / fadeOutDuration);
         }
 
-        shape.opacity = opacity;
+        // Check if lifespan has been extended (node has fired and been rewarded)
+        const hasExtendedLifespan = shape.data.lifespan > shape.data.originalLifespan;
+
+        // Apply opacity based on state:
+        // - Normal idle nodes: 0.2 opacity (very subtle)
+        // - Firing nodes: 1.0 opacity (full brightness)
+        // - Extended lifespan nodes: 1.0 opacity (rewarded for activity)
+        if (shape.data.isFiring || hasExtendedLifespan) {
+          shape.opacity = baseOpacity * 1.0; // Full opacity
+        } else {
+          shape.opacity = baseOpacity * 0.2; // Very low opacity (1/5)
+        }
 
         // Handle firing state (glow effect)
         if (shape.data.isFiring) {
@@ -1259,17 +1790,17 @@
           }
         }
 
-        // Apply glow effect when firing, or restore to normal
+        // Apply glow effect and background tint based on firing state
         if (shape.data.fireIntensity > 0) {
-          // Increase stroke width to create glow
+          // FIRING: Increase stroke width to create glow
           shape.strokeWidth = shape.data.originalStrokeWidth + shape.data.fireIntensity * shapeConfig.fireEffects.glowStrokeMultiplier;
 
-          // Brighten the color
+          // FIRING: Brighten the stroke color
           const glowColor = new paper.Color(shape.data.originalStrokeColor);
           glowColor.brightness += shape.data.fireIntensity * shapeConfig.fireEffects.glowBrightnessMultiplier;
           shape.strokeColor = glowColor;
         } else {
-          // Restore to original appearance when not firing
+          // IDLE: Restore to original stroke appearance
           shape.strokeWidth = shape.data.originalStrokeWidth;
           shape.strokeColor = new paper.Color(shape.data.originalStrokeColor);
         }

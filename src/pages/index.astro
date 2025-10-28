@@ -102,8 +102,6 @@ import Contact from '../components/Sections/Contact.astro';
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(10, 58, 82, 0.7);
-    backdrop-filter: blur(2px);
     z-index: 1;
     pointer-events: none;
   }
@@ -116,7 +114,7 @@ import Contact from '../components/Sections/Contact.astro';
   /* Desktop adjustments */
   @media (min-width: 768px) {
     .section-content {
-      padding: 140px 40px 80px;
+      padding: 0 40px 80px;
       max-width: 1437px;
       margin: 0 auto;
     }
@@ -156,37 +154,36 @@ import Contact from '../components/Sections/Contact.astro';
     // Track current active section
     let currentSection = 'home';
 
-    // Intersection Observer for scroll animations
+    // Intersection Observer for scroll animations and hash updates
     const observerOptions = {
       root: null,
-      rootMargin: '0px',
-      threshold: [0.1, 0.5, 0.9]
+      rootMargin: '-20% 0px -60% 0px', // Trigger when section is 20% from top
+      threshold: 0
     };
 
     const sections = document.querySelectorAll('.page-section');
 
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
+        // Add animation class when section comes into view
         if (entry.isIntersecting) {
-          // Add animation class when section comes into view
           entry.target.classList.add('in-view');
 
-          // Update active section in URL and notify background
-          if (entry.intersectionRatio > 0.5) {
-            const sectionId = entry.target.id;
-            if (history.pushState && sectionId) {
-              history.replaceState(null, '', `#${sectionId}`);
-            }
+          const sectionId = entry.target.id;
 
-            // Notify background component about section change
-            if (sectionId && sectionId !== currentSection) {
-              currentSection = sectionId;
-              window.postMessage({
-                type: 'section-change',
-                section: sectionId
-              }, '*');
-              console.log(`Section changed to: ${sectionId}`);
-            }
+          // Update hash in URL
+          if (sectionId && history.pushState) {
+            history.replaceState(null, '', `#${sectionId}`);
+          }
+
+          // Notify background component about section change
+          if (sectionId && sectionId !== currentSection) {
+            currentSection = sectionId;
+            window.postMessage({
+              type: 'section-change',
+              section: sectionId
+            }, '*');
+            console.log(`Section changed to: ${sectionId}, hash updated to #${sectionId}`);
           }
         }
       });
@@ -194,12 +191,27 @@ import Contact from '../components/Sections/Contact.astro';
 
     sections.forEach(section => observer.observe(section));
 
-    // Initialize with home section
-    setTimeout(() => {
-      window.postMessage({
-        type: 'section-change',
-        section: 'home'
-      }, '*');
-    }, 100);
+    // Handle initial hash from URL
+    const initialHash = window.location.hash.substring(1);
+    if (initialHash && ['home', 'skills', 'experience'].includes(initialHash)) {
+      currentSection = initialHash;
+      setTimeout(() => {
+        window.postMessage({
+          type: 'section-change',
+          section: initialHash
+        }, '*');
+        console.log(`Initialized with section: ${initialHash}`);
+      }, 100);
+    } else {
+      // Initialize with home section
+      history.replaceState(null, '', '#home');
+      setTimeout(() => {
+        window.postMessage({
+          type: 'section-change',
+          section: 'home'
+        }, '*');
+        console.log('Initialized with section: home');
+      }, 100);
+    }
   });
 </script>

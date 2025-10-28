@@ -6,6 +6,36 @@ This guide explains how to use Claude (Anthropic's AI assistant) for developing 
 
 ---
 
+## ⚠️ Context Management & Documentation
+
+### Important: Always Document in `/docs`
+
+When implementing complex features or running low on context (>80% token usage):
+
+1. **Check context**: Run `/context` to see token usage
+2. **Document immediately**: Create comprehensive docs in `/docs` folder
+3. **Include**:
+   - Architecture overview
+   - Implementation details
+   - Configuration examples
+   - Next steps/TODOs
+4. **Reference in commits**: Link to docs in commit messages
+
+**Example**: Neural network background documentation:
+- `/docs/NEURAL_NETWORK_CURVES.md` - Bezier curve system
+- `/docs/SCROLL_MORPHING_PLAN.md` - Scroll-based morphing plan
+- `/docs/NEURAL_NETWORK_BACKGROUND.md` - Overall architecture
+
+### Why This Matters
+
+Claude has a 200k token context limit. Complex sessions can reach this limit. Documentation ensures:
+- ✅ Work is preserved even if context is lost
+- ✅ Future Claude sessions can pick up where you left off
+- ✅ You have reference material for the implementation
+- ✅ Other developers can understand the system
+
+---
+
 ## Table of Contents
 
 1. [Development with Claude](#development-with-claude)
