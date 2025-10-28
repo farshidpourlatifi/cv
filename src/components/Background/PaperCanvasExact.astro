@@ -87,10 +87,10 @@
       },
       skills: {
         pattern: 'curve',  // Bezier curve using control points
-        sizes: { circle: [1], rect: [1], triangle: [1] },
+        sizes: { circle: [5], rect: [5], triangle: [5] },
         distribution: {
           minDistance: 10,
-          bandWidth: 300,     // Width of curve band
+          bandWidth: 250,     // Width of curve band
           spacing: 20,
           spacingRandomness: 3,
           edgeMargin: 10,
@@ -110,7 +110,7 @@
             { x: 0, y: 0 }    // End: top-right
           ]
         },
-        appearance: { strokeWidthOptions: [2, 3, 4] },
+        appearance: { strokeWidthOptions: [2] },
       },
       experience: {
         pattern: 'circle',    // Large circular arrangement touching bottom
@@ -142,7 +142,7 @@
       floatSpeed: { yMin: 0.01, yMax: 0.03, xMin: 0.0, xMax: 0.0 },
       amplitude: { yMin: 1, yMax: 4, xMin: 1, xMax: 1.03 },
       blur: { enabled: false, probability: 0.3, amount: 8 },
-      lifespan: { min: 2, max: 50 },
+      lifespan: { min: 30, max: 50 },
       firing: { decay: 0.08, cooldown: 180, lifespanExtension: 100 },
       sizes: preset.sizes,
       distribution: preset.distribution,
