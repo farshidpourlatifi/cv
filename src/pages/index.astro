@@ -172,7 +172,7 @@ import Contact from '../components/Sections/Contact.astro';
           const sectionId = entry.target.id;
 
           // Update hash in URL
-          if (sectionId && history.pushState) {
+          if (sectionId && typeof history.pushState === 'function') {
             history.replaceState(null, '', `#${sectionId}`);
           }
 
@@ -190,6 +190,44 @@ import Contact from '../components/Sections/Contact.astro';
     }, observerOptions);
 
     sections.forEach(section => observer.observe(section));
+
+    // Continuous scroll progress tracking for smooth background transitions
+    window.addEventListener('scroll', () => {
+      // Get all sections and their positions
+      const sectionsArray = Array.from(sections) as HTMLElement[];
+      const scrollTop = window.scrollY;
+
+      // Find which two sections we're between based on scroll position
+      for (let i = 0; i < sectionsArray.length - 1; i++) {
+        const fromSectionEl = sectionsArray[i];
+        const toSectionEl = sectionsArray[i + 1];
+
+        const fromTop = fromSectionEl.offsetTop;
+        const toTop = toSectionEl.offsetTop;
+
+        // Calculate the transition range (from the start of current section to start of next)
+        const transitionStart = fromTop;
+        const transitionEnd = toTop;
+        const transitionRange = transitionEnd - transitionStart;
+
+        // Check if we're in this transition zone
+        if (scrollTop >= transitionStart && scrollTop < transitionEnd) {
+          // Calculate progress (0 to 1) through this transition
+          const progress = (scrollTop - transitionStart) / transitionRange;
+          const clampedProgress = Math.max(0, Math.min(1, progress));
+
+          // Send continuous progress updates
+          window.postMessage({
+            type: 'scroll-progress',
+            fromSection: fromSectionEl.id,
+            toSection: toSectionEl.id,
+            progress: clampedProgress
+          }, '*');
+
+          break;
+        }
+      }
+    }, { passive: true });
 
     // Handle initial hash from URL
     const initialHash = window.location.hash.substring(1);

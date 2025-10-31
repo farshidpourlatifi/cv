@@ -47,6 +47,27 @@
 
     console.log('Paper.js setup complete');
 
+    // ==================== DEVICE DETECTION & OPTIMIZATION ====================
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth < 768;
+    const isLowEnd = navigator.hardwareConcurrency ? navigator.hardwareConcurrency <= 4 : false;
+    const hasReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    console.log('🔍 Device Detection:', { isMobile, isLowEnd, hasReducedMotion, cores: navigator.hardwareConcurrency });
+
+    // Disable on very low-end devices
+    if (hasReducedMotion || (navigator.hardwareConcurrency && navigator.hardwareConcurrency < 2)) {
+      console.log('⚠️ Canvas disabled - device too low-end or reduced motion preferred');
+      canvas.style.display = 'none';
+      return;
+    }
+
+    // Performance multipliers based on device
+    const SHAPE_DENSITY_MULTIPLIER = .4; // isMobile ? 0.4 : isLowEnd ? 0.6 : 1.0;
+    const ENABLE_BLUR = !isMobile && !isLowEnd;
+    const CONNECTION_UPDATE_INTERVAL = isMobile ? 3 : isLowEnd ? 2 : 1;
+    const ENABLE_MOUSE_INTERACTION = !isMobile;
+    const RANDOM_FIRE_PROBABILITY = 0.02; // isMobile ? 0.0005 : isLowEnd ? 0.001 : 0.002;
+
     // Helper function to get CSS variable value
     const getCSSVariable = (variableName: string): string => {
       return getComputedStyle(document.documentElement)
@@ -78,7 +99,7 @@
           bandWidth: 300,
           sineAmplitude: 100,
           sineFrequency: 0.004,
-          spacing: 5,
+          spacing: 5 / SHAPE_DENSITY_MULTIPLIER,  // Increase spacing = fewer shapes
           spacingRandomness: 3,
           edgeMargin: 50,
           boundsInset: 30,
@@ -91,7 +112,7 @@
         distribution: {
           minDistance: 10,
           bandWidth: 250,     // Width of curve band
-          spacing: 20,
+          spacing: 20 / SHAPE_DENSITY_MULTIPLIER,  // Increase spacing = fewer shapes
           spacingRandomness: 3,
           edgeMargin: 10,
           boundsInset: 30,
@@ -120,7 +141,7 @@
           bandWidth: 200,     // Wide band for space in center
           sineAmplitude: 0,
           sineFrequency: 0,
-          spacing: 5,
+          spacing: 5 / SHAPE_DENSITY_MULTIPLIER,  // Increase spacing = fewer shapes
           spacingRandomness: 3,
           edgeMargin: 50,
           boundsInset: 30,
@@ -141,7 +162,7 @@
       rotationSpeed: { min: -0.005, max: 0.005 },
       floatSpeed: { yMin: 0.01, yMax: 0.03, xMin: 0.0, xMax: 0.0 },
       amplitude: { yMin: 1, yMax: 4, xMin: 1, xMax: 1.03 },
-      blur: { enabled: false, probability: 0.3, amount: 8 },
+      blur: { enabled: ENABLE_BLUR, probability: 0.3, amount: 8 },
       lifespan: { min: 30, max: 50 },
       firing: { decay: 0.08, cooldown: 180, lifespanExtension: 100 },
       sizes: preset.sizes,
@@ -173,7 +194,7 @@
       // Traveling pulse animation
       pulseSpeed: {
         min: 0.05,               // Minimum pulse travel speed (slower)
-        max: 0.3,                // Maximum pulse travel speed (faster)
+        max: 0.1,                // Maximum pulse travel speed (faster)
       },
 
       // Traveling pulse stroke width animation
@@ -1188,7 +1209,7 @@
     updateGuides();
 
     // TOGGLE GUIDE VISIBILITY: Set to false to hide the guides
-    const showGuides = true;
+    const showGuides = false;  // DISABLED FOR PERFORMANCE
     if (!showGuides) {
       guidePaths.centerLine.visible = false;
       guidePaths.upperBoundary.visible = false;
@@ -1616,6 +1637,10 @@
     // Track current frame for mouse interaction
     let currentFrameCount = 0;
 
+    // Performance tracking
+    let connectionUpdateCounter = 0;
+    let frameTimeWarningCount = 0;
+
     // Death rate acceleration during transitions
     let isTransitioning = false;
     let acceleratedDeathRate = 1.0; // 1.0 = normal, higher = faster death
@@ -1659,8 +1684,13 @@
 
     // Organic floating animations - each shape moves independently in X and Y with easing
     paper.view.onFrame = (event: any) => {
+      const frameStartTime = performance.now();
       const time = event.count;
       currentFrameCount = time;
+
+      // Frame budget for 60fps (16.67ms per frame)
+      const frameBudget = 16.67;
+      let budgetExceeded = false;
 
       // Handle config transitions
       if (transitionProgress < 1) {
@@ -1730,12 +1760,17 @@
         }
       }
 
-      // Randomly trigger fires from shapes (neural activity) - reduced frequency
-      if (Math.random() < shapeConfig.fireEffects.randomFireProbability) {
+      // Randomly trigger fires from shapes (neural activity) - device-adjusted frequency
+      if (Math.random() < RANDOM_FIRE_PROBABILITY) {
         const randomShape = shapes[Math.floor(Math.random() * shapes.length)];
         if (randomShape) {
           fireShape(randomShape, time);
         }
+      }
+
+      // Check frame budget before expensive operations
+      if (performance.now() - frameStartTime > frameBudget * 0.6) {
+        budgetExceeded = true;
       }
 
       shapes.forEach((shape, index) => {
@@ -1830,9 +1865,12 @@
         shape.rotate(shape.data.rotationSpeed * 60 * (rotationEase * 2 - 1));
       });
 
-      // Animate neuron connections
-      for (let i = connections.length - 1; i >= 0; i--) {
-        const connection = connections[i];
+      // Animate neuron connections (throttled based on device)
+      const shouldUpdateConnections = (connectionUpdateCounter++ % CONNECTION_UPDATE_INTERVAL === 0);
+
+      if (shouldUpdateConnections && !budgetExceeded) {
+        for (let i = connections.length - 1; i >= 0; i--) {
+          const connection = connections[i];
 
         // Safety check: ensure both shapes are still valid
         const startShape = connection.data.startShape;
@@ -1991,34 +2029,57 @@
           }
         }
       }
-    };
+      }  // End of shouldUpdateConnections check
 
-    console.log('Animation loop started');
-
-    // Mouse interaction - fire nodes on hover
-    let lastHoveredShape: paper.Path | null = null;
-
-    paper.view.onMouseMove = (event: any) => {
-      const hitResult = paper.project.hitTest(event.point, {
-        fill: true,
-        stroke: true,
-        tolerance: 5
-      });
-
-      if (hitResult && hitResult.item) {
-        // Check if the hit item is one of our shapes
-        const hoveredShape = shapes.find(s => s === hitResult.item);
-
-        if (hoveredShape && hoveredShape !== lastHoveredShape) {
-          // Fire the shape when mouse enters it
-          fireShape(hoveredShape, currentFrameCount);
-          lastHoveredShape = hoveredShape;
+      // Performance monitoring - warn if frames are taking too long
+      const frameTime = performance.now() - frameStartTime;
+      if (frameTime > frameBudget) {
+        frameTimeWarningCount++;
+        if (frameTimeWarningCount % 60 === 0) {  // Log every 60 slow frames
+          console.warn(`⚠️ Slow frame: ${frameTime.toFixed(1)}ms (target: ${frameBudget}ms) - ${frameTimeWarningCount} slow frames total`);
         }
-      } else {
-        // Mouse is not over any shape
-        lastHoveredShape = null;
       }
     };
+
+    console.log('Animation loop started with optimizations:', {
+      shapeMultiplier: SHAPE_DENSITY_MULTIPLIER,
+      blurEnabled: ENABLE_BLUR,
+      connectionInterval: CONNECTION_UPDATE_INTERVAL,
+      mouseInteraction: ENABLE_MOUSE_INTERACTION
+    });
+
+    // Mouse interaction - fire nodes on hover (disabled on mobile for performance)
+    if (ENABLE_MOUSE_INTERACTION) {
+      let lastHoveredShape: paper.Path | null = null;
+      let lastMouseMoveTime = 0;
+      const mouseThrottleMs = 50; // Throttle to every 50ms
+
+      paper.view.onMouseMove = (event: any) => {
+        const now = Date.now();
+        if (now - lastMouseMoveTime < mouseThrottleMs) return;
+        lastMouseMoveTime = now;
+
+        const hitResult = paper.project.hitTest(event.point, {
+          fill: true,
+          stroke: true,
+          tolerance: 5
+        });
+
+        if (hitResult && hitResult.item) {
+          // Check if the hit item is one of our shapes
+          const hoveredShape = shapes.find(s => s === hitResult.item);
+
+          if (hoveredShape && hoveredShape !== lastHoveredShape) {
+            // Fire the shape when mouse enters it
+            fireShape(hoveredShape, currentFrameCount);
+            lastHoveredShape = hoveredShape;
+          }
+        } else {
+          // Mouse is not over any shape
+          lastHoveredShape = null;
+        }
+      };
+    }
 
     // Handle resize
     window.addEventListener('resize', () => {
