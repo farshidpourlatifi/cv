@@ -63,7 +63,7 @@
 
     // Performance multipliers based on device
     const SHAPE_DENSITY_MULTIPLIER = .4; // isMobile ? 0.4 : isLowEnd ? 0.6 : 1.0;
-    const ENABLE_BLUR = !isMobile && !isLowEnd;
+    const ENABLE_BLUR = false; //!isMobile && !isLowEnd;
     const CONNECTION_UPDATE_INTERVAL = isMobile ? 3 : isLowEnd ? 2 : 1;
     const ENABLE_MOUSE_INTERACTION = !isMobile;
     const RANDOM_FIRE_PROBABILITY = 0.02; // isMobile ? 0.0005 : isLowEnd ? 0.001 : 0.002;
@@ -162,7 +162,6 @@
       rotationSpeed: { min: -0.005, max: 0.005 },
       floatSpeed: { yMin: 0.01, yMax: 0.03, xMin: 0.0, xMax: 0.0 },
       amplitude: { yMin: 1, yMax: 4, xMin: 1, xMax: 1.03 },
-      blur: { enabled: ENABLE_BLUR, probability: 0.3, amount: 8 },
       lifespan: { min: 30, max: 50 },
       firing: { decay: 0.08, cooldown: 180, lifespanExtension: 100 },
       sizes: preset.sizes,
@@ -202,12 +201,6 @@
         start: 0.05,               // Starting width (thin)
         peak: 3,                  // Peak width (thick)
         end: .05,                   // Ending width (medium)
-      },
-
-      // Pulse blur effect
-      pulseBlur: {
-        enabled: false,            // Enable blur on traveling pulses
-        amount: 10,               // Blur radius in pixels
       },
 
       // Phase durations for pulse animation
@@ -276,6 +269,10 @@
 
     // ==================== SHAPE GENERATION FUNCTIONS ====================
 
+    // Pre-calculate constants used in generation
+    const shapeTypes = ['circle', 'rect', 'triangle'];
+    const colorOptions = [colors.primaryLight, colors.secondary, colors.accent, colors.tertiary, colors.white];
+
     // Generate shapes within a diagonal sine wave band (bottom-left to top-right)
     const generateShapesInDiagonalBand = () => {
       const generatedShapes: any[] = [];
@@ -303,10 +300,7 @@
       const perpX = -directionY;
       const perpY = directionX;
 
-      // Shape types to cycle through for equal distribution
-      const shapeTypes = ['circle', 'rect', 'triangle'];
       const sizes = shapeConfig.sizes;
-      const colorOptions = [colors.primaryLight, colors.secondary, colors.accent, colors.tertiary, colors.white];
       const strokeWidthOptions = shapeConfig.appearance.strokeWidthOptions;
 
       // Counters for equal distribution
@@ -547,10 +541,7 @@
       const centerX = paper.view.size.width / 2;
       const centerY = paper.view.size.height - circleRadius + circleOffsetY;
 
-      // Shape types for equal distribution
-      const shapeTypes = ['circle', 'rect', 'triangle'];
       const sizes = shapeConfig.sizes;
-      const colorOptions = [colors.primaryLight, colors.secondary, colors.accent, colors.tertiary, colors.white];
       const strokeWidthOptions = shapeConfig.appearance.strokeWidthOptions;
 
       // Counters for equal distribution
@@ -663,10 +654,7 @@
       const p2 = { x: controlPoints[2].x * paper.view.size.width, y: controlPoints[2].y * paper.view.size.height };
       const p3 = { x: controlPoints[3].x * paper.view.size.width, y: controlPoints[3].y * paper.view.size.height };
 
-      // Shape types for equal distribution
-      const shapeTypes = ['circle', 'rect', 'triangle'];
       const sizes = shapeConfig.sizes;
-      const colorOptions = [colors.primaryLight, colors.secondary, colors.accent, colors.tertiary, colors.white];
       const strokeWidthOptions = shapeConfig.appearance.strokeWidthOptions;
 
       // Counters for equal distribution
@@ -936,7 +924,10 @@
 
     const shapesData = generateShapes();
 
-    // Dynamic guide drawing functions for all patterns
+    // GUIDE SYSTEM REMOVED FOR PRODUCTION - Guides are only needed during development
+    // If you need to debug patterns, restore guide code from git history
+
+    /* GUIDE SYSTEM REMOVED - Restore from git if needed for debugging
     const drawDiagonalGuides = (centerLine: paper.Path, upperBoundary: paper.Path, lowerBoundary: paper.Path) => {
       // Get current preset config
       const preset = configPresets[targetPresetName as keyof typeof configPresets];
@@ -1165,59 +1156,13 @@
         lowerBoundary.add(new paper.Point(lowerX, lowerY));
       }
     };
+    */ // End of removed guide system
 
-    // Create guide paths (will be dynamically updated)
-    const guidePaths = {
-      centerLine: new paper.Path(),
-      upperBoundary: new paper.Path(),
-      lowerBoundary: new paper.Path()
-    };
-
-    // Configure guide appearance
-    guidePaths.centerLine.strokeColor = new paper.Color('#FF0000');
-    guidePaths.centerLine.strokeWidth = 2;
-    guidePaths.centerLine.opacity = 0.3;
-    guidePaths.centerLine.dashArray = [10, 5];
-
-    guidePaths.upperBoundary.strokeColor = new paper.Color('#FFFFFF');
-    guidePaths.upperBoundary.strokeWidth = 1;
-    guidePaths.upperBoundary.opacity = 0.2;
-    guidePaths.upperBoundary.dashArray = [5, 5];
-
-    guidePaths.lowerBoundary.strokeColor = new paper.Color('#FFFFFF');
-    guidePaths.lowerBoundary.strokeWidth = 1;
-    guidePaths.lowerBoundary.opacity = 0.2;
-    guidePaths.lowerBoundary.dashArray = [5, 5];
-
-    // Function to update guides based on current pattern
-    const updateGuides = () => {
-      const currentPreset = configPresets[targetPresetName as keyof typeof configPresets];
-      const pattern = currentPreset.pattern;
-
-      if (pattern === 'curve') {
-        drawCurveGuides(guidePaths.centerLine, guidePaths.upperBoundary, guidePaths.lowerBoundary);
-      } else if (pattern === 'vertical') {
-        drawVerticalGuides(guidePaths.centerLine, guidePaths.upperBoundary, guidePaths.lowerBoundary);
-      } else if (pattern === 'circle') {
-        drawCircularGuides(guidePaths.centerLine, guidePaths.upperBoundary, guidePaths.lowerBoundary);
-      } else {
-        drawDiagonalGuides(guidePaths.centerLine, guidePaths.upperBoundary, guidePaths.lowerBoundary);
-      }
-    };
-
-    // Initialize guides with current pattern
-    updateGuides();
-
-    // TOGGLE GUIDE VISIBILITY: Set to false to hide the guides
-    const showGuides = false;  // DISABLED FOR PERFORMANCE
-    if (!showGuides) {
-      guidePaths.centerLine.visible = false;
-      guidePaths.upperBoundary.visible = false;
-      guidePaths.lowerBoundary.visible = false;
-    }
-
-    // Create shapes
+    // Create shapes with optimized Paper.js settings
     const shapes: paper.Path[] = [];
+
+    // Pre-create reusable color objects to avoid repeated allocations
+    const bgFillColor = new paper.Color(colors.background);
 
     shapesData.forEach(shapeData => {
       let shape: paper.Path | paper.Shape;
@@ -1281,13 +1226,7 @@
       // Add background fill to hide connection lines behind shapes
       // (except for line shapes which don't need fills)
       if (shapeData.type !== 'line') {
-        shape.fillColor = new paper.Color(colors.background);
-      }
-
-      // Apply blur effect to some shapes randomly
-      if (shapeConfig.blur.enabled && Math.random() < shapeConfig.blur.probability) {
-        shape.shadowBlur = shapeConfig.blur.amount;
-        shape.shadowColor = shape.strokeColor;
+        shape.fillColor = bgFillColor.clone(); // Clone to avoid reference issues
       }
 
       // Store original position and lifecycle data
@@ -1328,6 +1267,9 @@
     // Create neuron-like connections between nearby shapes
     const connections: any[] = [];
 
+    // Pre-create connection color to avoid repeated allocations
+    const connectionColor = new paper.Color(colors.secondary);
+
     const createConnections = () => {
       shapes.forEach((shape, i) => {
         shapes.forEach((otherShape, j) => {
@@ -1347,7 +1289,7 @@
             const line = new paper.Path.Line({
               from: shape.position,
               to: otherShape.position,
-              strokeColor: new paper.Color(colors.secondary), // Will be updated in animation loop
+              strokeColor: connectionColor.clone(),
               strokeWidth: connectionConfig.staticStrokeWidth,
               opacity: connectionConfig.staticOpacity,
               dashArray: connectionConfig.staticDashArray,
@@ -1394,7 +1336,7 @@
           const line = new paper.Path.Line({
             from: shape.position,
             to: otherShape.position,
-            strokeColor: new paper.Color(colors.secondary), // Will be updated in animation loop
+            strokeColor: connectionColor.clone(),
             strokeWidth: connectionConfig.staticStrokeWidth,
             opacity: connectionConfig.staticOpacity,
             dashArray: connectionConfig.staticDashArray,
@@ -1429,7 +1371,7 @@
           const line = new paper.Path.Line({
             from: otherShape.position,
             to: shape.position,
-            strokeColor: new paper.Color(colors.secondary), // Will be updated in animation loop
+            strokeColor: connectionColor.clone(),
             strokeWidth: connectionConfig.staticStrokeWidth,
             opacity: connectionConfig.staticOpacity,
             dashArray: connectionConfig.staticDashArray,
@@ -1554,13 +1496,7 @@
       }
 
       // Add background fill to hide connection lines behind shapes
-      newShape.fillColor = new paper.Color(colors.background);
-
-      // Apply blur effect to some shapes randomly
-      if (shapeConfig.blur.enabled && Math.random() < shapeConfig.blur.probability) {
-        newShape.shadowBlur = shapeConfig.blur.amount;
-        newShape.shadowColor = newShape.strokeColor;
-      }
+      newShape.fillColor = bgFillColor.clone();
 
       // Reset lifecycle data with new randomized values
       const regeneratedLifespan = shapeConfig.lifespan.min + Math.random() * (shapeConfig.lifespan.max - shapeConfig.lifespan.min);
@@ -1645,12 +1581,6 @@
     let isTransitioning = false;
     let acceleratedDeathRate = 1.0; // 1.0 = normal, higher = faster death
 
-    // Guide transition state
-    let guideMorphProgress = 1.0; // 1.0 = fully morphed, 0.0 = start of morph
-    let guideFadeOut = false;
-    let guideFadeIn = false;
-    const guideTransitionSpeed = 0.05; // Speed of guide morphing
-
     // Listen for scroll section changes
     window.addEventListener('message', (event) => {
       if (event.data.type === 'section-change') {
@@ -1667,20 +1597,12 @@
             console.log(`Pattern changing from ${oldPattern} to ${newPattern} - accelerating death rate`);
             isTransitioning = true;
             acceleratedDeathRate = 5.0; // Shapes die 5x faster during transition
-
-            // Start guide morphing sequence: fade out -> update -> fade in
-            guideMorphProgress = 0.0;
-            guideFadeOut = true;
-            guideFadeIn = false;
           }
 
           console.log(`Background transitioning to ${section} preset`);
         }
       }
     });
-
-    // Smooth lerp function
-    const lerp = (start: number, end: number, t: number) => start + (end - start) * t;
 
     // Organic floating animations - each shape moves independently in X and Y with easing
     paper.view.onFrame = (event: any) => {
@@ -1710,53 +1632,11 @@
       }
 
       // Gradually reduce death rate back to normal after transition
-      if (isTransitioning) {
-        if (acceleratedDeathRate > 1.0) {
-          acceleratedDeathRate -= 0.05; // Gradually slow down death rate
-          if (acceleratedDeathRate <= 1.0) {
-            acceleratedDeathRate = 1.0;
-            isTransitioning = false;
-            console.log('Death rate returned to normal');
-          }
-        }
-      }
-
-      // Handle guide morphing animation
-      if (guideFadeOut || guideFadeIn) {
-        guideMorphProgress += guideTransitionSpeed;
-
-        if (guideFadeOut) {
-          // Fade out phase (0.0 to 0.5)
-          if (guideMorphProgress >= 0.5) {
-            // Fade out complete - update the guide shapes
-            updateGuides();
-            guideFadeOut = false;
-            guideFadeIn = true;
-            console.log('Guides updated - starting fade in');
-          } else {
-            // Fade out in progress (opacity: 1.0 -> 0.0)
-            const fadeOutOpacity = 1.0 - (guideMorphProgress / 0.5);
-            guidePaths.centerLine.opacity = 0.3 * fadeOutOpacity;
-            guidePaths.upperBoundary.opacity = 0.2 * fadeOutOpacity;
-            guidePaths.lowerBoundary.opacity = 0.2 * fadeOutOpacity;
-          }
-        } else if (guideFadeIn) {
-          // Fade in phase (0.5 to 1.0)
-          if (guideMorphProgress >= 1.0) {
-            // Fade in complete - finish morphing
-            guideMorphProgress = 1.0;
-            guideFadeIn = false;
-            guidePaths.centerLine.opacity = 0.3;
-            guidePaths.upperBoundary.opacity = 0.2;
-            guidePaths.lowerBoundary.opacity = 0.2;
-            console.log('Guide morphing complete');
-          } else {
-            // Fade in in progress (opacity: 0.0 -> 1.0)
-            const fadeInOpacity = (guideMorphProgress - 0.5) / 0.5;
-            guidePaths.centerLine.opacity = 0.3 * fadeInOpacity;
-            guidePaths.upperBoundary.opacity = 0.2 * fadeInOpacity;
-            guidePaths.lowerBoundary.opacity = 0.2 * fadeInOpacity;
-          }
+      if (isTransitioning && acceleratedDeathRate > 1.0) {
+        acceleratedDeathRate -= 0.05; // Gradually slow down death rate
+        if (acceleratedDeathRate <= 1.0) {
+          acceleratedDeathRate = 1.0;
+          isTransitioning = false;
         }
       }
 
@@ -1825,19 +1705,25 @@
           }
         }
 
-        // Apply glow effect and background tint based on firing state
+        // Apply glow effect based on firing state (optimized)
         if (shape.data.fireIntensity > 0) {
           // FIRING: Increase stroke width to create glow
           shape.strokeWidth = shape.data.originalStrokeWidth + shape.data.fireIntensity * shapeConfig.fireEffects.glowStrokeMultiplier;
 
-          // FIRING: Brighten the stroke color
-          const glowColor = new paper.Color(shape.data.originalStrokeColor);
-          glowColor.brightness += shape.data.fireIntensity * shapeConfig.fireEffects.glowBrightnessMultiplier;
-          shape.strokeColor = glowColor;
-        } else {
-          // IDLE: Restore to original stroke appearance
+          // FIRING: Brighten the stroke color (reuse existing color object)
+          if (!shape.data.glowColor) {
+            shape.data.glowColor = new paper.Color(shape.data.originalStrokeColor);
+          }
+          const currentBrightness = shape.strokeColor?.brightness || 0;
+          shape.data.glowColor.brightness = currentBrightness + shape.data.fireIntensity * shapeConfig.fireEffects.glowBrightnessMultiplier;
+          shape.strokeColor = shape.data.glowColor;
+        } else if (shape.data.isFiring === false && shape.strokeWidth !== shape.data.originalStrokeWidth) {
+          // IDLE: Restore to original stroke appearance (only if changed)
           shape.strokeWidth = shape.data.originalStrokeWidth;
-          shape.strokeColor = new paper.Color(shape.data.originalStrokeColor);
+          if (!shape.data.originalColorObject) {
+            shape.data.originalColorObject = new paper.Color(shape.data.originalStrokeColor);
+          }
+          shape.strokeColor = shape.data.originalColorObject;
         }
 
         // Raw sine wave values (oscillating between -1 and 1)
@@ -1889,26 +1775,42 @@
         // Update connection positions to follow shapes
         const startPos = startShape.position;
         const endPos = endShape.position;
-        connection.segments[0].point = startPos;
-        connection.segments[1].point = endPos;
 
-        // Create gradient color from start node to end node
-        const startNodeColor = new paper.Color(startShape.strokeColor);
-        const endNodeColor = new paper.Color(endShape.strokeColor);
+        // Optimize: Only update segments if position changed significantly (>1px)
+        const seg0 = connection.segments[0].point;
+        const seg1 = connection.segments[1].point;
 
-        // Create a linear gradient from start to end position
-        const gradient = new paper.Color({
-          gradient: {
-            stops: [
-              [startNodeColor, 0],
-              [endNodeColor, 1]
-            ]
-          },
-          origin: startPos,
-          destination: endPos
-        });
+        if (Math.abs(seg0.x - startPos.x) > 1 || Math.abs(seg0.y - startPos.y) > 1) {
+          connection.segments[0].point = startPos;
+        }
+        if (Math.abs(seg1.x - endPos.x) > 1 || Math.abs(seg1.y - endPos.y) > 1) {
+          connection.segments[1].point = endPos;
+        }
 
-        connection.strokeColor = gradient;
+        // Cache gradient object to avoid recreation every frame
+        if (!connection.data.gradient) {
+          const startNodeColor = new paper.Color(startShape.strokeColor);
+          const endNodeColor = new paper.Color(endShape.strokeColor);
+
+          connection.data.gradient = new paper.Color({
+            gradient: {
+              stops: [
+                [startNodeColor, 0],
+                [endNodeColor, 1]
+              ]
+            },
+            origin: startPos,
+            destination: endPos
+          });
+          connection.data.gradientStartColor = startNodeColor;
+          connection.data.gradientEndColor = endNodeColor;
+        }
+
+        // Update gradient origin/destination (cheaper than recreating)
+        connection.data.gradient.origin = startPos;
+        connection.data.gradient.destination = endPos;
+
+        connection.strokeColor = connection.data.gradient;
 
         // Pulsing opacity animation (like neurons firing)
         connection.data.age += connection.data.pulseSpeed;
@@ -1928,16 +1830,21 @@
           const pulse = pulses[i];
           pulse.progress += pulse.speed;
 
-          // Two-phase animation:
-          // Phase 1: Line grows from A to B with easing
-          // Phase 2: Line fades and shrinks from A side with easing
+          // Two-phase animation: grow then fade (pre-calculated constants)
           const phase1Duration = connectionConfig.pulseGrowthPhase;
           const phase2Duration = connectionConfig.pulseFadePhase;
+
+          // Pre-calculate for performance
+          const swStart = connectionConfig.pulseStrokeWidth.start;
+          const swPeak = connectionConfig.pulseStrokeWidth.peak;
+          const swEnd = connectionConfig.pulseStrokeWidth.end;
+          const swGrowthRange = swPeak - swStart;
+          const swShrinkRange = swEnd - swPeak;
 
           let pulseStart = 0;
           let pulseEnd = 0;
           let opacity = 0.9;
-          let strokeWidth = connectionConfig.pulseStrokeWidth.start;
+          let strokeWidth = swStart;
 
           // Track if we've fired the target neuron yet
           if (!pulse.hasFired && pulse.progress >= phase1Duration) {
@@ -1955,9 +1862,8 @@
             pulseEnd = easedProgress; // Grows from 0 to 1
             opacity = 0.9; // Full opacity during growth
 
-            // Stroke width grows from start to peak
-            strokeWidth = connectionConfig.pulseStrokeWidth.start +
-              (connectionConfig.pulseStrokeWidth.peak - connectionConfig.pulseStrokeWidth.start) * easedProgress;
+            // Stroke width grows from start to peak (optimized calculation)
+            strokeWidth = swStart + swGrowthRange * easedProgress;
           } else {
             // Phase 2: Shrinking from start while fading
             const t = (pulse.progress - phase1Duration) / phase2Duration; // Normalize to 0-1
@@ -1967,25 +1873,29 @@
             pulseEnd = 1; // Stays at end
             opacity = 0.9 * (1 - easedProgress); // Fade out as it shrinks
 
-            // Stroke width shrinks from peak to end
-            strokeWidth = connectionConfig.pulseStrokeWidth.peak +
-              (connectionConfig.pulseStrokeWidth.end - connectionConfig.pulseStrokeWidth.peak) * easedProgress;
+            // Stroke width shrinks from peak to end (optimized calculation)
+            strokeWidth = swPeak + swShrinkRange * easedProgress;
           }
 
-          // Create gradient effect: interpolate color from start to end along the pulse
-          const startColor = new paper.Color(startShape.strokeColor);
-          const endColor = new paper.Color(endShape.strokeColor);
-
-          // For gradient effect, we need to create a path with gradient stroke
-          // Since Paper.js doesn't support gradient strokes directly, we'll use the average color
-          // weighted by the pulse position for a smooth transition
-          const averagePosition = (pulseStart + pulseEnd) / 2; // Midpoint of the pulse
-          const pulseColor = startColor.clone();
+          // Optimize color interpolation - cache and reuse color objects
+          if (!pulse.colorCache) {
+            pulse.colorCache = {
+              start: new paper.Color(startShape.strokeColor),
+              end: new paper.Color(endShape.strokeColor),
+              current: new paper.Color(startShape.strokeColor)
+            };
+          }
 
           // Lerp between start and end color based on the pulse's average position
-          pulseColor.red = startColor.red + (endColor.red - startColor.red) * averagePosition;
-          pulseColor.green = startColor.green + (endColor.green - startColor.green) * averagePosition;
-          pulseColor.blue = startColor.blue + (endColor.blue - startColor.blue) * averagePosition;
+          const averagePosition = (pulseStart + pulseEnd) * 0.5; // Midpoint
+          const cc = pulse.colorCache;
+
+          // Reuse existing color object instead of creating new one
+          cc.current.red = cc.start.red + (cc.end.red - cc.start.red) * averagePosition;
+          cc.current.green = cc.start.green + (cc.end.green - cc.start.green) * averagePosition;
+          cc.current.blue = cc.start.blue + (cc.end.blue - cc.start.blue) * averagePosition;
+
+          const pulseColor = cc.current;
 
           if (!pulse.segment) {
             pulse.segment = new paper.Path.Line({
@@ -1996,12 +1906,6 @@
               strokeCap: 'round',
             });
 
-            // Apply blur effect to traveling pulse
-            if (connectionConfig.pulseBlur.enabled) {
-              pulse.segment.shadowBlur = connectionConfig.pulseBlur.amount;
-              pulse.segment.shadowColor = pulseColor;
-            }
-
             // Send pulse to back so it appears behind shapes
             pulse.segment.sendToBack();
           } else {
@@ -2010,11 +1914,6 @@
             pulse.segment.segments[1].point = startPos.add(endPos.subtract(startPos).multiply(pulseEnd));
             pulse.segment.strokeColor = pulseColor;
             pulse.segment.strokeWidth = strokeWidth;
-
-            // Update shadow color to match pulse color
-            if (connectionConfig.pulseBlur.enabled) {
-              pulse.segment.shadowColor = pulseColor;
-            }
           }
 
           // Apply the calculated opacity
