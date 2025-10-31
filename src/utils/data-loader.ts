@@ -97,7 +97,7 @@ export function getExperienceByYearRange(): Map<string, ExperiencePosition[]> {
   experience.positions.forEach(position => {
     // Extract year range (e.g., "2020 – 2024" -> "2020-2024")
     const yearMatch = position.period.match(/(\d{4})/);
-    const decade = yearMatch ? `${Math.floor(parseInt(yearMatch[1]) / 10) * 10}s` : 'Other';
+    const decade = yearMatch && yearMatch[1] ? `${Math.floor(parseInt(yearMatch[1]) / 10) * 10}s` : 'Other';
 
     if (!grouped.has(decade)) {
       grouped.set(decade, []);

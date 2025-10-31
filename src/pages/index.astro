@@ -202,6 +202,8 @@ import Contact from '../components/Sections/Contact.astro';
         const fromSectionEl = sectionsArray[i];
         const toSectionEl = sectionsArray[i + 1];
 
+        if (!fromSectionEl || !toSectionEl) continue;
+
         const fromTop = fromSectionEl.offsetTop;
         const toTop = toSectionEl.offsetTop;
 

@@ -157,9 +157,9 @@ export class PerformanceMonitor {
     let memoryMB = 0;
     let memoryStr = 'N/A';
 
-    if (performance.memory) {
-      const used = performance.memory.usedJSHeapSize / 1048576;
-      const total = performance.memory.totalJSHeapSize / 1048576;
+    if ('memory' in performance && (performance as any).memory) {
+      const used = (performance as any).memory.usedJSHeapSize / 1048576;
+      const total = (performance as any).memory.totalJSHeapSize / 1048576;
       memoryMB = used;
       memoryStr = `${used.toFixed(1)}/${total.toFixed(1)}MB`;
     }

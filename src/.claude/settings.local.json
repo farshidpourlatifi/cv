@@ -7,7 +7,8 @@
       "mcp__browsermcp__browser_screenshot",
       "mcp__browsermcp__browser_get_console_logs",
       "mcp__browsermcp__browser_click",
-      "mcp__browsermcp__browser_press_key"
+      "mcp__browsermcp__browser_press_key",
+      "Bash(bun run build:prod:*)"
     ],
     "deny": [],
     "ask": []

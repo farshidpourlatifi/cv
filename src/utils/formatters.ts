@@ -108,7 +108,7 @@ export function slugify(text: string): string {
  */
 export function formatEmail(email: string): string {
   const [local, domain] = email.split('@');
-  if (!domain) return email;
+  if (!domain || !local) return email;
 
   const visibleChars = Math.min(3, local.length);
   const hidden = '*'.repeat(Math.max(0, local.length - visibleChars));
@@ -141,7 +141,7 @@ export function formatPhone(phone: string): string {
  */
 export function formatList(items: string[], conjunction: 'and' | 'or' = 'and'): string {
   if (items.length === 0) return '';
-  if (items.length === 1) return items[0];
+  if (items.length === 1) return items[0] || '';
   if (items.length === 2) return `${items[0]} ${conjunction} ${items[1]}`;
 
   const lastItem = items[items.length - 1];
@@ -184,8 +184,8 @@ export function parsePeriod(period: string): { start: number; end: number | 'pre
   const [start, end] = period.split('–').map(s => s.trim());
 
   return {
-    start: parseInt(start),
-    end: end.toLowerCase() === 'present' ? 'present' : parseInt(end),
+    start: parseInt(start || '0'),
+    end: end && end.toLowerCase() === 'present' ? 'present' : parseInt(end || '0'),
   };
 }
 

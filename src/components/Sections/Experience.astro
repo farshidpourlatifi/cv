@@ -13,10 +13,10 @@ const positions = experience.positions;
 // Helper to parse period dates
 function parsePeriod(period: string) {
   const parts = period.split(' - ');
-  const startParts = parts[0].split(' ');
+  const startParts = parts[0]?.split(' ') || [];
   return {
-    month: startParts[0],
-    year: startParts[1],
+    month: startParts[0] || '',
+    year: startParts[1] || '',
     isPresent: parts[1] === 'Present'
   };
 }

@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "astro dev",
     "build": "bun run validate && astro check && astro build",
+    "build:prod": "bun run validate && astro build",
     "preview": "astro preview",
     "astro": "astro",
     "validate": "bun scripts/validate-data.js",
