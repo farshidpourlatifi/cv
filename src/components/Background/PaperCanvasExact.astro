@@ -65,7 +65,7 @@
     // Performance multipliers based on device
     const SHAPE_DENSITY_MULTIPLIER = .4; // isMobile ? 0.4 : isLowEnd ? 0.6 : 1.0;
     const ENABLE_BLUR = false; //!isMobile && !isLowEnd;
-    const CONNECTION_UPDATE_INTERVAL = isMobile ? 3 : isLowEnd ? 2 : 1;
+    const CONNECTION_UPDATE_INTERVAL = 1; //isMobile ? 3 : isLowEnd ? 2 : 1;
     const ENABLE_MOUSE_INTERACTION = !isMobile;
     const RANDOM_FIRE_PROBABILITY = 0.02; // isMobile ? 0.0005 : isLowEnd ? 0.001 : 0.002;
 
