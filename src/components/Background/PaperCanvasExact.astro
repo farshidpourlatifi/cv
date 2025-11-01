@@ -41,23 +41,23 @@
       return;
     }
 
-    console.log('Initializing Paper.js...');
+    // console.log('Initializing Paper.js...');
 
     // Setup Paper.js
     paper.setup(canvas);
 
-    console.log('Paper.js setup complete');
+    // console.log('Paper.js setup complete');
 
     // ==================== DEVICE DETECTION & OPTIMIZATION ====================
     const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth < 768;
     const isLowEnd = navigator.hardwareConcurrency ? navigator.hardwareConcurrency <= 4 : false;
     const hasReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    console.log('🔍 Device Detection:', { isMobile, isLowEnd, hasReducedMotion, cores: navigator.hardwareConcurrency });
+    // console.log('🔍 Device Detection:', { isMobile, isLowEnd, hasReducedMotion, cores: navigator.hardwareConcurrency });
 
     // Disable on very low-end devices
     if (hasReducedMotion || (navigator.hardwareConcurrency && navigator.hardwareConcurrency < 2)) {
-      console.log('⚠️ Canvas disabled - device too low-end or reduced motion preferred');
+      // console.log('⚠️ Canvas disabled - device too low-end or reduced motion preferred');
       canvas.style.display = 'none';
       return;
     }
@@ -179,22 +179,22 @@
     // Connection line configuration - adjust all connection properties here
     const connectionConfig = {
       // Connection creation
-      maxDistance: 150,          // Maximum distance to connect shapes
-      probability: 0.5,          // Probability of creating a connection (0-1)
+      maxDistance: 120,          // Maximum distance to connect shapes
+      probability: 0.8,          // Probability of creating a connection (0-1)
 
       // Static connection line appearance
-      staticOpacity: 0.4,        // Base opacity of connection lines (0-1)
-      staticStrokeWidth: .5,     // Line thickness
+      staticOpacity: 0.6,        // Base opacity of connection lines (0-1)
+      staticStrokeWidth: 2,     // Line thickness
       staticDashArray: [2, 4],    // Dash pattern [dash, gap]
 
       // Pulsing animation for connection lines
-      pulseBaseOpacity: 0.7,     // Minimum opacity during pulse
-      pulseAmount: 0.3,           // How much the pulse adds to opacity
+      pulseBaseOpacity: 0.5,     // Minimum opacity during pulse
+      pulseAmount: 0.5,           // How much the pulse adds to opacity
 
       // Traveling pulse animation
       pulseSpeed: {
-        min: 0.05,               // Minimum pulse travel speed (slower)
-        max: 0.1,                // Maximum pulse travel speed (faster)
+        min: 0.04,               // Minimum pulse travel speed (slower)
+        max: 0.08,                // Maximum pulse travel speed (faster)
       },
 
       // Traveling pulse stroke width animation
@@ -1263,7 +1263,7 @@
       shapes.push(shape);
     });
 
-    console.log(`Created ${shapes.length} shapes`);
+    // console.log(`Created ${shapes.length} shapes`);
 
     // Create neuron-like connections between nearby shapes
     const connections: any[] = [];
@@ -1312,7 +1312,7 @@
     };
 
     createConnections();
-    console.log(`Created ${connections.length} neuron connections`);
+    // console.log(`Created ${connections.length} neuron connections`);
 
     // Send all connection lines to the back so shapes are drawn on top
     connections.forEach(connection => {
@@ -1595,12 +1595,12 @@
 
           // If pattern is changing, activate accelerated death rate
           if (oldPattern !== newPattern) {
-            console.log(`Pattern changing from ${oldPattern} to ${newPattern} - accelerating death rate`);
+            // console.log(`Pattern changing from ${oldPattern} to ${newPattern} - accelerating death rate`);
             isTransitioning = true;
             acceleratedDeathRate = 5.0; // Shapes die 5x faster during transition
           }
 
-          console.log(`Background transitioning to ${section} preset`);
+          // console.log(`Background transitioning to ${section} preset`);
         }
       }
     });
@@ -1627,7 +1627,7 @@
 
           if (preset) {
             shapeConfig = buildShapeConfig(preset);
-            console.log(`Background config updated to ${currentPresetName} - shapes will morph gradually`);
+            // console.log(`Background config updated to ${currentPresetName} - shapes will morph gradually`);
           }
         }
       }
@@ -1941,12 +1941,12 @@
       }
     };
 
-    console.log('Animation loop started with optimizations:', {
-      shapeMultiplier: SHAPE_DENSITY_MULTIPLIER,
-      blurEnabled: ENABLE_BLUR,
-      connectionInterval: CONNECTION_UPDATE_INTERVAL,
-      mouseInteraction: ENABLE_MOUSE_INTERACTION
-    });
+    // console.log('Animation loop started with optimizations:', {
+    //   shapeMultiplier: SHAPE_DENSITY_MULTIPLIER,
+    //   blurEnabled: ENABLE_BLUR,
+    //   connectionInterval: CONNECTION_UPDATE_INTERVAL,
+    //   mouseInteraction: ENABLE_MOUSE_INTERACTION
+    // });
 
     // Mouse interaction - fire nodes on hover (disabled on mobile for performance)
     if (ENABLE_MOUSE_INTERACTION) {
@@ -1988,16 +1988,16 @@
   }
 
   // Run when DOM is ready
-  console.log('Script loaded! readyState:', document.readyState);
+  // console.log('Script loaded! readyState:', document.readyState);
 
   if (document.readyState === 'loading') {
-    console.log('Waiting for DOMContentLoaded...');
+    // console.log('Waiting for DOMContentLoaded...');
     document.addEventListener('DOMContentLoaded', () => {
-      console.log('DOMContentLoaded fired!');
+      // console.log('DOMContentLoaded fired!');
       initPaperCanvas();
     });
   } else {
-    console.log('DOM already ready, initializing immediately');
+    // console.log('DOM already ready, initializing immediately');
     initPaperCanvas();
   }
 </script>
