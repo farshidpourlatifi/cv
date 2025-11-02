@@ -22,7 +22,8 @@
       "Bash(npm install:*)",
       "Bash(bun install:*)",
       "Bash(open http://localhost:4322)",
-      "mcp__ide__getDiagnostics"
+      "mcp__ide__getDiagnostics",
+      "mcp__browsermcp__browser_wait"
     ],
     "deny": [],
     "ask": []
