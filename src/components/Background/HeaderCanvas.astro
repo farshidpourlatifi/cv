@@ -1,0 +1,1138 @@
+---
+// @ts-nocheck
+/**
+ * HeaderCanvas Component
+ *
+ * Specialized version of PaperCanvas for social media headers
+ * Features:
+ * - Fixed dimensions (no responsive)
+ * - Right-to-left curved arc pattern
+ * - No radial gradient overlay
+ * - Playback controls (pause/play, slow motion, screenshot)
+ * - Auto-pause feature
+ */
+
+interface Props {
+  width: number;
+  height: number;
+  autoPauseAfter?: number; // seconds
+}
+
+const { width, height, autoPauseAfter = 10 } = Astro.props;
+---
+
+<div class="header-canvas-container" style={`width: ${width}px; height: ${height}px;`} data-width={width} data-height={height} data-auto-pause={autoPauseAfter}>
+  <canvas id="header-canvas" width={width} height={height}></canvas>
+
+  <!-- Control Panel -->
+  <div id="control-panel" class="control-panel">
+    <button id="pause-play-btn" class="control-btn" title="Pause/Play (Space)">
+      <span class="icon">▶️</span>
+      <span class="label">Play</span>
+    </button>
+
+    <button id="slow-motion-btn" class="control-btn" title="Toggle Slow Motion (S)">
+      <span class="icon">🐌</span>
+      <span class="label">Slow Motion</span>
+    </button>
+
+    <button id="screenshot-btn" class="control-btn" title="Download PNG (D)">
+      <span class="icon">📷</span>
+      <span class="label">Download</span>
+    </button>
+
+    <button id="hide-controls-btn" class="control-btn" title="Hide Controls (H)">
+      <span class="icon">👁️</span>
+      <span class="label">Hide UI</span>
+    </button>
+
+    <div class="timer-display" id="timer-display">Auto-pause in 10s</div>
+  </div>
+</div>
+
+<style>
+  .header-canvas-container {
+    position: relative;
+    background-color: #0A3A52;
+    overflow: hidden;
+  }
+
+  #header-canvas {
+    display: block;
+  }
+
+  .control-panel {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    display: flex;
+    gap: 10px;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 12px;
+    border-radius: 8px;
+    transition: opacity 0.3s;
+  }
+
+  .control-panel.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .control-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    padding: 8px 12px;
+    color: white;
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .control-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: translateY(-1px);
+  }
+
+  .control-btn.active {
+    background: rgba(62, 159, 212, 0.4);
+    border-color: #3E9FD4;
+  }
+
+  .control-btn .icon {
+    font-size: 18px;
+    line-height: 1;
+  }
+
+  .control-btn .label {
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .timer-display {
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    color: #3E9FD4;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    font-weight: bold;
+  }
+
+  .timer-display.paused {
+    color: #F0000F;
+  }
+</style>
+
+<script>
+  import paper from 'paper';
+
+  function initHeaderCanvas() {
+    const canvas = document.getElementById('header-canvas');
+    if (!canvas) {
+      console.error('Header canvas not found!');
+      return;
+    }
+
+    // Get dimensions from data attributes
+    const container = document.querySelector('.header-canvas-container');
+    const width = parseInt(container.getAttribute('data-width'));
+    const height = parseInt(container.getAttribute('data-height'));
+    const autoPauseAfter = parseInt(container.getAttribute('data-auto-pause'));
+
+    // Setup Paper.js with fixed dimensions
+    paper.setup(canvas);
+
+    // ==================== ANIMATION CONTROLS ====================
+    let isPaused = false;
+    let isSlowMotion = false;
+    let speedMultiplier = 1.0;
+    let frameCount = 0;
+    let secondsElapsed = 0;
+    let hasAutoPaused = false;
+
+    // Control elements
+    const pausePlayBtn = document.getElementById('pause-play-btn');
+    const slowMotionBtn = document.getElementById('slow-motion-btn');
+    const screenshotBtn = document.getElementById('screenshot-btn');
+    const hideControlsBtn = document.getElementById('hide-controls-btn');
+    const controlPanel = document.getElementById('control-panel');
+    const timerDisplay = document.getElementById('timer-display');
+
+    // Toggle pause/play
+    const togglePause = () => {
+      isPaused = !isPaused;
+      pausePlayBtn.classList.toggle('active', !isPaused);
+      pausePlayBtn.querySelector('.icon').textContent = isPaused ? '▶️' : '⏸️';
+      pausePlayBtn.querySelector('.label').textContent = isPaused ? 'Play' : 'Pause';
+      timerDisplay.classList.toggle('paused', isPaused);
+
+      if (!isPaused && hasAutoPaused) {
+        hasAutoPaused = false;
+      }
+    };
+
+    // Toggle slow motion
+    const toggleSlowMotion = () => {
+      isSlowMotion = !isSlowMotion;
+      speedMultiplier = isSlowMotion ? 0.5 : 1.0;
+      slowMotionBtn.classList.toggle('active', isSlowMotion);
+    };
+
+    // Download screenshot
+    const downloadScreenshot = () => {
+      // Temporarily hide controls
+      const wasHidden = controlPanel?.classList.contains('hidden');
+      controlPanel?.classList.add('hidden');
+
+      setTimeout(() => {
+        // Create a temporary canvas to combine background + animation
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = width;
+        tempCanvas.height = height;
+        const tempCtx = tempCanvas.getContext('2d');
+
+        if (tempCtx) {
+          // Fill with background color
+          tempCtx.fillStyle = colors.background;
+          tempCtx.fillRect(0, 0, width, height);
+
+          // Get the actual Paper.js canvas (which might be different from the HTML canvas)
+          const paperCanvas = paper.view.element;
+
+          // Draw the Paper.js canvas at full size
+          tempCtx.drawImage(paperCanvas, 0, 0, width, height);
+        }
+
+        // Create download link
+        const link = document.createElement('a');
+        link.download = `header-${width}x${height}-${Date.now()}.png`;
+        link.href = tempCanvas.toDataURL('image/png');
+        link.click();
+
+        // Restore controls visibility
+        if (!wasHidden) {
+          controlPanel?.classList.remove('hidden');
+        }
+      }, 100);
+    };
+
+    // Toggle controls visibility
+    const toggleControls = () => {
+      controlPanel.classList.toggle('hidden');
+    };
+
+    // Event listeners
+    pausePlayBtn?.addEventListener('click', togglePause);
+    slowMotionBtn?.addEventListener('click', toggleSlowMotion);
+    screenshotBtn?.addEventListener('click', downloadScreenshot);
+    hideControlsBtn?.addEventListener('click', toggleControls);
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      switch(e.key.toLowerCase()) {
+        case ' ':
+        case 'p':
+          e.preventDefault();
+          togglePause();
+          break;
+        case 's':
+          e.preventDefault();
+          toggleSlowMotion();
+          break;
+        case 'd':
+          e.preventDefault();
+          downloadScreenshot();
+          break;
+        case 'h':
+          e.preventDefault();
+          toggleControls();
+          break;
+      }
+    });
+
+    // ==================== CONFIGURATION ====================
+    const SHAPE_DENSITY_MULTIPLIER = .1;
+    const RANDOM_FIRE_PROBABILITY = 0.22;
+
+    // Helper function to get CSS variable value
+    const getCSSVariable = (variableName) => {
+      return getComputedStyle(document.documentElement)
+        .getPropertyValue(variableName)
+        .trim();
+    };
+
+    // Colors from design system
+    const colors = {
+      primary: getCSSVariable('--color-primary') || '#0A3A52',
+      primaryLight: getCSSVariable('--color-primary-light') || '#004B72',
+      secondary: getCSSVariable('--color-secondary') || '#006BA5',
+      secondaryLight: getCSSVariable('--color-secondary-light') || '#3E9FD4',
+      tertiary: getCSSVariable('--color-secondary') || '#006BA5',
+      accent: getCSSVariable('--color-accent') || '#F0000F',
+      accentDark: getCSSVariable('--color-accent-dark') || '#BF0B16',
+      lineAccent: getCSSVariable('--color-line-accent') || '#E00514',
+      white: getCSSVariable('--color-white') || '#FFFFFF',
+      background: getCSSVariable('--color-primary') || '#0A3A52',
+    };
+
+    // Header configuration - curved arc from right to left
+    const headerConfig = {
+      pattern: 'curve',
+      sizes: { circle: [30, 35, 40], rect: [30, 35, 40], triangle: [30, 35, 40] },
+      distribution: {
+        minDistance: 80,
+        bandWidth: 400,
+        spacing: 100 / SHAPE_DENSITY_MULTIPLIER,
+        spacingRandomness: 3,
+        edgeMargin: -10,
+        boundsInset: 0,
+        // Right to left curve across the header
+        curveControlPoints: [
+          { x: 1.0, y: 0.5 },    // Start: middle-right
+          { x: 0.75, y: 0.3 },   // Control: pull up slightly
+          { x: 0.25, y: 0.7 },   // Control: pull down slightly
+          { x: 0, y: 0.5 }       // End: middle-left
+        ]
+      },
+      appearance: { strokeWidthOptions: [5, 8, 10] },
+    };
+
+    // Build shape config
+    const shapeConfig = {
+      rotationSpeed: { min: -0.005, max: 0.005 },
+      floatSpeed: { yMin: 0.01, yMax: 0.03, xMin: 0.0, xMax: 0.0 },
+      amplitude: { yMin: 1, yMax: 4, xMin: 1, xMax: 1.03 },
+      lifespan: { min: 30, max: 50 },
+      firing: { decay: 0.08, cooldown: 180, lifespanExtension: 100 },
+      sizes: headerConfig.sizes,
+      distribution: headerConfig.distribution,
+      appearance: { ...headerConfig.appearance, initialRotation: 360 },
+      fade: { fadeInDuration: 10, fadeOutDuration: 10 },
+      fireEffects: { randomFireProbability: 0.003, glowStrokeMultiplier: 3, glowBrightnessMultiplier: 0.3 },
+      regeneration: { jitterX: 0, jitterY: 0, defaultSizeFallback: 20 },
+    };
+
+    // Connection configuration
+    const connectionConfig = {
+      maxDistance: 150,
+      probability: 0.8,
+      staticOpacity: 0.6,
+      staticStrokeWidth: 5,
+      staticDashArray: [5, 5],
+      pulseBaseOpacity: 0.5,
+      pulseAmount: 0.5,
+      pulseSpeed: { min: 0.04, max: 0.08 },
+      pulseStrokeWidth: { start: 0.05, peak: 3, end: 0.05 },
+      pulseGrowthPhase: 0.3,
+      pulseFadePhase: 0.7,
+      pulseVisuals: { opacityMultiplier: 0.5, opacityOffset: 0.5 },
+      initialization: { maxAge: 60, initialFireTime: -300 },
+    };
+
+    // ==================== BEZIER CURVE FUNCTIONS ====================
+    const bezierPoint = (t, p0, p1, p2, p3) => {
+      const mt = 1 - t;
+      const mt2 = mt * mt;
+      const mt3 = mt2 * mt;
+      const t2 = t * t;
+      const t3 = t2 * t;
+
+      return {
+        x: mt3 * p0.x + 3 * mt2 * t * p1.x + 3 * mt * t2 * p2.x + t3 * p3.x,
+        y: mt3 * p0.y + 3 * mt2 * t * p1.y + 3 * mt * t2 * p2.y + t3 * p3.y
+      };
+    };
+
+    const bezierTangent = (t, p0, p1, p2, p3) => {
+      const mt = 1 - t;
+      const mt2 = mt * mt;
+      const t2 = t * t;
+
+      const dx = -3 * mt2 * p0.x + 3 * mt2 * p1.x - 6 * mt * t * p1.x + 6 * mt * t * p2.x - 3 * t2 * p2.x + 3 * t2 * p3.x;
+      const dy = -3 * mt2 * p0.y + 3 * mt2 * p1.y - 6 * mt * t * p1.y + 6 * mt * t * p2.y - 3 * t2 * p2.y + 3 * t2 * p3.y;
+
+      return { dx, dy };
+    };
+
+    // ==================== SHAPE GENERATION ====================
+    const shapeTypes = ['circle', 'rect', 'triangle'];
+    const colorOptions = [colors.primaryLight, colors.secondary, colors.accent, colors.tertiary, colors.white];
+
+    const generateShapesAlongCurve = () => {
+      const generatedShapes = [];
+      const minDistance = shapeConfig.distribution.minDistance;
+      const bandWidth = shapeConfig.distribution.bandWidth;
+
+      const controlPoints = shapeConfig.distribution.curveControlPoints;
+      if (!controlPoints || controlPoints.length !== 4) {
+        console.error('Curve pattern requires exactly 4 control points');
+        return [];
+      }
+
+      // Convert control points to pixel coordinates
+      const p0 = { x: controlPoints[0].x * width, y: controlPoints[0].y * height };
+      const p1 = { x: controlPoints[1].x * width, y: controlPoints[1].y * height };
+      const p2 = { x: controlPoints[2].x * width, y: controlPoints[2].y * height };
+      const p3 = { x: controlPoints[3].x * width, y: controlPoints[3].y * height };
+
+      const sizes = shapeConfig.sizes;
+      const strokeWidthOptions = shapeConfig.appearance.strokeWidthOptions;
+
+      let shapeCounter = 0;
+      let colorCounter = 0;
+      let strokeCounter = 0;
+
+      const isTooClose = (x, y, existing) => {
+        return existing.some(shape => {
+          const dx = shape.x - x;
+          const dy = shape.y - y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          return distance < minDistance;
+        });
+      };
+
+      const spacing = shapeConfig.distribution.spacing;
+      const boundsInset = shapeConfig.distribution.boundsInset;
+
+      // Sample points along the curve
+      for (let t = 0; t <= 1; t += 0.01) {
+        const curvePoint = bezierPoint(t, p0, p1, p2, p3);
+
+        const tangent = bezierTangent(t, p0, p1, p2, p3);
+        const perpX = -tangent.dy;
+        const perpY = tangent.dx;
+        const perpLength = Math.sqrt(perpX * perpX + perpY * perpY);
+        const perpNormX = perpX / perpLength;
+        const perpNormY = perpY / perpLength;
+
+        const bandOffset = (Math.random() - 0.5) * bandWidth;
+        const x = curvePoint.x + perpNormX * bandOffset;
+        const y = curvePoint.y + perpNormY * bandOffset;
+
+        if (x >= boundsInset && x <= width - boundsInset &&
+            y >= boundsInset && y <= height - boundsInset &&
+            !isTooClose(x, y, generatedShapes)) {
+
+          if (Math.random() < spacing / 100) {
+            const type = shapeTypes[shapeCounter % shapeTypes.length];
+            shapeCounter++;
+
+            const sizeOptions = sizes[type];
+            const size = sizeOptions[Math.floor(Math.random() * sizeOptions.length)];
+
+            const strokeColor = colorOptions[colorCounter % colorOptions.length];
+            colorCounter++;
+
+            const strokeWidth = strokeWidthOptions[strokeCounter % strokeWidthOptions.length];
+            strokeCounter++;
+
+            const rotation = Math.random() * shapeConfig.appearance.initialRotation;
+
+            if (type === 'circle') {
+              generatedShapes.push({
+                type: 'circle', x, y, radius: size, strokeColor, strokeWidth
+              });
+            } else if (type === 'rect') {
+              generatedShapes.push({
+                type: 'rect', x, y, width: size, height: size,
+                radius: Math.random() > 0.5 ? 2.5 : 4.5, rotation, strokeColor, strokeWidth
+              });
+            } else if (type === 'triangle') {
+              generatedShapes.push({
+                type: 'triangle', x, y, size, rotation, strokeColor, strokeWidth
+              });
+            }
+          }
+        }
+      }
+
+      return generatedShapes;
+    };
+
+    const generateSingleShapePosition = (existingShapes) => {
+      const minDistance = shapeConfig.distribution.minDistance;
+      const boundsInset = shapeConfig.distribution.boundsInset;
+      const bandWidth = shapeConfig.distribution.bandWidth;
+      const controlPoints = shapeConfig.distribution.curveControlPoints;
+
+      const isTooClose = (x, y) => {
+        return existingShapes.some(shape => {
+          const dx = shape.position.x - x;
+          const dy = shape.position.y - y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          return distance < minDistance;
+        });
+      };
+
+      let attempts = 0;
+      const maxAttempts = 100;
+
+      while (attempts < maxAttempts) {
+        const p0 = { x: controlPoints[0].x * width, y: controlPoints[0].y * height };
+        const p1 = { x: controlPoints[1].x * width, y: controlPoints[1].y * height };
+        const p2 = { x: controlPoints[2].x * width, y: controlPoints[2].y * height };
+        const p3 = { x: controlPoints[3].x * width, y: controlPoints[3].y * height };
+
+        const t = Math.random();
+        const curvePoint = bezierPoint(t, p0, p1, p2, p3);
+
+        const tangent = bezierTangent(t, p0, p1, p2, p3);
+        const perpX = -tangent.dy;
+        const perpY = tangent.dx;
+        const perpLength = Math.sqrt(perpX * perpX + perpY * perpY);
+        const perpNormX = perpX / perpLength;
+        const perpNormY = perpY / perpLength;
+
+        const bandOffset = (Math.random() - 0.5) * bandWidth;
+        const x = curvePoint.x + perpNormX * bandOffset;
+        const y = curvePoint.y + perpNormY * bandOffset;
+
+        if (x >= boundsInset && x <= width - boundsInset &&
+            y >= boundsInset && y <= height - boundsInset &&
+            !isTooClose(x, y)) {
+          return { x, y };
+        }
+
+        attempts++;
+      }
+
+      return {
+        x: width * (0.3 + Math.random() * 0.4),
+        y: height * (0.3 + Math.random() * 0.4)
+      };
+    };
+
+    const shapesData = generateShapesAlongCurve();
+
+    // ==================== CREATE SHAPES ====================
+    const shapes = [];
+    const bgFillColor = new paper.Color(colors.background);
+
+    shapesData.forEach(shapeData => {
+      let shape;
+
+      switch(shapeData.type) {
+        case 'circle':
+          shape = new paper.Path.Circle({
+            center: [shapeData.x, shapeData.y],
+            radius: shapeData.radius,
+            strokeColor: shapeData.strokeColor,
+            strokeWidth: shapeData.strokeWidth,
+          });
+          break;
+
+        case 'rect':
+          shape = new paper.Path.Rectangle({
+            point: [shapeData.x - shapeData.width/2, shapeData.y - shapeData.height/2],
+            size: [shapeData.width, shapeData.height],
+            radius: shapeData.radius || 0,
+            strokeColor: shapeData.strokeColor,
+            strokeWidth: shapeData.strokeWidth,
+          });
+          shape.position = new paper.Point(shapeData.x, shapeData.y);
+          if (shapeData.rotation) {
+            shape.rotate(shapeData.rotation, shape.position);
+          }
+          break;
+
+        case 'triangle':
+          shape = new paper.Path.RegularPolygon({
+            center: [shapeData.x, shapeData.y],
+            sides: 3,
+            radius: shapeData.size,
+            strokeColor: shapeData.strokeColor,
+            strokeWidth: shapeData.strokeWidth,
+          });
+          if (shapeData.rotation) {
+            shape.rotate(shapeData.rotation);
+          }
+          shape.segments.forEach(segment => {
+            segment.smooth();
+          });
+          break;
+
+        default:
+          return;
+      }
+
+      if (shapeData.type !== 'line') {
+        shape.fillColor = bgFillColor.clone();
+      }
+
+      const initialLifespan = shapeConfig.lifespan.min + Math.random() * (shapeConfig.lifespan.max - shapeConfig.lifespan.min);
+      shape.data = {
+        originalPosition: shape.position.clone(),
+        originalRotation: shapeData.rotation || 0,
+        floatPhaseY: Math.random() * Math.PI * 2,
+        floatPhaseX: Math.random() * Math.PI * 2,
+        rotationSpeed: shapeConfig.rotationSpeed.min + Math.random() * (shapeConfig.rotationSpeed.max - shapeConfig.rotationSpeed.min),
+        floatSpeedY: shapeConfig.floatSpeed.yMin + Math.random() * (shapeConfig.floatSpeed.yMax - shapeConfig.floatSpeed.yMin),
+        floatSpeedX: shapeConfig.floatSpeed.xMin + Math.random() * (shapeConfig.floatSpeed.xMax - shapeConfig.floatSpeed.xMin),
+        amplitudeY: shapeConfig.amplitude.yMin + Math.random() * (shapeConfig.amplitude.yMax - shapeConfig.amplitude.yMin),
+        amplitudeX: shapeConfig.amplitude.xMin + Math.random() * (shapeConfig.amplitude.xMax - shapeConfig.amplitude.xMin),
+        age: 0,
+        lifespan: initialLifespan,
+        originalLifespan: initialLifespan,
+        baseX: shapeData.x,
+        baseY: shapeData.y,
+        shapeType: shapeData.type,
+        isFiring: false,
+        fireIntensity: 0,
+        fireDecay: shapeConfig.firing.decay,
+        originalStrokeWidth: shapeData.strokeWidth,
+        originalStrokeColor: shapeData.strokeColor,
+        lastFireTime: connectionConfig.initialization.initialFireTime,
+        fireCooldown: shapeConfig.firing.cooldown,
+        lifespanExtension: shapeConfig.firing.lifespanExtension,
+      };
+
+      shapes.push(shape);
+    });
+
+    // ==================== CREATE CONNECTIONS ====================
+    const connections = [];
+    const connectionColor = new paper.Color(colors.secondary);
+
+    const createConnections = () => {
+      shapes.forEach((shape, i) => {
+        shapes.forEach((otherShape, j) => {
+          if (i >= j) return;
+
+          const dx = otherShape.position.x - shape.position.x;
+          const dy = otherShape.position.y - shape.position.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+
+          if (distance < connectionConfig.maxDistance &&
+              (dx > 0 || dy < 0) &&
+              Math.random() < connectionConfig.probability) {
+
+            const line = new paper.Path.Line({
+              from: shape.position,
+              to: otherShape.position,
+              strokeColor: connectionColor.clone(),
+              strokeWidth: connectionConfig.staticStrokeWidth,
+              opacity: connectionConfig.staticOpacity,
+              dashArray: connectionConfig.staticDashArray,
+            });
+
+            line.data = {
+              startShape: shape,
+              endShape: otherShape,
+              age: Math.random() * connectionConfig.initialization.maxAge,
+              pulseSpeed: connectionConfig.pulseSpeed.min + Math.random() * (connectionConfig.pulseSpeed.max - connectionConfig.pulseSpeed.min),
+              travelingPulses: [],
+            };
+
+            connections.push(line);
+          }
+        });
+      });
+    };
+
+    createConnections();
+
+    connections.forEach(connection => {
+      connection.sendToBack();
+    });
+
+    const regenerateConnectionsForShape = (shape, index) => {
+      shapes.forEach((otherShape, j) => {
+        if (index === j) return;
+
+        const dx = otherShape.position.x - shape.position.x;
+        const dy = otherShape.position.y - shape.position.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance < connectionConfig.maxDistance &&
+            (dx > 0 || dy < 0) &&
+            Math.random() < connectionConfig.probability) {
+
+          const line = new paper.Path.Line({
+            from: shape.position,
+            to: otherShape.position,
+            strokeColor: connectionColor.clone(),
+            strokeWidth: connectionConfig.staticStrokeWidth,
+            opacity: connectionConfig.staticOpacity,
+            dashArray: connectionConfig.staticDashArray,
+          });
+
+          line.data = {
+            startShape: shape,
+            endShape: otherShape,
+            age: Math.random() * connectionConfig.initialization.maxAge,
+            pulseSpeed: connectionConfig.pulseSpeed.min + Math.random() * (connectionConfig.pulseSpeed.max - connectionConfig.pulseSpeed.min),
+            travelingPulses: [],
+          };
+
+          line.sendToBack();
+          connections.push(line);
+        }
+      });
+
+      shapes.forEach((otherShape, j) => {
+        if (index === j) return;
+
+        const dx = shape.position.x - otherShape.position.x;
+        const dy = shape.position.y - otherShape.position.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance < connectionConfig.maxDistance &&
+            (dx > 0 || dy < 0) &&
+            Math.random() < connectionConfig.probability) {
+
+          const line = new paper.Path.Line({
+            from: otherShape.position,
+            to: shape.position,
+            strokeColor: connectionColor.clone(),
+            strokeWidth: connectionConfig.staticStrokeWidth,
+            opacity: connectionConfig.staticOpacity,
+            dashArray: connectionConfig.staticDashArray,
+          });
+
+          line.data = {
+            startShape: otherShape,
+            endShape: shape,
+            age: Math.random() * connectionConfig.initialization.maxAge,
+            pulseSpeed: connectionConfig.pulseSpeed.min + Math.random() * (connectionConfig.pulseSpeed.max - connectionConfig.pulseSpeed.min),
+            travelingPulses: [],
+          };
+
+          line.sendToBack();
+          connections.push(line);
+        }
+      });
+    };
+
+    let shapeTypeCounter = 0;
+    let colorCounter = 0;
+    let strokeWidthCounter = 0;
+
+    const easeInOutSine = (t) => -(Math.cos(Math.PI * t) - 1) / 2;
+    const easeInOutCubic = (t) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+    const regenerateShape = (shape, index) => {
+      const oldShape = shape;
+
+      for (let i = connections.length - 1; i >= 0; i--) {
+        const conn = connections[i];
+        if (conn.data.startShape === oldShape || conn.data.endShape === oldShape) {
+          conn.data.travelingPulses.forEach((pulse) => {
+            if (pulse.segment) {
+              pulse.segment.remove();
+            }
+          });
+          conn.remove();
+          connections.splice(i, 1);
+        }
+      }
+
+      const newPosition = generateSingleShapePosition(shapes);
+      const newX = newPosition.x;
+      const newY = newPosition.y;
+
+      const shapeTypes = ['circle', 'rect', 'triangle'];
+      const newType = shapeTypes[shapeTypeCounter % shapeTypes.length];
+      shapeTypeCounter++;
+
+      const sizes = shapeConfig.sizes;
+      const sizeOptions = sizes[newType];
+      const sizeIndex = Math.floor(Math.random() * sizeOptions.length);
+      const newSize = sizeOptions[sizeIndex] || shapeConfig.regeneration.defaultSizeFallback;
+
+      const colorOptions = [colors.primaryLight, colors.secondary, colors.accent, colors.tertiary, colors.white];
+      const newColor = colorOptions[colorCounter % colorOptions.length];
+      colorCounter++;
+
+      const strokeWidthOptions = shapeConfig.appearance.strokeWidthOptions;
+      const newStrokeWidth = strokeWidthOptions[strokeWidthCounter % strokeWidthOptions.length];
+      strokeWidthCounter++;
+
+      const newRotation = Math.random() * shapeConfig.appearance.initialRotation;
+
+      shape.remove();
+
+      let newShape;
+
+      switch(newType) {
+        case 'circle':
+          newShape = new paper.Path.Circle({
+            center: [newX, newY],
+            radius: newSize,
+            strokeColor: newColor,
+            strokeWidth: newStrokeWidth,
+          });
+          break;
+
+        case 'rect':
+          newShape = new paper.Path.Rectangle({
+            point: [newX - newSize/2, newY - newSize/2],
+            size: [newSize, newSize],
+            radius: Math.random() > 0.5 ? 2.5 : 4.5,
+            strokeColor: newColor,
+            strokeWidth: newStrokeWidth,
+          });
+          newShape.position = new paper.Point(newX, newY);
+          newShape.rotate(newRotation, newShape.position);
+          break;
+
+        case 'triangle':
+          newShape = new paper.Path.RegularPolygon({
+            center: [newX, newY],
+            sides: 3,
+            radius: newSize,
+            strokeColor: newColor,
+            strokeWidth: newStrokeWidth,
+          });
+          newShape.rotate(newRotation);
+          newShape.segments.forEach(segment => {
+            segment.smooth();
+          });
+          break;
+
+        default:
+          return;
+      }
+
+      newShape.fillColor = bgFillColor.clone();
+
+      const regeneratedLifespan = shapeConfig.lifespan.min + Math.random() * (shapeConfig.lifespan.max - shapeConfig.lifespan.min);
+      newShape.data = {
+        originalPosition: newShape.position.clone(),
+        originalRotation: newRotation,
+        floatPhaseY: Math.random() * Math.PI * 2,
+        floatPhaseX: Math.random() * Math.PI * 2,
+        rotationSpeed: shapeConfig.rotationSpeed.min + Math.random() * (shapeConfig.rotationSpeed.max - shapeConfig.rotationSpeed.min),
+        floatSpeedY: shapeConfig.floatSpeed.yMin + Math.random() * (shapeConfig.floatSpeed.yMax - shapeConfig.floatSpeed.yMin),
+        floatSpeedX: shapeConfig.floatSpeed.xMin + Math.random() * (shapeConfig.floatSpeed.xMax - shapeConfig.floatSpeed.xMin),
+        amplitudeY: shapeConfig.amplitude.yMin + Math.random() * (shapeConfig.amplitude.yMax - shapeConfig.amplitude.yMin),
+        amplitudeX: shapeConfig.amplitude.xMin + Math.random() * (shapeConfig.amplitude.xMax - shapeConfig.amplitude.xMin),
+        age: 0,
+        lifespan: regeneratedLifespan,
+        originalLifespan: regeneratedLifespan,
+        baseX: newX,
+        baseY: newY,
+        shapeType: newType,
+        isFiring: false,
+        fireIntensity: 0,
+        fireDecay: shapeConfig.firing.decay,
+        originalStrokeWidth: newStrokeWidth,
+        originalStrokeColor: newColor,
+        lastFireTime: connectionConfig.initialization.initialFireTime,
+        fireCooldown: shapeConfig.firing.cooldown,
+        lifespanExtension: shapeConfig.firing.lifespanExtension,
+      };
+
+      shapes[index] = newShape;
+      regenerateConnectionsForShape(newShape, index);
+    };
+
+    const fireShape = (shape, currentFrame) => {
+      if (!shape || !shape.data || !shapes.includes(shape)) {
+        return;
+      }
+
+      const timeSinceLastFire = currentFrame - shape.data.lastFireTime;
+      if (timeSinceLastFire < shape.data.fireCooldown) {
+        return;
+      }
+
+      if (!shape.data.isFiring) {
+        shape.data.isFiring = true;
+        shape.data.fireIntensity = 1.0;
+        shape.data.lastFireTime = currentFrame;
+        shape.data.lifespan += shape.data.lifespanExtension;
+
+        connections.forEach((connection) => {
+          if (connection.data.startShape === shape) {
+            const speedRange = connectionConfig.pulseSpeed.max - connectionConfig.pulseSpeed.min;
+            connection.data.travelingPulses.push({
+              progress: 0,
+              speed: connectionConfig.pulseSpeed.min + Math.random() * speedRange,
+              hasFired: false,
+            });
+          }
+        });
+      }
+    };
+
+    // ==================== ANIMATION LOOP ====================
+    paper.view.onFrame = (event) => {
+      // Handle pause
+      if (isPaused) {
+        return;
+      }
+
+      // Apply speed multiplier
+      const time = frameCount * speedMultiplier;
+      frameCount++;
+
+      // Update timer every 60 frames (1 second at 60fps)
+      if (frameCount % 60 === 0 && !hasAutoPaused) {
+        secondsElapsed++;
+        const remaining = autoPauseAfter - secondsElapsed;
+
+        if (remaining > 0) {
+          timerDisplay.textContent = `Auto-pause in ${remaining}s`;
+        } else if (!hasAutoPaused) {
+          hasAutoPaused = true;
+          isPaused = true;
+          pausePlayBtn.classList.add('active');
+          pausePlayBtn.querySelector('.icon').textContent = '▶️';
+          pausePlayBtn.querySelector('.label').textContent = 'Play';
+          timerDisplay.textContent = 'Paused';
+          timerDisplay.classList.add('paused');
+        }
+      }
+
+      // Random fire
+      if (Math.random() < RANDOM_FIRE_PROBABILITY) {
+        const randomShape = shapes[Math.floor(Math.random() * shapes.length)];
+        if (randomShape) {
+          fireShape(randomShape, time);
+        }
+      }
+
+      // Update shapes
+      shapes.forEach((shape, index) => {
+        if (shape.data.age >= shape.data.lifespan) {
+          regenerateShape(shape, index);
+          const regeneratedShape = shapes[index];
+          if (!regeneratedShape) return;
+          shape = regeneratedShape;
+        }
+
+        shape.data.age += 1;
+
+        const fadeInDuration = shapeConfig.fade.fadeInDuration;
+        const fadeOutDuration = shapeConfig.fade.fadeOutDuration;
+        const age = shape.data.age;
+        const lifespan = shape.data.lifespan;
+
+        let baseOpacity = 1;
+
+        if (age <= fadeInDuration) {
+          baseOpacity = age / fadeInDuration;
+        } else if (age >= lifespan - fadeOutDuration) {
+          baseOpacity = Math.max(0, (lifespan - age) / fadeOutDuration);
+        }
+
+        const hasExtendedLifespan = shape.data.lifespan > shape.data.originalLifespan;
+
+        if (shape.data.isFiring || hasExtendedLifespan) {
+          shape.opacity = baseOpacity * 1.0;
+        } else {
+          shape.opacity = baseOpacity * 0.2;
+        }
+
+        if (shape.data.isFiring) {
+          shape.data.fireIntensity -= shape.data.fireDecay;
+          if (shape.data.fireIntensity <= 0) {
+            shape.data.isFiring = false;
+            shape.data.fireIntensity = 0;
+          }
+        }
+
+        if (shape.data.fireIntensity > 0) {
+          shape.strokeWidth = shape.data.originalStrokeWidth + shape.data.fireIntensity * shapeConfig.fireEffects.glowStrokeMultiplier;
+
+          if (!shape.data.glowColor) {
+            shape.data.glowColor = new paper.Color(shape.data.originalStrokeColor);
+          }
+          const currentBrightness = shape.strokeColor?.brightness || 0;
+          shape.data.glowColor.brightness = currentBrightness + shape.data.fireIntensity * shapeConfig.fireEffects.glowBrightnessMultiplier;
+          shape.strokeColor = shape.data.glowColor;
+        } else if (shape.data.isFiring === false && shape.strokeWidth !== shape.data.originalStrokeWidth) {
+          shape.strokeWidth = shape.data.originalStrokeWidth;
+          if (!shape.data.originalColorObject) {
+            shape.data.originalColorObject = new paper.Color(shape.data.originalStrokeColor);
+          }
+          shape.strokeColor = shape.data.originalColorObject;
+        }
+
+        const rawSinY = Math.sin(time * shape.data.floatSpeedY + shape.data.floatPhaseY);
+        const rawSinX = Math.sin(time * shape.data.floatSpeedX + shape.data.floatPhaseX);
+
+        const normalizedY = (rawSinY + 1) / 2;
+        const normalizedX = (rawSinX + 1) / 2;
+
+        const easedY = easeInOutSine(normalizedY);
+        const easedX = easeInOutSine(normalizedX);
+
+        const floatOffsetY = (easedY * 2 - 1) * shape.data.amplitudeY;
+        const floatOffsetX = (easedX * 2 - 1) * shape.data.amplitudeX;
+
+        shape.position.x = shape.data.originalPosition.x + floatOffsetX;
+        shape.position.y = shape.data.originalPosition.y + floatOffsetY;
+
+        const rotationEase = easeInOutSine(normalizedY);
+        shape.rotate(shape.data.rotationSpeed * 60 * (rotationEase * 2 - 1));
+      });
+
+      // Update connections
+      for (let i = connections.length - 1; i >= 0; i--) {
+        const connection = connections[i];
+
+        const startShape = connection.data.startShape;
+        const endShape = connection.data.endShape;
+
+        if (!startShape || !endShape || !shapes.includes(startShape) || !shapes.includes(endShape)) {
+          connection.data.travelingPulses.forEach((pulse) => {
+            if (pulse.segment) pulse.segment.remove();
+          });
+          connection.remove();
+          connections.splice(i, 1);
+          continue;
+        }
+
+        const startPos = startShape.position;
+        const endPos = endShape.position;
+
+        const seg0 = connection.segments[0].point;
+        const seg1 = connection.segments[1].point;
+
+        if (Math.abs(seg0.x - startPos.x) > 1 || Math.abs(seg0.y - startPos.y) > 1) {
+          connection.segments[0].point = startPos;
+        }
+        if (Math.abs(seg1.x - endPos.x) > 1 || Math.abs(seg1.y - endPos.y) > 1) {
+          connection.segments[1].point = endPos;
+        }
+
+        if (!connection.data.gradient) {
+          const startNodeColor = new paper.Color(startShape.strokeColor);
+          const endNodeColor = new paper.Color(endShape.strokeColor);
+
+          connection.data.gradient = new paper.Color({
+            gradient: {
+              stops: [
+                [startNodeColor, 0],
+                [endNodeColor, 1]
+              ]
+            },
+            origin: startPos,
+            destination: endPos
+          });
+        }
+
+        connection.data.gradient.origin = startPos;
+        connection.data.gradient.destination = endPos;
+
+        connection.strokeColor = connection.data.gradient;
+
+        connection.data.age += connection.data.pulseSpeed;
+        const pulseValue = Math.sin(connection.data.age);
+        connection.opacity = connectionConfig.pulseBaseOpacity +
+          (pulseValue * connectionConfig.pulseVisuals.opacityMultiplier + connectionConfig.pulseVisuals.opacityOffset) * connectionConfig.pulseAmount;
+
+        const startOpacity = connection.data.startShape.opacity;
+        const endOpacity = connection.data.endShape.opacity;
+        const minShapeOpacity = Math.min(startOpacity, endOpacity);
+        connection.opacity *= minShapeOpacity;
+
+        const pulses = connection.data.travelingPulses;
+        for (let j = pulses.length - 1; j >= 0; j--) {
+          const pulse = pulses[j];
+          pulse.progress += pulse.speed * speedMultiplier;
+
+          const phase1Duration = connectionConfig.pulseGrowthPhase;
+          const phase2Duration = connectionConfig.pulseFadePhase;
+
+          const swStart = connectionConfig.pulseStrokeWidth.start;
+          const swPeak = connectionConfig.pulseStrokeWidth.peak;
+          const swEnd = connectionConfig.pulseStrokeWidth.end;
+          const swGrowthRange = swPeak - swStart;
+          const swShrinkRange = swEnd - swPeak;
+
+          let pulseStart = 0;
+          let pulseEnd = 0;
+          let opacity = 0.9;
+          let strokeWidth = swStart;
+
+          if (!pulse.hasFired && pulse.progress >= phase1Duration) {
+            fireShape(connection.data.endShape, time);
+            pulse.hasFired = true;
+          }
+
+          if (pulse.progress <= phase1Duration) {
+            const t = pulse.progress / phase1Duration;
+            const easedProgress = easeInOutCubic(t);
+
+            pulseStart = 0;
+            pulseEnd = easedProgress;
+            opacity = 0.9;
+
+            strokeWidth = swStart + swGrowthRange * easedProgress;
+          } else {
+            const t = (pulse.progress - phase1Duration) / phase2Duration;
+            const easedProgress = easeInOutCubic(t);
+
+            pulseStart = easedProgress;
+            pulseEnd = 1;
+            opacity = 0.9 * (1 - easedProgress);
+
+            strokeWidth = swPeak + swShrinkRange * easedProgress;
+          }
+
+          if (!pulse.colorCache) {
+            pulse.colorCache = {
+              start: new paper.Color(startShape.strokeColor),
+              end: new paper.Color(endShape.strokeColor),
+              current: new paper.Color(startShape.strokeColor)
+            };
+          }
+
+          const averagePosition = (pulseStart + pulseEnd) * 0.5;
+          const cc = pulse.colorCache;
+
+          cc.current.red = cc.start.red + (cc.end.red - cc.start.red) * averagePosition;
+          cc.current.green = cc.start.green + (cc.end.green - cc.start.green) * averagePosition;
+          cc.current.blue = cc.start.blue + (cc.end.blue - cc.start.blue) * averagePosition;
+
+          const pulseColor = cc.current;
+
+          if (!pulse.segment) {
+            pulse.segment = new paper.Path.Line({
+              from: startPos.add(endPos.subtract(startPos).multiply(pulseStart)),
+              to: startPos.add(endPos.subtract(startPos).multiply(pulseEnd)),
+              strokeColor: pulseColor,
+              strokeWidth: strokeWidth,
+              strokeCap: 'round',
+            });
+
+            pulse.segment.sendToBack();
+          } else {
+            pulse.segment.segments[0].point = startPos.add(endPos.subtract(startPos).multiply(pulseStart));
+            pulse.segment.segments[1].point = startPos.add(endPos.subtract(startPos).multiply(pulseEnd));
+            pulse.segment.strokeColor = pulseColor;
+            pulse.segment.strokeWidth = strokeWidth;
+          }
+
+          pulse.segment.opacity = opacity;
+
+          if (pulse.progress >= 1) {
+            if (pulse.segment) {
+              pulse.segment.remove();
+            }
+            pulses.splice(j, 1);
+          }
+        }
+      }
+    };
+
+    console.log(`Header canvas initialized: ${width}x${height} with ${shapes.length} shapes`);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initHeaderCanvas);
+  } else {
+    initHeaderCanvas();
+  }
+</script>

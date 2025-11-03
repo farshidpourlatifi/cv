@@ -1,0 +1,199 @@
+---
+/**
+ * Twitter/X Header Background Generator
+ *
+ * Dimensions: 1500 x 500 px (Twitter/X recommended header size)
+ *
+ * Usage:
+ * 1. Run dev server: bun run dev
+ * 2. Navigate to http://localhost:4321/twitter-header
+ * 3. Use controls to find perfect frame
+ * 4. Click "Download" to save PNG
+ *
+ * Controls:
+ * - Space/P: Pause/Play
+ * - S: Toggle slow motion (50% speed)
+ * - D: Download screenshot
+ * - H: Hide/show controls
+ *
+ * Features:
+ * - Auto-pauses after 10 seconds
+ * - Starts in slow motion for easier capture
+ * - Same animation as home page (curved arc, right to left)
+ * - No radial gradient overlay
+ */
+
+import HeaderCanvas from '../components/Background/HeaderCanvas.astro';
+
+const TWITTER_WIDTH = 1500;
+const TWITTER_HEIGHT = 500;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Twitter/X Header Background Generator</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      /* Color system - matching CV design */
+      --color-primary: #0A3A52;
+      --color-primary-light: #004B72;
+      --color-secondary: #006BA5;
+      --color-secondary-light: #3E9FD4;
+      --color-accent: #F0000F;
+      --color-accent-dark: #BF0B16;
+      --color-line-accent: #E00514;
+      --color-white: #FFFFFF;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a1a;
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+
+    .page-header {
+      text-align: center;
+      margin-bottom: 30px;
+      max-width: 1500px;
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: var(--color-secondary-light);
+    }
+
+    .dimensions {
+      font-size: 14px;
+      color: #999;
+      font-family: 'Courier New', monospace;
+    }
+
+    .instructions {
+      margin-top: 20px;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .instructions h2 {
+      font-size: 16px;
+      margin-bottom: 12px;
+      color: var(--color-secondary-light);
+    }
+
+    .instructions ul {
+      list-style: none;
+      font-size: 14px;
+      line-height: 1.8;
+    }
+
+    .instructions li {
+      padding-left: 20px;
+      position: relative;
+    }
+
+    .instructions li:before {
+      content: "▹";
+      position: absolute;
+      left: 0;
+      color: var(--color-accent);
+    }
+
+    .instructions kbd {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .canvas-wrapper {
+      box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5);
+      border-radius: 4px;
+      overflow: hidden;
+      border: 2px solid rgba(62, 159, 212, 0.3);
+    }
+
+    footer {
+      margin-top: 30px;
+      text-align: center;
+      font-size: 12px;
+      color: #666;
+    }
+
+    footer a {
+      color: var(--color-secondary-light);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    .platform-note {
+      margin-top: 12px;
+      font-size: 13px;
+      color: #888;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <div class="page-header">
+    <h1>Twitter/X Header Background</h1>
+    <div class="dimensions">{TWITTER_WIDTH} × {TWITTER_HEIGHT} px</div>
+
+    <div class="instructions">
+      <h2>Quick Start</h2>
+      <ul>
+        <li>Animation starts in <strong>slow motion</strong> and <strong>auto-pauses at 10s</strong></li>
+        <li><kbd>Space</kbd> or <kbd>P</kbd> - Pause/Play animation</li>
+        <li><kbd>S</kbd> - Toggle 50% slow motion</li>
+        <li><kbd>D</kbd> - Download PNG (exact Twitter/X dimensions)</li>
+        <li><kbd>H</kbd> - Hide/show controls for clean capture</li>
+      </ul>
+      <div class="platform-note">
+        ✨ Tip: Twitter/X crops center area for profile photo. Test with your profile to ensure composition works!
+      </div>
+    </div>
+  </div>
+
+  <div class="canvas-wrapper">
+    <HeaderCanvas
+      width={TWITTER_WIDTH}
+      height={TWITTER_HEIGHT}
+      autoPauseAfter={10}
+    />
+  </div>
+
+  <footer>
+    <p>
+      Local-only page for generating Twitter/X header backgrounds<br>
+      <a href="/">← Back to CV</a>
+    </p>
+  </footer>
+</body>
+</html>
