@@ -64,7 +64,7 @@ const [emailUser, emailDomain] = splitEmail(personal.email);
         copyBtn.classList.remove('error');
         copyBtn.classList.add('copied');
         copyBtn.setAttribute('aria-label', 'Email address copied');
-      } catch (e) {
+      } catch {
         // Clipboard unavailable (e.g. insecure context / denied): show an error
         // state rather than a false success.
         copyBtn.classList.remove('copied');
@@ -145,13 +145,13 @@ const [emailUser, emailDomain] = splitEmail(personal.email);
 
   /* Email CTA row — the address plus an inline copy icon, centred under the
      title. */
+  /* Centered inline flow (not flex) so that when the address wraps on narrow
+     screens the copy icon trails directly after the last line rather than being
+     pushed onto its own orphaned line. */
   .contact-email-row {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-3);
     margin: 0;
+    text-align: center;
+    line-height: 1.3;
   }
 
   .contact-email {
@@ -176,6 +176,8 @@ const [emailUser, emailDomain] = splitEmail(personal.email);
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    vertical-align: middle;
+    margin-left: var(--space-2);
     width: 34px;
     height: 34px;
     padding: 6px;
@@ -217,6 +219,23 @@ const [emailUser, emailDomain] = splitEmail(personal.email);
   /* Error state — the copy glyph turns red (>=3:1 on navy) when the write fails. */
   .copy-icon.error {
     color: var(--color-focus);
+  }
+
+  /* On phones the obfuscated address is long. Keep it and the copy icon on a
+     single line (never letting the icon wrap onto its own orphaned line) by
+     narrowing the side padding and scaling the address down with the viewport. */
+  @media (max-width: 767px) {
+    .closing-section {
+      padding: var(--title-offset) var(--space-3) var(--space-12);
+    }
+
+    .contact-email-row {
+      white-space: nowrap;
+    }
+
+    .contact-email {
+      font-size: clamp(13px, 4.3vw, 18px);
+    }
   }
 
   @media print {
