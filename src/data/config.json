@@ -1,0 +1,50 @@
+{
+  "_generated": "GENERATED FILE - do not edit. Source of truth: profile/cv-data.json in the Job Search Accelerator repo. Regenerate with build/export-web.py.",
+  "site": {
+    "title": "Farshid Pourlatifi - CV",
+    "og_title": "Farshid Pourlatifi — Senior Full-Stack Engineer · Multi-Tenant SaaS · AI Integration · Migrations",
+    "og_image_alt": "Farshid Pourlatifi — Senior Full-Stack Engineer: Multi-Tenant SaaS, AI Integration, Migrations",
+    "description": "Senior Full-Stack Engineer with 15+ years building SaaS platforms, e-commerce systems, and AI-powered web applications",
+    "url": "https://farshid.is-a.dev",
+    "author": "Farshid Pourlatifi",
+    "lang": "en"
+  },
+  "professional_summary": "Senior Full-Stack Engineer with 15+ years of experience building SaaS platforms, e-commerce systems, and AI-powered web applications. Currently a core developer on Younea's multi-tenant LetzChat WordPress SaaS platform, combining React/TypeScript, PHP, WordPress REST APIs, AI chat automation, voice and telephony integrations, usage-based billing, and deployment automation. Strong background across PHP/WordPress, Python, Node.js, service/repository architectures, automated testing, and production delivery across frontend, backend, infrastructure, and AI integration layers.",
+  "metadata": {
+    "total_experience_years": 15,
+    "current_role": "Senior Web Developer",
+    "current_company": "Younea S.à r.l.",
+    "work_preferences": {
+      "remote": true,
+      "location_preference": "Remote (EU time zones), UTC+3",
+      "job_types": [
+        "Full-time",
+        "Contract"
+      ]
+    },
+    "specializations": [
+      "AI Integration",
+      "SaaS Platforms",
+      "E-commerce",
+      "Full Stack Development",
+      "Frontend Architecture",
+      "Performance Optimization"
+    ]
+  },
+  "theme": {
+    "primary_color": "#0A3A52",
+    "secondary_color": "#006BA5",
+    "accent_color": "#F0000F",
+    "background_gradient": {
+      "from": "#0A3A52",
+      "to": "#004B72"
+    }
+  },
+  "features": {
+    "show_achievements": true,
+    "show_technologies": true,
+    "show_timeline": true,
+    "enable_pdf_download": true,
+    "enable_geometric_background": true
+  }
+}

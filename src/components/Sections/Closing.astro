@@ -1,0 +1,231 @@
+---
+/**
+ * Closing Section
+ *
+ * The page's final section: a clear contact path so it doesn't dead-end in
+ * blank navy. Contact actions only — education/certifications/languages live at
+ * the end of the Experience section. Styled to match the dark scroll sections.
+ */
+
+import { getPersonalInfo } from '../../utils/data-loader';
+import { splitEmail, obfuscateEmail } from '../../utils/email';
+
+const personal = getPersonalInfo();
+// Shown with a lightly obfuscated @; the real mailto: is assembled client-side
+// from the split parts (below), so the plain address never ships in the HTML —
+// yet the link is clickable and right-click "Copy email address" works.
+// LinkedIn and the CV download live in the footer social icons.
+const emailDisplay = obfuscateEmail(personal.email);
+const [emailUser, emailDomain] = splitEmail(personal.email);
+---
+
+<section class="closing-section">
+  <!-- Soft blurred circle behind the contact block, echoing the centred ring
+       of canvas shapes rendered for this section. -->
+  <div class="closing-glow" aria-hidden="true"></div>
+
+  <h2 class="section-title">Get in Touch</h2>
+
+  <div class="closing-inner">
+    <!-- Email CTA. Obfuscated text in the HTML; the real mailto: href and the
+         copy action are wired by the script below (LinkedIn + CV are the footer
+         social icons). -->
+    <p class="contact-email-row">
+      <a class="contact-email" data-u={emailUser} data-d={emailDomain} aria-label="Email me">{emailDisplay}</a>
+      <button type="button" class="copy-icon" data-u={emailUser} data-d={emailDomain} aria-label="Copy email address" title="Copy email address">
+        <svg class="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="9" y="9" width="13" height="13" rx="2"></rect>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+        </svg>
+        <svg class="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      </button>
+    </p>
+  </div>
+</section>
+
+<script>
+  // Assemble the real mailto: from the split parts once JS runs, so the plain
+  // address is never in the server-rendered HTML but the link is clickable and
+  // right-click "Copy email address" works.
+  const el = document.querySelector<HTMLAnchorElement>('.contact-email');
+  if (el && el.dataset.u && el.dataset.d) {
+    el.href = `mailto:${el.dataset.u}@${el.dataset.d}`;
+  }
+
+  const copyBtn = document.querySelector<HTMLButtonElement>('.copy-icon');
+  if (copyBtn && copyBtn.dataset.u && copyBtn.dataset.d) {
+    const address = `${copyBtn.dataset.u}@${copyBtn.dataset.d}`;
+    copyBtn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(address);
+        // Success state only after the write actually resolves.
+        copyBtn.classList.remove('error');
+        copyBtn.classList.add('copied');
+        copyBtn.setAttribute('aria-label', 'Email address copied');
+      } catch (e) {
+        // Clipboard unavailable (e.g. insecure context / denied): show an error
+        // state rather than a false success.
+        copyBtn.classList.remove('copied');
+        copyBtn.classList.add('error');
+        copyBtn.setAttribute('aria-label', 'Copy failed — select the address to copy it');
+      }
+      window.setTimeout(() => {
+        copyBtn.classList.remove('copied');
+        copyBtn.classList.remove('error');
+        copyBtn.setAttribute('aria-label', 'Copy email address');
+      }, 1600);
+    });
+  }
+</script>
+
+<style>
+  .closing-section {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    position: relative;
+    padding: var(--title-offset) var(--space-8) var(--space-12);
+  }
+
+  /* Everything except the glow sits above it. */
+  .closing-section > *:not(.closing-glow) {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Blurred circle backdrop, centred on the section (which is itself centred in
+     the viewport), so it lines up with the centred ring of canvas shapes. */
+  .closing-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(520px, 80vw);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    /* Same hue as the page background (--color-primary #0A3A52), just faded via
+       alpha — so it softly hides the canvas shapes in the centre and blends
+       seamlessly into the bg rather than reading as a lighter/darker glow. */
+    background: radial-gradient(
+      circle,
+      rgba(10, 58, 82, 0.9) 0%,
+      rgba(10, 58, 82, 0.6) 45%,
+      transparent 72%
+    );
+    filter: blur(44px);
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* Matches the sticky title treatment of the other sections, minus the
+     stickiness — this section is short, so the title just sits at its top. */
+  .section-title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(2.5rem, 5vw, 70px);
+    line-height: 1.15;
+    text-align: center;
+    color: var(--color-secondary-light);
+    margin: 0 0 var(--space-8) 0;
+    letter-spacing: -0.02em;
+    width: 100%;
+  }
+
+  .closing-inner {
+    width: 100%;
+    max-width: 900px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-10);
+  }
+
+  /* Email CTA row — the address plus an inline copy icon, centred under the
+     title. */
+  .contact-email-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-3);
+    margin: 0;
+  }
+
+  .contact-email {
+    font-family: var(--font-display);
+    font-weight: var(--font-semibold);
+    font-size: var(--text-2xl);
+    line-height: 1.3;
+    letter-spacing: 0.01em;
+    color: var(--color-white);
+    text-decoration: none;
+    cursor: pointer;
+    word-break: break-word;
+    transition: color var(--transition-base);
+  }
+
+  .contact-email:hover {
+    color: var(--color-secondary-light);
+  }
+
+  /* Inline copy-to-clipboard icon next to the email. */
+  .copy-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    padding: 6px;
+    color: var(--color-secondary-light);
+    background: transparent;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition:
+      color var(--transition-base),
+      background var(--transition-base);
+  }
+
+  .copy-icon:hover {
+    background: rgba(87, 172, 220, 0.16);
+    color: var(--color-white);
+  }
+
+  .copy-icon svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  /* Toggle copy ↔ check glyphs. */
+  .copy-icon .i-check {
+    display: none;
+  }
+
+  .copy-icon.copied .i-copy {
+    display: none;
+  }
+
+  .copy-icon.copied .i-check {
+    display: block;
+    color: var(--color-secondary-light);
+  }
+
+  /* Error state — the copy glyph turns red (>=3:1 on navy) when the write fails. */
+  .copy-icon.error {
+    color: var(--color-focus);
+  }
+
+  @media print {
+    .closing-section {
+      padding: var(--space-4) 0;
+    }
+
+    .section-title {
+      position: static;
+    }
+  }
+</style>

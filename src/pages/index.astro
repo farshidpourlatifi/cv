@@ -1,0 +1,300 @@
+---
+/**
+ * Homepage - CV Website
+ *
+ * Main page displaying CV content with all sections
+ */
+
+import CVLayout from '../layouts/CVLayout.astro';
+import Hero from '../components/Sections/Hero.astro';
+import Skills from '../components/Sections/Skills.astro';
+import Experience from '../components/Sections/Experience.astro';
+import Closing from '../components/Sections/Closing.astro';
+
+// Static CV — no server logic. Prerender so it's emitted as dist/index.html and
+// Netlify's static [[headers]] (CSP, X-Frame-Options, …) apply to it.
+export const prerender = true;
+---
+
+<CVLayout>
+  <!-- All sections visible and scrollable on both mobile and desktop -->
+
+  <!-- Top (hero) Section -->
+  <section id="top" data-page-section="top" class="page-section">
+    <div class="section-content">
+      <Hero />
+    </div>
+  </section>
+
+  <!-- Skills Section -->
+  <section id="skills" data-page-section="skills" class="page-section">
+    <div class="section-content">
+      <Skills />
+    </div>
+  </section>
+
+  <!-- Experience Section -->
+  <section id="experience" data-page-section="experience" class="page-section">
+    <div class="section-content">
+      <Experience />
+    </div>
+  </section>
+
+  <!-- Closing / Contact Section -->
+  <section id="contact" data-page-section="contact" class="page-section">
+    <div class="section-content">
+      <Closing />
+    </div>
+  </section>
+</CVLayout>
+
+<style>
+  /* Scroll-based sections for both mobile and desktop */
+  .page-section {
+    /* Where an anchored jump (nav click or #hash) lands this section.
+       --scroll-offset is 0 — sections land flush at their own top. The
+       clearance that keeps content out from under the sticky title is top
+       padding on the section itself, not scroll distance. See the
+       --scroll-offset note in BaseLayout.astro for why both non-zero
+       directions were tried and rejected. */
+    scroll-margin-top: var(--scroll-offset);
+    min-height: 100vh;
+    /* height: 100vh; */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    position: relative;
+  }
+
+  .section-content {
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 100px 20px 60px;
+    position: relative;
+    z-index: 2;
+    animation: fadeIn 0.8s ease-out forwards;
+  }
+
+  /* Opacity only — no transform. `animation-fill-mode: forwards` leaves the
+     final transform applied permanently, and a transformed ancestor becomes
+     the containing block for position: sticky, which strands the section
+     titles instead of pinning them to the viewport. */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  /* Top (hero) section - Full viewport and initially visible */
+  [data-page-section="top"] {
+    min-height: 100vh;
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Skills section with overlay */
+  [data-page-section="skills"] {
+    position: relative;
+    min-height: 100vh;
+  }
+
+  [data-page-section="skills"]::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  /* Experience section */
+  [data-page-section="experience"] {
+    min-height: 100vh;
+  }
+
+  /* Skills and Experience grow past one screen, so they start under the nav
+     rather than centering, letting their titles stick while content scrolls. */
+  [data-page-section="experience"],
+  [data-page-section="skills"],
+  [data-page-section="experience"] .section-content,
+  [data-page-section="skills"] .section-content {
+    align-items: flex-start;
+    justify-content: flex-start;
+  }
+
+  [data-page-section="experience"] .section-content,
+  [data-page-section="skills"] .section-content {
+    flex-direction: column;
+    height: auto;
+  }
+
+  /* Desktop adjustments */
+  @media (min-width: 768px) {
+    .section-content {
+      /* Extra bottom padding keeps the last lines clear of the fixed
+         bottom-right nav + social/CV icons (see TabNav / SocialLinks). */
+      padding: 0 40px 160px;
+      max-width: 1437px;
+      margin: 0 auto;
+    }
+
+    /* No fixed height: sections grow with their content so titles can stick. */
+    .page-section {
+      min-height: 100vh;
+    }
+
+    /* No extra top padding here. This used to re-add 110px of clearance for a
+       fixed top nav bar; the nav now sits bottom-right (TabNav.astro), and each
+       section's own --title-offset padding keeps content clear of the sticky
+       title. Both together double-counted and pushed Experience down. */
+  }
+
+  /* Mobile adjustments */
+  @media (max-width: 767px) {
+    .page-section {
+      min-height: 600px; /* Minimum pixel height for mobile */
+    }
+
+    .section-content {
+      /* Extra bottom padding so the last lines (e.g. Experience bullets) clear
+         the fixed social/CV icons centred at the bottom of the viewport. */
+      padding: 80px 20px 110px;
+    }
+  }
+
+  /* Print styles */
+  @media print {
+    .page-section {
+      height: auto;
+      min-height: auto;
+      page-break-inside: avoid;
+    }
+  }
+</style>
+
+<script>
+  import { claimInitOnce } from '../utils/section-init';
+
+  // Smooth scroll behavior and scroll animations
+  document.addEventListener('DOMContentLoaded', () => {
+    // Initialise section-tracking exactly once. The bundled module script runs
+    // a single time, but this guard makes re-entry (HMR, re-injection) a no-op.
+    if (!claimInitOnce(document.documentElement.dataset)) return;
+
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    // Enable smooth scrolling (unless the visitor asked for reduced motion)
+    if (!prefersReducedMotion) {
+      document.documentElement.style.scrollBehavior = 'smooth';
+    }
+
+    // Track current active section
+    let currentSection = 'top';
+
+    // Intersection Observer for scroll animations and hash updates
+    const observerOptions = {
+      root: null,
+      rootMargin: '-20% 0px -60% 0px', // Trigger when section is 20% from top
+      threshold: 0
+    };
+
+    const sections = document.querySelectorAll('.page-section');
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        // Add animation class when section comes into view
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in-view');
+
+          const sectionId = entry.target.id;
+
+          // Update hash in URL
+          if (sectionId && typeof history.pushState === 'function') {
+            history.replaceState(null, '', `#${sectionId}`);
+          }
+
+          // Notify background component about section change
+          if (sectionId && sectionId !== currentSection) {
+            currentSection = sectionId;
+            window.postMessage({
+              type: 'section-change',
+              section: sectionId
+            }, '*');
+          }
+        }
+      });
+    }, observerOptions);
+
+    sections.forEach(section => observer.observe(section));
+
+    // Continuous scroll progress tracking for smooth background transitions
+    window.addEventListener('scroll', () => {
+      // Get all sections and their positions
+      const sectionsArray = Array.from(sections) as HTMLElement[];
+      const scrollTop = window.scrollY;
+
+      // Find which two sections we're between based on scroll position
+      for (let i = 0; i < sectionsArray.length - 1; i++) {
+        const fromSectionEl = sectionsArray[i];
+        const toSectionEl = sectionsArray[i + 1];
+
+        if (!fromSectionEl || !toSectionEl) continue;
+
+        const fromTop = fromSectionEl.offsetTop;
+        const toTop = toSectionEl.offsetTop;
+
+        // Calculate the transition range (from the start of current section to start of next)
+        const transitionStart = fromTop;
+        const transitionEnd = toTop;
+        const transitionRange = transitionEnd - transitionStart;
+
+        // Check if we're in this transition zone
+        if (scrollTop >= transitionStart && scrollTop < transitionEnd) {
+          // Calculate progress (0 to 1) through this transition
+          const progress = (scrollTop - transitionStart) / transitionRange;
+          const clampedProgress = Math.max(0, Math.min(1, progress));
+
+          // Send continuous progress updates
+          window.postMessage({
+            type: 'scroll-progress',
+            fromSection: fromSectionEl.id,
+            toSection: toSectionEl.id,
+            progress: clampedProgress
+          }, '*');
+
+          break;
+        }
+      }
+    }, { passive: true });
+
+    // Handle initial hash from URL
+    const initialHash = window.location.hash.substring(1);
+    if (initialHash && ['top', 'skills', 'experience', 'contact'].includes(initialHash)) {
+      currentSection = initialHash;
+      setTimeout(() => {
+        window.postMessage({
+          type: 'section-change',
+          section: initialHash
+        }, '*');
+      }, 100);
+    } else {
+      // Initialize with the top section
+      history.replaceState(null, '', '#top');
+      setTimeout(() => {
+        window.postMessage({
+          type: 'section-change',
+          section: 'top'
+        }, '*');
+      }, 100);
+    }
+  });
+</script>

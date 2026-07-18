@@ -1,0 +1,344 @@
+---
+/**
+ * Skills Section
+ *
+ * Every category is stacked and scrolls with the page. The title sticks below
+ * the fixed nav for the length of the section, and content dissolves beneath
+ * it via a masked scrim that leaves the animated background visible.
+ */
+
+import { getSkills } from '../../utils/data-loader';
+
+const skills = getSkills();
+
+// Curated, prominent groups (editorial selection lives in cv-data.json).
+const featured = skills.featured;
+
+// Pair each schema key with a display label in a sensible order
+// (frontend/backend first). Keys are typed from CoreCompetencies, so each
+// list is a guaranteed string[]. Drop any empty categories.
+const c = skills.core_competencies;
+const categories = [
+  { label: 'Front-End', items: c.frontend_development },
+  { label: 'Back-End', items: c.backend_development },
+  { label: 'AI & Automation', items: c.ai_automation },
+  { label: 'DevOps & CI/CD', items: c.devops_cicd },
+  { label: 'Databases', items: c.databases },
+  { label: 'Cloud & Infrastructure', items: c.cloud_infrastructure },
+  { label: 'Testing', items: c.testing_frameworks },
+  { label: 'E-commerce Platforms', items: c.ecommerce_platforms },
+].filter((category) => category.items.length > 0);
+
+// Chunk categories into pages of 2 for the desktop carousel.
+const PER_PAGE = 2;
+const pages = [];
+for (let i = 0; i < categories.length; i += PER_PAGE) {
+  pages.push(categories.slice(i, i + PER_PAGE));
+}
+---
+
+<section class="skills-section">
+  <!-- Section Title -->
+  <h2 class="section-title">Skills</h2>
+
+  <!-- Featured tier: the curated groups a reader should see first. Chips give
+       them more visual weight than the plain full breakdown below. -->
+  {featured.length > 0 && (
+    <div class="skills-featured">
+      {featured.map(group => (
+        <div class="featured-group">
+          <h3 class="featured-label">{group.label}</h3>
+          <ul class="featured-items">
+            {group.items.map(item => (
+              <li class="featured-chip">{item}</li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+  )}
+
+  <!-- Secondary tier: the full categorized inventory, collapsed by default so
+       it doesn't overwhelm the page but stays available. -->
+  <details class="skills-more">
+    <summary class="skills-more-summary">Full skills list</summary>
+
+  <!-- Carousel: one page (two categories) at a time on desktop; on mobile
+       every page is displayed, so all categories stack and scroll.
+       The two columns mirror each other around a center gutter: the left
+       column is right-aligned, the right column left-aligned. -->
+  <div class="skills-carousel">
+    {pages.map((page, pageIndex) => (
+      <div class="skills-page" data-skills-page={pageIndex} class:list={[{ 'is-active': pageIndex === 0 }]}>
+        <div class="skills-cards">
+          {page.map((category, colIndex) => (
+            <div class="skill-column" data-col={colIndex === 0 ? 'left' : 'right'}>
+              <h3 class="column-title">{category.label}</h3>
+              <div class="skills-list">
+                {category.items.map(skill => (
+                  <p class="skill-item">{skill}</p>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    ))}
+    </div>
+  </details>
+
+</section>
+
+<style>
+  .skills-section {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* Top-aligned, auto height: this section is taller than the viewport, and
+       centering it would strand the sticky title mid-section. */
+    justify-content: flex-start;
+    position: relative;
+    /* Top padding clears the (mobile) top nav and the page top; sections land
+       flush on anchored jumps (--scroll-offset: 0). */
+    padding: var(--title-offset) var(--space-8) var(--space-12);
+  }
+
+  /* Keep content above the background canvas layer. */
+  .skills-section > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Section Title */
+  .section-title {
+    font-family: var(--font-display);
+    font-style: normal;
+    font-weight: 600;
+    font-size: clamp(2.5rem, 5vw, 70px);
+    line-height: 1.15;
+    text-align: center;
+    color: var(--color-secondary-light);
+    margin: 0 0 var(--space-6) 0;
+    letter-spacing: -0.02em;
+    width: 100%;
+  }
+
+  /* Featured tier — three curated groups of chips */
+  .skills-featured {
+    width: 100%;
+    max-width: 900px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-8);
+    margin-bottom: var(--space-10);
+  }
+
+  .featured-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--space-4);
+  }
+
+  .featured-label {
+    font-family: var(--font-display);
+    font-weight: var(--font-semibold);
+    font-size: var(--text-xl);
+    line-height: 1.2;
+    color: var(--color-secondary-light);
+    margin: 0;
+  }
+
+  .featured-items {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-2);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .featured-chip {
+    font-family: var(--font-display);
+    font-weight: var(--font-semibold);
+    font-size: var(--text-sm);
+    line-height: 1.2;
+    color: var(--color-white);
+    padding: var(--space-2) var(--space-4);
+    border: 1.5px solid rgba(62, 159, 212, 0.6);
+    border-radius: var(--radius-full);
+    background: rgba(10, 58, 82, 0.35);
+  }
+
+  @media (min-width: 768px) {
+    .skills-featured {
+      /* Four groups read as a balanced 2×2 rather than 3 + 1. */
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-8) var(--space-10);
+      align-items: start;
+    }
+  }
+
+  /* Secondary tier — collapsed full inventory */
+  .skills-more {
+    width: 100%;
+    max-width: 900px;
+    margin-bottom: var(--space-8);
+  }
+
+  .skills-more-summary {
+    cursor: pointer;
+    list-style: none;
+    text-align: center;
+    font-family: var(--font-display);
+    font-weight: var(--font-semibold);
+    font-size: var(--text-base);
+    color: var(--color-secondary-light);
+    padding: var(--space-3) 0;
+    margin-bottom: var(--space-6);
+    transition: color var(--transition-fast);
+  }
+
+  .skills-more-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .skills-more-summary::after {
+    content: ' ▾';
+    color: var(--color-secondary-light);
+  }
+
+  .skills-more[open] .skills-more-summary::after {
+    content: ' ▴';
+  }
+
+  .skills-more-summary:hover {
+    color: var(--color-white);
+  }
+
+  /* Content wrapper (carousel removed — all pages stack) */
+  .skills-carousel {
+    width: 100%;
+    max-width: 900px;
+    margin-bottom: var(--space-8);
+  }
+
+  /* Mobile-first: every page visible, stacked vertically */
+  .skills-page {
+    width: 100%;
+    margin-bottom: var(--space-8);
+  }
+
+  .skills-page:last-child {
+    margin-bottom: 0;
+  }
+
+  /* Columns within a page: single column, centered, on mobile */
+  .skills-cards {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+  }
+
+  /* No card surface — text sits directly on the animated background */
+  .skill-column {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+  }
+
+  /* Column / category titles */
+  .column-title {
+    font-family: var(--font-display);
+    font-style: normal;
+    font-weight: var(--font-semibold);
+    font-size: var(--text-2xl);
+    line-height: 1.21;
+    color: var(--color-white);
+    margin: 0 0 var(--space-4) 0;
+  }
+
+  /* Skills list */
+  .skills-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  /* Skill items */
+  .skill-item {
+    font-family: var(--font-display);
+    font-style: normal;
+    font-weight: var(--font-semibold);
+    font-size: var(--text-base);
+    line-height: 1.19;
+    color: var(--color-white);
+    margin: 0;
+  }
+
+  /* Tablet & up: two columns mirrored around a center gutter.
+     Left column right-aligned, right column left-aligned, so both lists
+     hug the middle. */
+  @media (min-width: 640px) {
+    .skills-cards {
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-10);
+      align-items: start;
+    }
+
+    .skill-column[data-col="left"] {
+      text-align: right;
+      align-items: flex-end;
+    }
+
+    .skill-column[data-col="right"] {
+      text-align: left;
+      align-items: flex-start;
+    }
+  }
+
+  /* Desktop: every page shown stacked (carousel removed) */
+  @media (min-width: 768px) {
+    .skills-carousel {
+      margin-bottom: var(--space-10);
+    }
+
+    .skills-page {
+      margin-bottom: var(--space-12);
+    }
+  }
+
+  /* Mobile responsive adjustments */
+  @media (max-width: 767px) {
+    .column-title {
+      font-size: var(--text-xl);
+    }
+
+    .skill-item {
+      font-size: var(--text-sm);
+    }
+  }
+
+  @media print {
+    .skills-section {
+      padding: var(--space-4) 0;
+    }
+
+    .skills-page {
+      margin-bottom: var(--space-4);
+    }
+
+    /* Sticky title would repeat oddly across printed pages; mask would clip */
+    .section-title {
+      position: static;
+    }
+
+    .skills-carousel {
+      -webkit-mask-image: none;
+      mask-image: none;
+    }
+  }
+</style>

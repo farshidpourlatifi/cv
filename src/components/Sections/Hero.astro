@@ -1,0 +1,190 @@
+---
+/**
+ * Hero Section - Home Page
+ *
+ * Centered name and title based on Figma design
+ */
+
+import { getConfig, getPersonalInfo } from '../../utils/data-loader';
+
+const personal = getPersonalInfo();
+const config = getConfig();
+const nameParts = personal.name.split(' ');
+const firstName = nameParts[0];
+const lastName = nameParts.slice(1).join(' ');
+const titleLines = personal.title.split(' | ');
+
+// Signal line a recruiter scans in the first seconds: location, remote
+// availability, years of experience — pulled from the generated config.
+const { total_experience_years, work_preferences } = config.metadata;
+const signals = [
+  personal.location,
+  work_preferences.location_preference,
+  `${total_experience_years}+ years`,
+].filter(Boolean);
+// Hero shows only the opening sentence of the summary — the concise pitch with
+// the "15+ years" hook. The full summary lives in the generated data; this is a
+// presentation-only trim, not a content edit.
+const summary = config.professional_summary.split(/\.\s+/)[0] + '.';
+---
+
+<section class="hero-section" id="hero">
+  <!-- Centered name group -->
+  <div class="hero-content">
+    <!-- Full name (single h1 for SEO / screen readers; the two visual sizes
+         are spans, not separate headings) -->
+    <h1 class="hero-name">
+      <span class="hero-first-name">{firstName}</span>
+      <span class="hero-last-name">{lastName}</span>
+    </h1>
+
+    <!-- Title/Role -->
+    <div class="hero-title">
+      {titleLines.map((line) => (
+        <div class="hero-title-line">{line}</div>
+      ))}
+    </div>
+
+    <!-- Signal line -->
+    <p class="hero-signals">
+      {signals.map((s, i) => (
+        <>
+          {i > 0 && <span class="hero-signal-sep" aria-hidden="true">·</span>}
+          <span class="hero-signal">{s}</span>
+        </>
+      ))}
+    </p>
+
+    <!-- Professional summary -->
+    <p class="hero-summary">{summary}</p>
+  </div>
+</section>
+
+<style>
+  .hero-section {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    /* Allow shrinking below content min-width so long lines (the signal row,
+       the summary) wrap to the viewport instead of forcing overflow. */
+    min-width: 0;
+  }
+
+  .hero-content {
+    text-align: center;
+    position: relative;
+    z-index: 10;
+    /* width:100% pins the flex item to the parent width so it can't grow to its
+       content's max-content size and overflow a narrow viewport. */
+    width: 100%;
+    max-width: 720px;
+    min-width: 0;
+    padding: 0 var(--space-4);
+    overflow-wrap: break-word;
+  }
+
+  /* Single h1 holding both visual sizes as stacked block spans */
+  .hero-name {
+    margin: 0;
+  }
+
+  /* First name - EXACT Figma: 70px, line-height 85px */
+  .hero-first-name {
+    display: block;
+    font-family: var(--font-display);
+    font-style: normal;
+    font-weight: 600;
+    font-size: 70px; /* Exact value from Figma */
+    line-height: 85px; /* Exact value from Figma */
+    color: var(--color-white);
+    /* letter-spacing: -0.02em; */
+  }
+
+  /* Last name - EXACT Figma: 60px, line-height 73px */
+  .hero-last-name {
+    display: block;
+    font-family: var(--font-display);
+    font-style: normal;
+    font-weight: 600;
+    font-size: 60px; /* Exact value from Figma */
+    line-height: 73px; /* Exact value from Figma */
+    color: var(--color-white);
+    letter-spacing: -0.02em;
+  }
+
+  /* Title - EXACT Figma: 25px, line-height 30px */
+  .hero-title {
+    margin: 9px 0 0 0; /* Slight spacing as per Figma */
+  }
+
+  .hero-title-line {
+    font-family: var(--font-display);
+    font-style: normal;
+    font-weight: 600;
+    font-size: 25px; /* Exact value from Figma */
+    line-height: 30px; /* Exact value from Figma */
+    color: var(--color-secondary-light);
+    letter-spacing: -0.01em;
+  }
+
+  /* Signal line: location · remote · years — the recruiter's 5-second scan */
+  .hero-signals {
+    margin: var(--space-5) 0 0 0;
+    font-family: var(--font-display);
+    font-weight: var(--font-semibold);
+    font-size: var(--text-base);
+    line-height: 1.4;
+    color: var(--color-white);
+  }
+
+  .hero-signal-sep {
+    margin: 0 var(--space-2);
+    color: var(--color-secondary-light);
+  }
+
+  /* Professional summary — the "15+ years" pitch, constrained for readability */
+  .hero-summary {
+    margin: var(--space-5) 0 0 0;
+    font-family: var(--font-display);
+    font-weight: var(--font-normal);
+    font-size: var(--text-base);
+    line-height: 1.6;
+    color: var(--color-blue-light);
+  }
+
+  /* Mobile responsive */
+  @media (max-width: 767px) {
+    .hero-first-name {
+      font-size: 2.5rem; /* 40px */
+      line-height: 2.7rem;
+    }
+
+    .hero-last-name {
+      font-size: 2rem; /* 32px */
+      line-height: 2.2rem;
+    }
+
+    .hero-title-line {
+      font-size: 1.125rem; /* 18px */
+      line-height: 1.8rem;
+    }
+
+    .hero-signals {
+      font-size: var(--text-sm);
+    }
+
+    .hero-summary {
+      font-size: var(--text-sm);
+      line-height: 1.55;
+    }
+  }
+
+  @media print {
+    .hero-section {
+      padding: var(--space-4) 0;
+    }
+  }
+</style>

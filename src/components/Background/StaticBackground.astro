@@ -1,0 +1,144 @@
+---
+/**
+ * StaticBackground Component
+ *
+ * Multi-layered background system from Figma design
+ * Includes Paper.js canvas with geometric shapes, blur effects, and gradients
+ */
+
+import PaperCanvasExact from './PaperCanvasExact.astro';
+---
+
+<div class="static-background">
+  <!-- Layer 1: Base gradient background -->
+  <div class="bg-layer-base"></div>
+
+  <!-- Layer 2: Paper.js canvas with exact geometric shapes from design -->
+  <div class="bg-layer-shapes">
+    <PaperCanvasExact />
+  </div>
+
+  <!-- Layer 3: SVG Background pattern (hidden - using Paper.js instead) -->
+  <div class="bg-layer-pattern" style="display: none;">
+    <img src="/bg.svg" alt="" class="bg-svg" />
+  </div>
+
+  <!-- Layer 4: Radial gradient overlay for depth -->
+  <div class="bg-layer-gradient">
+    <div class="radial-overlay"></div>
+  </div>
+
+  <!-- Layer 5: Dark overlay (for sections that need it) -->
+  <div class="bg-layer-overlay" data-overlay="false"></div>
+</div>
+
+<style>
+  .static-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  /* Layer 1: Base gradient */
+  .bg-layer-base {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--color-primary);
+    z-index: 1;
+  }
+
+  /* Layer 2: Paper.js canvas with exact geometric shapes */
+  .bg-layer-shapes {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    /* No blur - show exact shapes clearly */
+    opacity: 0.9;
+  }
+
+  /* Layer 3: Pattern */
+  .bg-layer-pattern {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 3;
+    opacity: 0.3;
+  }
+
+  .bg-svg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    mix-blend-mode: screen;
+  }
+
+  /* Layer 4: Radial gradient */
+  .bg-layer-gradient {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 4;
+    pointer-events: none;
+  }
+
+  .radial-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 460px;
+    height: 460px;
+    background: radial-gradient(50% 50% at 50% 50%, var(--color-primary) 56.5%, rgba(10, 58, 82, 0) 100%);
+  }
+
+  /* Layer 5: Dark overlay (conditional) */
+  .bg-layer-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 5;
+    background: rgba(10, 58, 82, 0);
+    transition: background 0.3s ease;
+  }
+
+  .bg-layer-overlay[data-overlay="true"] {
+    background: rgba(10, 58, 82, 0.7);
+  }
+
+  @media (max-width: 768px) {
+    .radial-overlay {
+      width: 400px;
+      height: 400px;
+    }
+
+    /* No blur on mobile either */
+  }
+
+  /* Performance optimization for animations */
+  @media (prefers-reduced-motion: reduce) {
+    .bg-layer-shapes {
+      filter: none;
+    }
+  }
+</style>

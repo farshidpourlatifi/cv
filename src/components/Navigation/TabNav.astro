@@ -1,0 +1,254 @@
+---
+/**
+ * TabNav Component
+ *
+ * A single nav bar sitting directly under the social/CV-download icons, which
+ * are anchored to the bottom-right on desktop (bottom: 120px; right: 180px in
+ * SocialLinks.astro). This bar mirrors that anchor rather than centring, so
+ * the two read as one stacked group — see --nav-right/--nav-bottom below.
+ *
+ * All three links are always visible; the active one is highlighted via
+ * `data-active-section` on the wrapper, which the scroll spy keeps in sync.
+ *
+ * Desktop only: the icons take the centre of the screen bottom on mobile and
+ * there's no room for a link row under them, so the whole nav is hidden below
+ * 768px.
+ */
+
+const SECTIONS = [
+  { id: 'top', label: 'Top' },
+  { id: 'skills', label: 'Skills' },
+  { id: 'experience', label: 'Experience' },
+  { id: 'contact', label: 'Contact' },
+] as const;
+---
+
+<nav class="tab-nav" id="tab-navigation" data-active-section="top" aria-label="Sections">
+  <ul class="nav-list">
+    {SECTIONS.map((section, index) => (
+      <li class="nav-item" data-section={section.id} data-index={index}>
+        <a href={`#${section.id}`} class="nav-tab" data-section={section.id}>
+          {section.label}
+        </a>
+      </li>
+    ))}
+  </ul>
+</nav>
+
+<style>
+  /* Sits directly under the social/CV icons and shares their centre line.
+     .social-footer is anchored `bottom: 120px; right: 180px`, so its centre is
+     180px + half its own width from the right edge. The icon row is far
+     narrower than this link row, so matching right edges would leave the two
+     visibly off-centre from each other; instead the bar is pinned to that
+     centre with a 50% self-offset, the same trick .social-footer uses on
+     mobile. --icon-half-width tracks the icon row's measured ~100px width. */
+  .tab-nav {
+    --icon-half-width: 50px;
+    --nav-bottom: 60px;
+    position: fixed;
+    bottom: var(--nav-bottom);
+    right: calc(180px + var(--icon-half-width));
+    transform: translateX(50%);
+    z-index: 100;
+    pointer-events: none;
+  }
+
+  .nav-list {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--space-6);
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    position: relative;
+  }
+
+  /* Scrim behind the menu items — an arc of tinted background rather than a
+     full-width band, so it darkens just enough to keep the links legible while
+     leaving the animated canvas visible around them. Over-sized via the
+     negative insets so the ellipse's flanks reach past the text before the
+     radial mask fades them out. Horizontal spread is in `em` so it tracks the
+     font size. */
+  .nav-list::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    top: -140%;
+    bottom: -140%;
+    left: -3.5em;
+    right: -3.5em;
+    background: var(--color-primary);
+    /* Ellipse fading to transparent at the rim — a soft arc with no hard edge.
+       `closest-side` keys the radius to the box, so it scales with the links. */
+    -webkit-mask-image: radial-gradient(ellipse closest-side at center, #000 55%, rgba(0, 0, 0, 0.78) 80%, transparent 100%);
+    mask-image: radial-gradient(ellipse closest-side at center, #000 55%, rgba(0, 0, 0, 0.78) 80%, transparent 100%);
+    pointer-events: none;
+  }
+
+  /* Separator between links. Drawn on every item except the first, so it sits
+     *between* pairs and never leads or trails the row. */
+  .nav-item + .nav-item::before {
+    content: '|';
+    margin-right: var(--space-6);
+    color: var(--color-secondary-light);
+    opacity: 0.5;
+  }
+
+  .nav-tab {
+    display: inline-block;
+    text-decoration: none;
+    padding: var(--space-2) 0;
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    font-weight: var(--font-semibold);
+    line-height: 1.2;
+    color: var(--color-white);
+    cursor: pointer;
+    pointer-events: auto;
+    transition: color var(--transition-fast);
+    position: relative;
+  }
+
+  .nav-tab::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--color-secondary-light);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--transition-base);
+  }
+
+  .nav-tab:hover {
+    color: var(--color-secondary-light);
+  }
+
+  .nav-tab:hover::after {
+    transform: scaleX(1);
+  }
+
+  /* Active section: since every link is always shown, this is the only cue for
+     where you are on the page. Underline stays drawn rather than on hover. */
+  .tab-nav[data-active-section='top'] .nav-item[data-section='top'] .nav-tab,
+  .tab-nav[data-active-section='skills'] .nav-item[data-section='skills'] .nav-tab,
+  .tab-nav[data-active-section='experience'] .nav-item[data-section='experience'] .nav-tab,
+  .tab-nav[data-active-section='contact'] .nav-item[data-section='contact'] .nav-tab {
+    color: var(--color-secondary-light);
+  }
+
+  .tab-nav[data-active-section='top'] .nav-item[data-section='top'] .nav-tab::after,
+  .tab-nav[data-active-section='skills'] .nav-item[data-section='skills'] .nav-tab::after,
+  .tab-nav[data-active-section='experience'] .nav-item[data-section='experience'] .nav-tab::after,
+  .tab-nav[data-active-section='contact'] .nav-item[data-section='contact'] .nav-tab::after {
+    transform: scaleX(1);
+  }
+
+  /* Mobile: the social/CV icons own the bottom-centre, so the section nav moves
+     to a compact bar pinned top-centre instead of being hidden. On a ~9,500px
+     page this is the only way to jump sections or get back to Top. */
+  @media (max-width: 767px) {
+    .tab-nav {
+      top: 10px;
+      bottom: auto;
+      right: auto;
+      left: 50%;
+      transform: translateX(-50%);
+      width: max-content;
+      max-width: 100vw;
+    }
+
+    .nav-list {
+      gap: var(--space-4);
+      flex-wrap: nowrap;
+    }
+
+    .nav-tab {
+      font-size: 0.8125rem; /* 13px */
+      /* ~44px tap target (13px text + 14px top/bottom) for comfortable touch. */
+      padding: 14px 0;
+      white-space: nowrap;
+    }
+
+    /* Keep the active underline just under the text rather than at the padded
+       box bottom. */
+    .nav-tab::after {
+      bottom: 12px;
+    }
+
+    /* Drop the pipe separators on mobile — gap carries the spacing, and the
+       tall `|` glyph misaligns against the smaller labels. */
+    .nav-item + .nav-item::before {
+      content: none;
+    }
+  }
+
+  @media print {
+    .tab-nav {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  // Scroll spy: mirror the active section onto the nav wrapper. The highlight
+  // lives in CSS keyed off this one attribute.
+  document.addEventListener('DOMContentLoaded', () => {
+    const nav = document.getElementById('tab-navigation');
+    if (!nav) return;
+
+    const sections = document.querySelectorAll('[data-page-section]');
+
+    const setActive = (sectionId: string) => {
+      nav.dataset.activeSection = sectionId;
+      nav.querySelectorAll<HTMLElement>('.nav-item').forEach((item) => {
+        const link = item.querySelector('a');
+        // Mark the current link for assistive tech, matching the visual cue.
+        if (link) {
+          if (item.dataset.section === sectionId) link.setAttribute('aria-current', 'true');
+          else link.removeAttribute('aria-current');
+        }
+      });
+    };
+
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    nav.querySelectorAll('.nav-tab').forEach((link) => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const targetId = link.getAttribute('href')?.substring(1);
+        const target = document.getElementById(targetId || '');
+        target?.scrollIntoView({
+          behavior: prefersReducedMotion ? 'auto' : 'smooth',
+          block: 'start',
+        });
+      });
+    });
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) setActive(entry.target.id);
+        });
+      },
+      { root: null, rootMargin: '-20% 0px -60% 0px', threshold: 0 }
+    );
+
+    sections.forEach((section) => observer.observe(section));
+
+    // Seed from scroll position, not the hash: index.astro rewrites the hash via
+    // replaceState on load, so a stale `#experience` from the previous page view
+    // would otherwise stick until the first scroll. Whichever section covers the
+    // top of the viewport is the honest answer, and it matches what the
+    // observer will report anyway.
+    const current = [...sections].find((section) => {
+      const { top, bottom } = section.getBoundingClientRect();
+      return top <= window.innerHeight * 0.2 && bottom > window.innerHeight * 0.2;
+    });
+    setActive(current?.id ?? 'top');
+  });
+</script>

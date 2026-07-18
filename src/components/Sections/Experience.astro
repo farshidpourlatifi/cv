@@ -1,0 +1,536 @@
+---
+/**
+ * Experience Section - Figma Design
+ *
+ * Every position is stacked and scrolls with the page. The title sticks below
+ * the fixed nav for the length of the section, and content dissolves beneath
+ * it via a masked scrim that leaves the animated background visible.
+ */
+
+import { getExperience, getPersonalInfo } from '../../utils/data-loader';
+
+const experience = getExperience();
+
+const personal = getPersonalInfo();
+const { education, certifications, languages } = personal;
+// Reverse-chronological by start year so the year rail reads monotonically.
+// Overlapping part-time roles otherwise render out of order (2016 before 2018).
+// The data file is generated — do not reorder it there; sort in the view.
+const positions = [...experience.positions].sort(
+  (a, b) => parsePeriod(b.period).startYear - parsePeriod(a.period).startYear
+);
+
+// Helper to parse period dates.
+// Data uses an en dash separator (e.g. "2024 – Present", "2020 – 2024").
+// Split on the dash tolerating either an en dash or a hyphen and any
+// surrounding whitespace, so both the current data and legacy values parse.
+function parsePeriod(period: string) {
+  const parts = period.split(/\s*[–-]\s*/);
+  const start = parts[0]?.trim() || '';
+  const end = parts[1]?.trim() || '';
+  const startParts = start.split(' ');
+  const yearStr = (startParts.length > 1 ? startParts[1] : startParts[0]) ?? '';
+  return {
+    // Values are year-only ("2024"); month stays empty unless a month is present.
+    month: startParts.length > 1 ? startParts[0] : '',
+    year: yearStr,
+    // Numeric start year for sorting (NaN-safe: unparseable sorts last).
+    startYear: parseInt(yearStr, 10) || 0,
+    isPresent: end === 'Present'
+  };
+}
+---
+
+<section class="experience-section">
+  <!-- Section Title -->
+  <h2 class="section-title">Experience</h2>
+
+  <!-- Experience List (mobile: all visible, desktop: carousel) -->
+  <div class="experience-carousel">
+    {positions.map((position, index) => {
+      const startDate = parsePeriod(position.period);
+      return (
+        <div class="experience-item" data-experience-index={index}>
+          <div class="experience-content">
+            <!-- Date Badge (Left) -->
+            <div class="date-badge" data-present={startDate.isPresent ? 'true' : 'false'}>
+              {startDate.month ? (
+                <>
+                  <div class="badge-month">{startDate.month}</div>
+                  <div class="badge-year">{startDate.year}</div>
+                </>
+              ) : (
+                <div class="badge-year-only">{startDate.year}</div>
+              )}
+            </div>
+
+            <!-- Company Info (Center-Left) -->
+            <div class="company-info">
+              <h3 class="job-title">{position.position}</h3>
+              <p class="company-details">
+                {position.company} · {position.location}
+              </p>
+              <p class="company-period">{position.period}</p>
+              <p class="company-type">{position.employment_type}</p>
+            </div>
+
+            <!-- Achievements + Skills (Right) -->
+            <div class="details-display">
+              <ul class="achievements-list">
+                {position.achievements.map(achievement => (
+                  <li class="achievement-item">{achievement}</li>
+                ))}
+              </ul>
+              <div class="skills-display">
+                <h4 class="skills-label">Skills:</h4>
+                <p class="skills-text">
+                  {position.technologies.join(' · ')}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    })}
+  </div>
+
+  <!-- Education / Certifications / Languages -->
+  <div class="credentials">
+    <div class="credential-group">
+      <h3 class="credential-heading">Education</h3>
+      <p class="credential-primary">{education.degree}, {education.field}</p>
+      <p class="credential-secondary">{education.institution} · {education.period}</p>
+    </div>
+
+    {certifications.length > 0 && (
+      <div class="credential-group">
+        <h3 class="credential-heading">Certifications</h3>
+        <ul class="credential-list">
+          {certifications.map(cert => (
+            <li class="credential-item">{cert}</li>
+          ))}
+        </ul>
+      </div>
+    )}
+
+    {languages.length > 0 && (
+      <div class="credential-group">
+        <h3 class="credential-heading">Languages</h3>
+        <ul class="credential-list plain">
+          {languages.map(lang => (
+            <li class="credential-item plain">{lang.language} - {lang.proficiency}</li>
+          ))}
+        </ul>
+      </div>
+    )}
+  </div>
+
+</section>
+
+<style>
+  .experience-section {
+    /* Diameter of the desktop timeline nodes. Shared by the circles and the
+       rail that joins them: the rail centres on half this value, so both are
+       driven from one number and can't drift apart. */
+    --timeline-node: 52px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* Top-aligned, auto height: this section is taller than the viewport. */
+    justify-content: flex-start;
+    position: relative;
+    /* Top padding clears the (mobile) top nav and the page top; sections land
+       flush on anchored jumps (--scroll-offset: 0). */
+    padding: var(--title-offset) var(--space-8) var(--space-8);
+  }
+
+  /* Keep content above the background canvas layer. */
+  .experience-section > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Section Title - EXACT Figma: 70px, cyan */
+  .section-title {
+    font-family: var(--font-display);
+    font-style: normal;
+    font-weight: 600;
+    font-size: clamp(2.5rem, 5vw, 70px);
+    line-height: 1.15;
+    text-align: center;
+    color: var(--color-secondary-light);
+    margin: 0 0 var(--space-6) 0;
+    letter-spacing: -0.02em;
+    width: 100%;
+  }
+
+  /* Mobile-first: All experience items visible, stacked vertically */
+  .experience-carousel {
+    width: 100%;
+    max-width: 900px;
+    margin-bottom: var(--space-8);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-8);
+  }
+
+  .experience-item {
+    width: 100%;
+    display: block;
+  }
+
+  /* Desktop: all experiences stacked (carousel removed) */
+  @media (min-width: 768px) {
+    .experience-carousel {
+      margin-bottom: var(--space-10);
+      gap: var(--space-12);
+    }
+  }
+
+  .experience-content {
+    display: grid;
+    grid-template-columns: auto 1fr 2fr;
+    gap: var(--space-8);
+    align-items: start;
+  }
+
+  /* Date Badge - Figma specs */
+  .date-badge {
+    width: 46.57px;
+    height: 46px;
+    background: var(--color-white);
+    border: 3px solid var(--color-secondary-light);
+    border-radius: 10px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .badge-month {
+    width: 100%;
+    height: 50%;
+    background: var(--color-secondary-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-weight: var(--font-bold);
+    font-size: 14px;
+    line-height: 17px;
+    color: var(--color-white);
+  }
+
+  .badge-year {
+    width: 100%;
+    height: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-weight: var(--font-bold);
+    font-size: 10px;
+    line-height: 12px;
+    color: var(--color-secondary);
+  }
+
+  /* Year-only badge (data has no month) - fills the badge with the start year */
+  .badge-year-only {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-weight: var(--font-bold);
+    font-size: 15px;
+    line-height: 1;
+    color: var(--color-secondary);
+  }
+
+  /* Current role: accent the badge so "present" reads visually */
+  .date-badge[data-present="true"] {
+    background: var(--color-secondary-light);
+  }
+
+  /* Navy on the cyan "present" badge — 4.79:1, vs 2.51:1 for white. */
+  .date-badge[data-present="true"] .badge-year-only {
+    color: var(--color-primary);
+  }
+
+  /* Company Info */
+  .company-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .job-title {
+    font-family: var(--font-display);
+    font-weight: var(--font-semibold);
+    font-size: var(--text-base);
+    line-height: 1.19;
+    color: var(--color-white);
+    margin: 0;
+  }
+
+  .company-details {
+    font-family: var(--font-display);
+    font-weight: var(--font-semibold);
+    font-size: var(--text-base);
+    line-height: 1.19;
+    color: var(--color-white);
+    margin: 0;
+  }
+
+  .company-period {
+    font-family: var(--font-display);
+    font-weight: var(--font-normal);
+    font-size: var(--text-sm);
+    line-height: 1.19;
+    color: var(--color-secondary-light);
+    margin: 0;
+  }
+
+  /* Employment arrangement (Remote / Part-Time …) — clarifies the overlapping
+     part-time roles so they don't read as a chronology error. */
+  .company-type {
+    font-family: var(--font-display);
+    font-weight: var(--font-normal);
+    font-size: var(--text-sm);
+    line-height: 1.3;
+    color: var(--color-blue-light);
+    margin: var(--space-1) 0 0 0;
+  }
+
+  /* Details column: achievements above the tech list */
+  .details-display {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  /* Achievements */
+  .achievements-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .achievement-item {
+    position: relative;
+    padding-left: var(--space-5);
+    font-family: var(--font-display);
+    font-weight: var(--font-normal);
+    font-size: var(--text-sm);
+    line-height: 1.4;
+    color: var(--color-white);
+  }
+
+  .achievement-item::before {
+    content: '▹';
+    position: absolute;
+    left: 0;
+    color: var(--color-secondary-light);
+  }
+
+  /* Skills Display */
+  .skills-display {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .skills-label {
+    font-family: var(--font-display);
+    font-weight: var(--font-normal);
+    font-size: var(--text-sm);
+    line-height: 1.21;
+    color: var(--color-white);
+    margin: 0;
+  }
+
+  .skills-text {
+    font-family: var(--font-display);
+    font-weight: var(--font-normal);
+    font-size: var(--text-sm);
+    line-height: 1.21;
+    color: var(--color-white);
+    margin: 0;
+  }
+
+  /* Education / Certifications / Languages — closes the section, sharing the
+     carousel's max width and the achievement bullet style. */
+  .credentials {
+    width: 100%;
+    max-width: 900px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+    margin-top: var(--space-4);
+    padding-top: var(--space-6);
+    border-top: 1px solid rgba(62, 159, 212, 0.25);
+  }
+
+  .credential-heading {
+    font-family: var(--font-display);
+    font-weight: var(--font-semibold);
+    font-size: var(--text-base);
+    line-height: 1.19;
+    color: var(--color-secondary-light);
+    margin: 0 0 var(--space-3) 0;
+  }
+
+  .credential-primary {
+    font-family: var(--font-display);
+    font-weight: var(--font-semibold);
+    font-size: var(--text-base);
+    line-height: 1.19;
+    color: var(--color-white);
+    margin: 0 0 var(--space-1) 0;
+  }
+
+  .credential-secondary {
+    font-family: var(--font-display);
+    font-weight: var(--font-normal);
+    font-size: var(--text-sm);
+    line-height: 1.19;
+    color: var(--color-secondary-light);
+    margin: 0;
+  }
+
+  .credential-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .credential-item {
+    position: relative;
+    padding-left: var(--space-5);
+    font-family: var(--font-display);
+    font-weight: var(--font-normal);
+    font-size: var(--text-sm);
+    line-height: 1.4;
+    color: var(--color-white);
+  }
+
+  .credential-item::before {
+    content: '▹';
+    position: absolute;
+    left: 0;
+    color: var(--color-secondary-light);
+  }
+
+  .credential-item.plain {
+    padding-left: 0;
+  }
+
+  .credential-item.plain::before {
+    content: none;
+  }
+
+  @media (min-width: 768px) {
+    .credentials {
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: var(--space-8);
+    }
+  }
+
+  /* Desktop timeline: the date badges become circular nodes joined by a
+     continuous vertical rail. Mobile keeps the plain stacked layout — the grid
+     collapses to one column there, so a rail would have nothing to run beside.
+     This block must stay *after* the base .date-badge rules: a media query adds
+     no specificity, so it only wins by source order. */
+  @media (min-width: 768px) {
+    .experience-carousel {
+      position: relative;
+    }
+
+    /* The rail. Drawn once on the list rather than per item, so it's one
+       unbroken line with no seams at the gaps between roles. Inset top and
+       bottom by half a node so it starts and ends *at* the first and last
+       circle instead of overshooting into open space. */
+    .experience-carousel::before {
+      content: '';
+      position: absolute;
+      top: calc(var(--timeline-node) / 2);
+      bottom: calc(var(--timeline-node) / 2);
+      left: calc(var(--timeline-node) / 2);
+      width: 2px;
+      transform: translateX(-1px);
+      background: var(--color-secondary-light);
+      opacity: 0.35;
+      z-index: 0;
+    }
+
+    /* Nodes sit above the rail so the line passes behind them. */
+    .experience-item {
+      position: relative;
+      z-index: 1;
+    }
+
+    .date-badge {
+      width: var(--timeline-node);
+      height: var(--timeline-node);
+      border-radius: 50%;
+      /* Opaque fill: the rail runs behind the circle and would otherwise show
+         through the year text. */
+      background: var(--color-primary);
+      border: 2px solid var(--color-secondary-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: visible;
+    }
+
+    /* Current role: filled node, so "present" reads at a glance down the rail. */
+    .date-badge[data-present='true'] {
+      background: var(--color-secondary-light);
+      box-shadow: 0 0 0 4px rgba(62, 159, 212, 0.25);
+    }
+
+    /* The month/year stack doesn't fit inside a circle; show the year alone. */
+    .badge-month {
+      display: none;
+    }
+
+    .badge-year,
+    .badge-year-only {
+      width: auto;
+      height: auto;
+      font-size: 13px;
+      line-height: 1;
+      color: var(--color-secondary-light);
+    }
+
+    .date-badge[data-present='true'] .badge-year,
+    .date-badge[data-present='true'] .badge-year-only {
+      color: var(--color-primary);
+    }
+  }
+
+  /* Mobile responsive */
+  @media (max-width: 767px) {
+    .experience-content {
+      grid-template-columns: 1fr;
+      gap: var(--space-4);
+    }
+  }
+
+  @media print {
+    .experience-section {
+      padding: var(--space-4) 0;
+    }
+
+    /* Sticky title would repeat oddly across printed pages */
+    .section-title {
+      position: static;
+    }
+  }
+</style>

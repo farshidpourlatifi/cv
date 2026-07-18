@@ -1,0 +1,123 @@
+---
+/**
+ * CVLayout Component
+ *
+ * Layout specifically for CV pages with navigation and background
+ */
+
+import BaseLayout from './BaseLayout.astro';
+import StaticBackground from '../components/Background/StaticBackground.astro';
+import TabNav from '../components/Navigation/TabNav.astro';
+import SocialLinks from '../components/Footer/SocialLinks.astro';
+import { getConfig, getPersonalInfo } from '../utils/data-loader';
+
+interface Props {
+  title?: string;
+  description?: string;
+  showBackground?: boolean;
+}
+
+const config = getConfig();
+const personal = getPersonalInfo();
+const {
+  title,
+  description,
+  showBackground = config.features.enable_geometric_background
+} = Astro.props;
+
+// Branded console banner. The email is read from the contact link's split data
+// attributes at log time (see the script below), so the plain address is never
+// a literal in the bundle — the minifier can't fold a runtime DOM read.
+const consoleBanner = `${personal.name} — ${personal.title.split(' | ')[0]}`;
+---
+
+<BaseLayout title={title} description={description}>
+  <div class="cv-layout">
+    <!-- Background Layer -->
+    {showBackground && (
+      <StaticBackground />
+    )}
+
+    <!-- Content Layer -->
+    <div class="content-layer">
+      <!-- Tab Navigation -->
+      <TabNav />
+
+      <!-- Main Content -->
+      <main id="main-content" class="main-content">
+        <slot />
+      </main>
+
+      <!-- Social Links Footer -->
+      <SocialLinks />
+    </div>
+  </div>
+
+  <!-- Branded console message. Deferred so it never delays first paint; the
+       email is assembled from split parts at log time (no plain address in the
+       bundle). Prints exactly once, in dev and production. -->
+  <script define:vars={{ banner: consoleBanner, linkedin: personal.linkedin }}>
+    (() => {
+      if (document.documentElement.dataset.brandConsole) return;
+      document.documentElement.dataset.brandConsole = 'true';
+      const print = () => {
+        const style =
+          'background:#0A3A52;color:#57ACDC;padding:6px 12px;border-radius:4px;font-weight:700;font-size:13px;';
+        // Assemble the address from the contact link's split data attributes at
+        // runtime (same source as the mailto) — a DOM read the minifier can't
+        // fold into a plain literal.
+        const link = document.querySelector('.contact-email');
+        const email = link && link.dataset.u && link.dataset.d
+          ? link.dataset.u + '@' + link.dataset.d
+          : '';
+        console.log('%c' + banner, style);
+        console.log('You read consoles. Good instinct.');
+        console.log(
+          'This site: Astro + TypeScript, a hand-tuned Paper.js geometric background, and content generated from a single JSON source of truth.'
+        );
+        console.log('Say hi: ' + email + ' · ' + linkedin + ' · CV: /farshid-pourlatifi.pdf');
+      };
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(print, { timeout: 3000 });
+      } else {
+        setTimeout(print, 800);
+      }
+    })();
+  </script>
+</BaseLayout>
+
+<style>
+  .cv-layout {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Content Layer */
+  .content-layer {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  /* Main Content */
+  .main-content {
+    flex: 1;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0;
+    /* No overflow here: `overflow-x: hidden` alone computes overflow-y to
+       `auto`, making this a scrollport and breaking the sticky titles inside.
+       Horizontal overflow is clipped on <body> instead. */
+  }
+
+  /* Print styles */
+  @media print {
+    .main-content {
+      padding: 0;
+    }
+  }
+</style>

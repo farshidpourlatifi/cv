@@ -1,0 +1,4 @@
+interface:
+  display_name: "CV Review"
+  short_description: "Review a CV site from multiple hiring perspectives"
+  default_prompt: "Use $cv-review to run a full evidence-based review of this CV website."

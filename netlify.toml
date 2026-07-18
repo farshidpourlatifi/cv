@@ -1,0 +1,65 @@
+[build]
+  command = "bun run build:prod"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+  # Use Bun for faster builds
+  BUN_VERSION = "1.2.17"
+
+# Redirect API routes to Netlify Functions
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+# Security headers
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "geolocation=(), microphone=(), camera=()"
+    # CSP notes:
+    #  - cdnjs removed: no external scripts are used (Paper.js is bundled).
+    #  - frame-ancestors 'none' + object-src 'none' added (X-Frame-Options kept
+    #    for older browsers).
+    #  - script-src keeps 'unsafe-inline' rather than hashes: the branded-console
+    #    script uses Astro `define:vars` (build-varying inline content) and the
+    #    JSON-LD block is inline, so static hashes would need regenerating every
+    #    content change. Astro's experimental CSP (auto-hashing) is the future
+    #    path; until then 'unsafe-inline' is retained deliberately. There is no
+    #    third-party script origin, which limits the exposure.
+    #  - style-src keeps 'unsafe-inline': Astro injects scoped component styles
+    #    inline; Google Fonts needs fonts.googleapis.com.
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self'; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self';"
+
+# Cache static assets
+[[headers]]
+  for = "/*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/fonts/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/images/*"
+  [headers.values]
+    Cache-Control = "public, max-age=2592000"
+
+# Dev server configuration
+[dev]
+  command = "bun run dev"
+  targetPort = 4321
+  port = 8888
+  autoLaunch = true

@@ -1,0 +1,27 @@
+{
+  "_generated": "GENERATED FILE - do not edit. Source of truth: profile/cv-data.json in the Job Search Accelerator repo. Regenerate with build/export-web.py.",
+  "name": "Farshid Pourlatifi",
+  "title": "Senior Full-Stack Engineer | Multi-Tenant SaaS · AI Integration · Migrations",
+  "location": "Istanbul, Turkey",
+  "email": "farshid.pourlatifi@gmail.com",
+  "linkedin": "linkedin.com/in/farshidpourlatifi",
+  "education": {
+    "institution": "University of Tehran",
+    "degree": "Associate Degree",
+    "field": "Physics",
+    "period": "1999 – 2003"
+  },
+  "languages": [
+    {
+      "language": "English",
+      "proficiency": "Advanced (C1)"
+    },
+    {
+      "language": "Farsi",
+      "proficiency": "Native"
+    }
+  ],
+  "certifications": [
+    "Oracle Cloud Infrastructure (OCI) AI Foundations Associate"
+  ]
+}
