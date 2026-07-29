@@ -18,12 +18,75 @@ interface Props {
   autoPauseAfter?: number; // seconds
   /** Shape-density multiplier. Lower = sparser. Default 0.1 (site background). */
   density?: number;
+  /** Scales shape sizes and stroke widths. 1 = site background scale. */
+  shapeScale?: number;
+  /** Minimum centre-to-centre gap between nodes (px). Lower = denser network. */
+  nodeSpacing?: number;
+  /** Max distance (px) at which two nodes get linked. */
+  connectionDistance?: number;
+  /** Chance (0-1) that an in-range node pair actually gets linked. */
+  connectionProbability?: number;
+  /** Bezier sampling step for candidate node positions. Smaller = more candidates. */
+  curveSampleStep?: number;
+  /** Placement bounds relative to the canvas edge. Negative lets shapes bleed off-canvas. */
+  boundsInset?: number;
+  /** Extends Bezier sampling past both endpoints so the network runs off the left/right edges. */
+  curveOvershoot?: number;
+  /** Perpendicular spread of nodes around the curve (px). Widen to reach the top/bottom edges. */
+  bandWidth?: number;
+  /**
+   * Chance (0-1) that a shape is filled solid with its own stroke colour.
+   * Unfilled shapes keep the background-coloured fill. 0 = all unfilled.
+   */
+  filledProbability?: number;
+  /**
+   * Chance (0-1) of EACH of the three blur levels, giving the network a shallow
+   * depth-of-field. 0.2 means 20% light + 20% medium + 20% heavy = 40% crisp.
+   * Capped so the three levels never exceed 1 in total. 0 = all crisp.
+   */
+  blurLevelProbability?: number;
+  /** Blur radius (px) of each level, softest first. Length sets the number of levels. */
+  blurLevels?: number[];
 }
 
-const { width, height, autoPauseAfter = 10, density = 0.1 } = Astro.props;
+const {
+  width,
+  height,
+  autoPauseAfter = 10,
+  density = 0.1,
+  shapeScale = 1,
+  nodeSpacing = 80,
+  connectionDistance = 150,
+  connectionProbability = 0.8,
+  curveSampleStep = 0.01,
+  boundsInset = 0,
+  curveOvershoot = 0,
+  bandWidth = 400,
+  filledProbability = 0,
+  blurLevelProbability = 0,
+  blurLevels = [5, 10, 20],
+} = Astro.props;
 ---
 
-<div class="header-canvas-container" style={`width: ${width}px; height: ${height}px;`} data-width={width} data-height={height} data-auto-pause={autoPauseAfter} data-density={density}>
+<div
+  class="header-canvas-container"
+  style={`width: ${width}px; height: ${height}px;`}
+  data-width={width}
+  data-height={height}
+  data-auto-pause={autoPauseAfter}
+  data-density={density}
+  data-shape-scale={shapeScale}
+  data-node-spacing={nodeSpacing}
+  data-connection-distance={connectionDistance}
+  data-connection-probability={connectionProbability}
+  data-curve-sample-step={curveSampleStep}
+  data-bounds-inset={boundsInset}
+  data-curve-overshoot={curveOvershoot}
+  data-band-width={bandWidth}
+  data-filled-probability={filledProbability}
+  data-blur-level-probability={blurLevelProbability}
+  data-blur-levels={blurLevels.join(',')}
+>
   <canvas id="header-canvas" width={width} height={height}></canvas>
 
   <!-- Control Panel -->
@@ -152,6 +215,28 @@ const { width, height, autoPauseAfter = 10, density = 0.1 } = Astro.props;
     const autoPauseAfter = parseInt(container.getAttribute('data-auto-pause'));
     const densityAttr = parseFloat(container.getAttribute('data-density'));
 
+    // Tunables (prop-driven, with the site-background values as fallbacks).
+    const num = (attr, fallback) => {
+      const value = parseFloat(container.getAttribute(attr));
+      return Number.isFinite(value) ? value : fallback;
+    };
+    const SHAPE_SCALE = num('data-shape-scale', 1);
+    const NODE_SPACING = num('data-node-spacing', 80);
+    const CONNECTION_DISTANCE = num('data-connection-distance', 150);
+    const CONNECTION_PROBABILITY = num('data-connection-probability', 0.8);
+    const CURVE_SAMPLE_STEP = num('data-curve-sample-step', 0.01);
+    const BOUNDS_INSET = num('data-bounds-inset', 0);
+    const CURVE_OVERSHOOT = num('data-curve-overshoot', 0);
+    const BAND_WIDTH = num('data-band-width', 400);
+    const FILLED_PROBABILITY = num('data-filled-probability', 0);
+    const BLUR_LEVEL_PROBABILITY = num('data-blur-level-probability', 0);
+    const BLUR_RADII = (container.getAttribute('data-blur-levels') || '')
+      .split(',')
+      .map((v) => parseFloat(v))
+      .filter((v) => Number.isFinite(v) && v > 0);
+    const BLUR_LEVELS = BLUR_RADII.length;
+    const scaled = (values) => values.map((v) => v * SHAPE_SCALE);
+
     // Setup Paper.js with fixed dimensions
     paper.setup(canvas);
 
@@ -171,18 +256,27 @@ const { width, height, autoPauseAfter = 10, density = 0.1 } = Astro.props;
     const controlPanel = document.getElementById('control-panel');
     const timerDisplay = document.getElementById('timer-display');
 
-    // Toggle pause/play
-    const togglePause = () => {
-      isPaused = !isPaused;
+    // Reflect the current playback state on the pause/play button.
+    const syncPlaybackUI = () => {
       pausePlayBtn.classList.toggle('active', !isPaused);
       pausePlayBtn.querySelector('.icon').textContent = isPaused ? '▶️' : '⏸️';
       pausePlayBtn.querySelector('.label').textContent = isPaused ? 'Play' : 'Pause';
       timerDisplay.classList.toggle('paused', isPaused);
-
-      if (!isPaused && hasAutoPaused) {
-        hasAutoPaused = false;
-      }
     };
+
+    // Toggle pause/play
+    const togglePause = () => {
+      isPaused = !isPaused;
+      // The countdown is a one-shot capture aid. Once the user takes manual
+      // control we retire it for good — re-arming it here would immediately
+      // re-pause, because secondsElapsed is already past autoPauseAfter.
+      hasAutoPaused = true;
+      timerDisplay.textContent = isPaused ? 'Paused' : 'Playing';
+      syncPlaybackUI();
+    };
+
+    // The animation starts playing, so show the "Pause" affordance up front.
+    syncPlaybackUI();
 
     // Toggle slow motion
     const toggleSlowMotion = () => {
@@ -299,14 +393,18 @@ const { width, height, autoPauseAfter = 10, density = 0.1 } = Astro.props;
     // Header configuration - curved arc from right to left
     const headerConfig = {
       pattern: 'curve',
-      sizes: { circle: [30, 35, 40], rect: [30, 35, 40], triangle: [30, 35, 40] },
+      sizes: {
+        circle: scaled([30, 35, 40]),
+        rect: scaled([30, 35, 40]),
+        triangle: scaled([30, 35, 40]),
+      },
       distribution: {
-        minDistance: 80,
-        bandWidth: 400,
+        minDistance: NODE_SPACING,
+        bandWidth: BAND_WIDTH,
         spacing: 100 / SHAPE_DENSITY_MULTIPLIER,
         spacingRandomness: 3,
         edgeMargin: -10,
-        boundsInset: 0,
+        boundsInset: BOUNDS_INSET,
         // Right to left curve across the header
         curveControlPoints: [
           { x: 1.0, y: 0.5 },    // Start: middle-right
@@ -315,7 +413,7 @@ const { width, height, autoPauseAfter = 10, density = 0.1 } = Astro.props;
           { x: 0, y: 0.5 }       // End: middle-left
         ]
       },
-      appearance: { strokeWidthOptions: [5, 8, 10] },
+      appearance: { strokeWidthOptions: scaled([5, 8, 10]) },
     };
 
     // Build shape config
@@ -330,20 +428,20 @@ const { width, height, autoPauseAfter = 10, density = 0.1 } = Astro.props;
       appearance: { ...headerConfig.appearance, initialRotation: 360 },
       fade: { fadeInDuration: 10, fadeOutDuration: 10 },
       fireEffects: { randomFireProbability: 0.003, glowStrokeMultiplier: 3, glowBrightnessMultiplier: 0.3 },
-      regeneration: { jitterX: 0, jitterY: 0, defaultSizeFallback: 20 },
+      regeneration: { jitterX: 0, jitterY: 0, defaultSizeFallback: 20 * SHAPE_SCALE },
     };
 
     // Connection configuration
     const connectionConfig = {
-      maxDistance: 150,
-      probability: 0.8,
+      maxDistance: CONNECTION_DISTANCE,
+      probability: CONNECTION_PROBABILITY,
       staticOpacity: 0.6,
-      staticStrokeWidth: 5,
+      staticStrokeWidth: 5 * SHAPE_SCALE,
       staticDashArray: [5, 5],
       pulseBaseOpacity: 0.5,
       pulseAmount: 0.5,
       pulseSpeed: { min: 0.04, max: 0.08 },
-      pulseStrokeWidth: { start: 0.05, peak: 3, end: 0.05 },
+      pulseStrokeWidth: { start: 0.05, peak: 3 * SHAPE_SCALE, end: 0.05 },
       pulseGrowthPhase: 0.3,
       pulseFadePhase: 0.7,
       pulseVisuals: { opacityMultiplier: 0.5, opacityOffset: 0.5 },
@@ -415,8 +513,9 @@ const { width, height, autoPauseAfter = 10, density = 0.1 } = Astro.props;
       const spacing = shapeConfig.distribution.spacing;
       const boundsInset = shapeConfig.distribution.boundsInset;
 
-      // Sample points along the curve
-      for (let t = 0; t <= 1; t += 0.01) {
+      // Sample points along the curve. Overshooting t past [0,1] extrapolates the
+      // Bezier beyond its endpoints so the network runs off the left/right edges.
+      for (let t = -CURVE_OVERSHOOT; t <= 1 + CURVE_OVERSHOOT; t += CURVE_SAMPLE_STEP) {
         const curvePoint = bezierPoint(t, p0, p1, p2, p3);
 
         const tangent = bezierTangent(t, p0, p1, p2, p3);
@@ -448,19 +547,21 @@ const { width, height, autoPauseAfter = 10, density = 0.1 } = Astro.props;
             strokeCounter++;
 
             const rotation = Math.random() * shapeConfig.appearance.initialRotation;
+            const filled = Math.random() < FILLED_PROBABILITY;
+            const blurLevel = rollBlurLevel();
 
             if (type === 'circle') {
               generatedShapes.push({
-                type: 'circle', x, y, radius: size, strokeColor, strokeWidth
+                type: 'circle', x, y, radius: size, strokeColor, strokeWidth, filled, blurLevel
               });
             } else if (type === 'rect') {
               generatedShapes.push({
                 type: 'rect', x, y, width: size, height: size,
-                radius: Math.random() > 0.5 ? 2.5 : 4.5, rotation, strokeColor, strokeWidth
+                radius: Math.random() > 0.5 ? 2.5 : 4.5, rotation, strokeColor, strokeWidth, filled, blurLevel
               });
             } else if (type === 'triangle') {
               generatedShapes.push({
-                type: 'triangle', x, y, size, rotation, strokeColor, strokeWidth
+                type: 'triangle', x, y, size, rotation, strokeColor, strokeWidth, filled, blurLevel
               });
             }
           }
@@ -494,7 +595,7 @@ const { width, height, autoPauseAfter = 10, density = 0.1 } = Astro.props;
         const p2 = { x: controlPoints[2].x * width, y: controlPoints[2].y * height };
         const p3 = { x: controlPoints[3].x * width, y: controlPoints[3].y * height };
 
-        const t = Math.random();
+        const t = -CURVE_OVERSHOOT + Math.random() * (1 + 2 * CURVE_OVERSHOOT);
         const curvePoint = bezierPoint(t, p0, p1, p2, p3);
 
         const tangent = bezierTangent(t, p0, p1, p2, p3);
@@ -523,6 +624,31 @@ const { width, height, autoPauseAfter = 10, density = 0.1 } = Astro.props;
       };
     };
 
+    // A blurred shape trades its hard stroke for a wide same-colour halo, so it
+    // reads as out-of-focus rather than merely glowing. Level 0 is crisp; 1-3
+    // get progressively softer and fainter, like receding depth planes.
+    // The softer the level, the fainter its hard stroke, so heavy blur reads as a
+    // distant out-of-focus plane rather than a bright halo.
+    const blurStrokeAlpha = (level) => (level ? Math.max(0.18, 1 - level * 0.26) : 1);
+
+    // Each level has its own probability; the remainder stays crisp.
+    const rollBlurLevel = () => {
+      if (!BLUR_LEVELS || BLUR_LEVEL_PROBABILITY <= 0) return 0;
+      const perLevel = Math.min(BLUR_LEVEL_PROBABILITY, 1 / BLUR_LEVELS);
+      const roll = Math.random();
+      for (let level = 1; level <= BLUR_LEVELS; level++) {
+        if (roll < perLevel * level) return level;
+      }
+      return 0;
+    };
+
+    const applyBlur = (shape, strokeColor, level) => {
+      if (!level) return;
+      shape.shadowColor = new paper.Color(strokeColor);
+      shape.shadowBlur = BLUR_RADII[level - 1];
+      shape.shadowOffset = new paper.Point(0, 0);
+    };
+
     const shapesData = generateShapesAlongCurve();
 
     // ==================== CREATE SHAPES ====================
@@ -531,13 +657,17 @@ const { width, height, autoPauseAfter = 10, density = 0.1 } = Astro.props;
 
     shapesData.forEach(shapeData => {
       let shape;
+      // Must be a Color, not the raw hex string: Paper.js keeps whatever the
+      // constructor was given, and its strokeColor setter later does
+      // `old._canvasStyle = null`, which throws on a string primitive.
+      const strokeColorObj = new paper.Color(shapeData.strokeColor);
 
       switch(shapeData.type) {
         case 'circle':
           shape = new paper.Path.Circle({
             center: [shapeData.x, shapeData.y],
             radius: shapeData.radius,
-            strokeColor: shapeData.strokeColor,
+            strokeColor: strokeColorObj,
             strokeWidth: shapeData.strokeWidth,
           });
           break;
@@ -547,7 +677,7 @@ const { width, height, autoPauseAfter = 10, density = 0.1 } = Astro.props;
             point: [shapeData.x - shapeData.width/2, shapeData.y - shapeData.height/2],
             size: [shapeData.width, shapeData.height],
             radius: shapeData.radius || 0,
-            strokeColor: shapeData.strokeColor,
+            strokeColor: strokeColorObj,
             strokeWidth: shapeData.strokeWidth,
           });
           shape.position = new paper.Point(shapeData.x, shapeData.y);
@@ -561,7 +691,7 @@ const { width, height, autoPauseAfter = 10, density = 0.1 } = Astro.props;
             center: [shapeData.x, shapeData.y],
             sides: 3,
             radius: shapeData.size,
-            strokeColor: shapeData.strokeColor,
+            strokeColor: strokeColorObj,
             strokeWidth: shapeData.strokeWidth,
           });
           if (shapeData.rotation) {
@@ -576,8 +706,22 @@ const { width, height, autoPauseAfter = 10, density = 0.1 } = Astro.props;
           return;
       }
 
+      const strokeAlpha = blurStrokeAlpha(shapeData.blurLevel);
+
       if (shapeData.type !== 'line') {
-        shape.fillColor = bgFillColor.clone();
+        shape.fillColor = shapeData.filled
+          ? new paper.Color(shapeData.strokeColor)
+          : bgFillColor.clone();
+        if (shapeData.filled && shapeData.blurLevel) {
+          shape.fillColor.alpha = strokeAlpha;
+        }
+      }
+
+      if (shapeData.blurLevel) {
+        applyBlur(shape, shapeData.strokeColor, shapeData.blurLevel);
+        const soft = new paper.Color(shapeData.strokeColor);
+        soft.alpha = strokeAlpha;
+        shape.strokeColor = soft;
       }
 
       const initialLifespan = shapeConfig.lifespan.min + Math.random() * (shapeConfig.lifespan.max - shapeConfig.lifespan.min);
@@ -597,6 +741,9 @@ const { width, height, autoPauseAfter = 10, density = 0.1 } = Astro.props;
         baseX: shapeData.x,
         baseY: shapeData.y,
         shapeType: shapeData.type,
+        isFilled: !!shapeData.filled,
+        blurLevel: shapeData.blurLevel || 0,
+        strokeAlpha,
         isFiring: false,
         fireIntensity: 0,
         fireDecay: shapeConfig.firing.decay,
@@ -769,17 +916,23 @@ const { width, height, autoPauseAfter = 10, density = 0.1 } = Astro.props;
       strokeWidthCounter++;
 
       const newRotation = Math.random() * shapeConfig.appearance.initialRotation;
+      const newFilled = Math.random() < FILLED_PROBABILITY;
+      const newBlurLevel = rollBlurLevel();
+      const newStrokeAlpha = blurStrokeAlpha(newBlurLevel);
 
       shape.remove();
 
       let newShape;
+      // See the note in the initial creation loop: Paper.js needs a Color here,
+      // not a hex string, or reassigning strokeColor later throws.
+      const newColorObj = new paper.Color(newColor);
 
       switch(newType) {
         case 'circle':
           newShape = new paper.Path.Circle({
             center: [newX, newY],
             radius: newSize,
-            strokeColor: newColor,
+            strokeColor: newColorObj,
             strokeWidth: newStrokeWidth,
           });
           break;
@@ -789,7 +942,7 @@ const { width, height, autoPauseAfter = 10, density = 0.1 } = Astro.props;
             point: [newX - newSize/2, newY - newSize/2],
             size: [newSize, newSize],
             radius: Math.random() > 0.5 ? 2.5 : 4.5,
-            strokeColor: newColor,
+            strokeColor: newColorObj,
             strokeWidth: newStrokeWidth,
           });
           newShape.position = new paper.Point(newX, newY);
@@ -801,7 +954,7 @@ const { width, height, autoPauseAfter = 10, density = 0.1 } = Astro.props;
             center: [newX, newY],
             sides: 3,
             radius: newSize,
-            strokeColor: newColor,
+            strokeColor: newColorObj,
             strokeWidth: newStrokeWidth,
           });
           newShape.rotate(newRotation);
@@ -814,7 +967,17 @@ const { width, height, autoPauseAfter = 10, density = 0.1 } = Astro.props;
           return;
       }
 
-      newShape.fillColor = bgFillColor.clone();
+      newShape.fillColor = newFilled ? new paper.Color(newColor) : bgFillColor.clone();
+      if (newFilled && newBlurLevel) {
+        newShape.fillColor.alpha = newStrokeAlpha;
+      }
+
+      if (newBlurLevel) {
+        applyBlur(newShape, newColor, newBlurLevel);
+        const soft = new paper.Color(newColor);
+        soft.alpha = newStrokeAlpha;
+        newShape.strokeColor = soft;
+      }
 
       const regeneratedLifespan = shapeConfig.lifespan.min + Math.random() * (shapeConfig.lifespan.max - shapeConfig.lifespan.min);
       newShape.data = {
@@ -833,6 +996,9 @@ const { width, height, autoPauseAfter = 10, density = 0.1 } = Astro.props;
         baseX: newX,
         baseY: newY,
         shapeType: newType,
+        isFilled: newFilled,
+        blurLevel: newBlurLevel,
+        strokeAlpha: newStrokeAlpha,
         isFiring: false,
         fireIntensity: 0,
         fireDecay: shapeConfig.firing.decay,
@@ -894,14 +1060,11 @@ const { width, height, autoPauseAfter = 10, density = 0.1 } = Astro.props;
 
         if (remaining > 0) {
           timerDisplay.textContent = `Auto-pause in ${remaining}s`;
-        } else if (!hasAutoPaused) {
+        } else {
           hasAutoPaused = true;
           isPaused = true;
-          pausePlayBtn.classList.add('active');
-          pausePlayBtn.querySelector('.icon').textContent = '▶️';
-          pausePlayBtn.querySelector('.label').textContent = 'Play';
           timerDisplay.textContent = 'Paused';
-          timerDisplay.classList.add('paused');
+          syncPlaybackUI();
         }
       }
 
@@ -958,16 +1121,24 @@ const { width, height, autoPauseAfter = 10, density = 0.1 } = Astro.props;
 
           if (!shape.data.glowColor) {
             shape.data.glowColor = new paper.Color(shape.data.originalStrokeColor);
+            shape.data.glowColor.alpha = shape.data.strokeAlpha;
           }
           const currentBrightness = shape.strokeColor?.brightness || 0;
           shape.data.glowColor.brightness = currentBrightness + shape.data.fireIntensity * shapeConfig.fireEffects.glowBrightnessMultiplier;
           shape.strokeColor = shape.data.glowColor;
+          if (shape.data.isFilled) {
+            shape.fillColor = shape.data.glowColor.clone();
+          }
         } else if (shape.data.isFiring === false && shape.strokeWidth !== shape.data.originalStrokeWidth) {
           shape.strokeWidth = shape.data.originalStrokeWidth;
           if (!shape.data.originalColorObject) {
             shape.data.originalColorObject = new paper.Color(shape.data.originalStrokeColor);
+            shape.data.originalColorObject.alpha = shape.data.strokeAlpha;
           }
           shape.strokeColor = shape.data.originalColorObject;
+          if (shape.data.isFilled) {
+            shape.fillColor = shape.data.originalColorObject.clone();
+          }
         }
 
         const rawSinY = Math.sin(time * shape.data.floatSpeedY + shape.data.floatPhaseY);
