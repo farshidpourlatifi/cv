@@ -4,12 +4,12 @@
     "title": "Farshid Pourlatifi - CV",
     "og_title": "Farshid Pourlatifi — Senior Full-Stack Engineer · Multi-Tenant SaaS · AI Integration · Migrations",
     "og_image_alt": "Farshid Pourlatifi — Senior Full-Stack Engineer: Multi-Tenant SaaS, AI Integration, Migrations",
-    "description": "Senior Full-Stack Engineer with 15+ years building SaaS platforms, e-commerce systems, and AI-powered web applications",
+    "description": "Senior Full-Stack Engineer building SaaS platforms, e-commerce systems, and AI-powered web applications",
     "url": "https://farshid.is-a.dev",
     "author": "Farshid Pourlatifi",
     "lang": "en"
   },
-  "professional_summary": "Senior Full-Stack Engineer with 15+ years of experience building SaaS platforms, e-commerce systems, and AI-powered web applications. Currently a core developer on Younea's multi-tenant LetzChat WordPress SaaS platform, combining React/TypeScript, PHP, WordPress REST APIs, AI chat automation, voice and telephony integrations, usage-based billing, and deployment automation. Strong background across PHP/WordPress, Python, Node.js, service/repository architectures, automated testing, and production delivery across frontend, backend, infrastructure, and AI integration layers.",
+  "professional_summary": "Senior Full-Stack Engineer building SaaS platforms, e-commerce systems, and AI-powered web applications. Currently a core developer on Younea's multi-tenant LetzChat WordPress SaaS platform, combining React/TypeScript, PHP, WordPress REST APIs, AI chat automation, voice and telephony integrations, usage-based billing, and deployment automation. Strong background across PHP/WordPress, Python, Node.js, service/repository architectures, automated testing, and production delivery across frontend, backend, infrastructure, and AI integration layers.",
   "metadata": {
     "total_experience_years": 15,
     "current_role": "Senior Web Developer",

@@ -4,7 +4,7 @@
     {
       "company": "Younea S.à r.l.",
       "location": "Luxembourg",
-      "position": "Senior Web Developer",
+      "position": "Senior Full Stack Developer",
       "employment_type": "Remote, Full-Time",
       "period": "2024 – Present",
       "slug": "younea",
@@ -43,7 +43,7 @@
     {
       "company": "Dextern",
       "location": "Dublin, Ireland",
-      "position": "Senior Frontend Developer",
+      "position": "Senior Full Stack Developer",
       "employment_type": "Remote, Full-Time 2020-2023 | Part-Time 2023-2024",
       "period": "2020 – 2024",
       "slug": "dextern",
@@ -105,7 +105,7 @@
       ]
     },
     {
-      "company": "Systema Technologies",
+      "company": "Systema Technologies (Quantreex)",
       "location": "Geneva, Switzerland",
       "position": "Senior Frontend Developer",
       "employment_type": "Remote, Part-Time",
@@ -248,7 +248,7 @@
       "achievements": [
         "Managed team of 5 developers as portal solutions team lead",
         "Built and extended Drupal-based enterprise portal solutions, using Drupal as an open-source CMS/CMF for reusable content, workflow, and integration architecture",
-        "Developed Drupal integrations with company back-office systems, contributing to adoption by 80% of existing customers",
+        "Developed Drupal integrations with company back-office systems, delivered across ~20 customer deployments",
         "Configured Apache Solr for advanced search functionality across portal content",
         "Implemented caching strategies using Varnish and Memcached, reducing server load by 70%",
         "Administered Linux servers running Apache/Nginx web servers"
