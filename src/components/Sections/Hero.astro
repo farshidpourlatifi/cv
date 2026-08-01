@@ -14,17 +14,18 @@ const firstName = nameParts[0];
 const lastName = nameParts.slice(1).join(' ');
 const titleLines = personal.title.split(' | ');
 
-// Signal line a recruiter scans in the first seconds: location, remote
-// availability, years of experience — pulled from the generated config.
+// Signal line a recruiter scans in the first seconds: location and remote
+// availability — pulled from the generated config. A years-of-experience count
+// is rendered only if the data still carries one; it is deliberately absent, so
+// the line does not lead with tenure.
 const { total_experience_years, work_preferences } = config.metadata;
 const signals = [
   personal.location,
   work_preferences.location_preference,
-  `${total_experience_years}+ years`,
+  total_experience_years ? `${total_experience_years}+ years` : null,
 ].filter(Boolean);
-// Hero shows only the opening sentence of the summary — the concise pitch with
-// the "15+ years" hook. The full summary lives in the generated data; this is a
-// presentation-only trim, not a content edit.
+// Hero shows only the opening sentence of the summary. The full summary lives in
+// the generated data; this is a presentation-only trim, not a content edit.
 const summary = config.professional_summary.split(/\.\s+/)[0] + '.';
 ---
 

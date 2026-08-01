@@ -111,7 +111,10 @@ export const WorkPreferencesSchema = z.object({
 });
 
 export const MetadataSchema = z.object({
-  total_experience_years: z.number().positive(),
+  // Optional: the CV deliberately does not lead with a years-of-experience
+  // count, so the generated config omits it. Kept in the schema so older data
+  // that still carries one stays valid.
+  total_experience_years: z.number().positive().optional(),
   current_role: z.string(),
   current_company: z.string(),
   work_preferences: WorkPreferencesSchema,

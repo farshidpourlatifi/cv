@@ -68,7 +68,7 @@ export function getAllExperienceSlugs(): string[] {
 /**
  * Get total years of experience
  */
-export function getTotalYearsOfExperience(): number {
+export function getTotalYearsOfExperience(): number | undefined {
   const config = getConfig();
   return config.metadata.total_experience_years;
 }

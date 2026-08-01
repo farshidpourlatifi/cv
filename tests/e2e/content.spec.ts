@@ -7,6 +7,14 @@ const EMAIL = JSON.parse(
   readFileSync(resolve(process.cwd(), 'src/data/personal.json'), 'utf8')
 ).email as string;
 
+// The hero trims the generated summary down to its opening sentence, so the
+// assertion tracks the data rather than any particular phrasing in it.
+const SUMMARY_OPENING = (
+  JSON.parse(
+    readFileSync(resolve(process.cwd(), 'src/data/config.json'), 'utf8')
+  ).professional_summary as string
+).split(/\.\s+/)[0] + '.';
+
 test.describe('Hero', () => {
   test('shows name, two-line title, availability, and summary', async ({ page }) => {
     await page.goto('/');
@@ -17,7 +25,7 @@ test.describe('Hero', () => {
     await expect(titleLines.nth(0)).toContainText('Senior Full-Stack Engineer');
     await expect(titleLines.nth(1)).toContainText('Multi-Tenant SaaS · AI Integration · Migrations');
     await expect(page.locator('.hero-signals')).toContainText('Remote (EU time zones), UTC+3');
-    await expect(page.locator('.hero-summary')).toContainText('15+ years');
+    await expect(page.locator('.hero-summary')).toContainText(SUMMARY_OPENING);
   });
 });
 
