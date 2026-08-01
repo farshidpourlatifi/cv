@@ -1043,7 +1043,7 @@ const {
     };
 
     // ==================== ANIMATION LOOP ====================
-    paper.view.onFrame = (event) => {
+    paper.view.onFrame = () => {
       // Handle pause
       if (isPaused) {
         return;

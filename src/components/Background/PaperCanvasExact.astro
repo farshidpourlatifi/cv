@@ -60,7 +60,6 @@
     // Experience networks the text is the point, and the web competes with it
     // on a small screen while costing the most on the weakest hardware.
     const MOBILE_CANVAS_SECTIONS = ['top'];
-    const isLowEnd = navigator.hardwareConcurrency ? navigator.hardwareConcurrency <= 4 : false;
     const hasReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     // console.log('🔍 Device Detection:', { isMobile, isLowEnd, hasReducedMotion, cores: navigator.hardwareConcurrency });
@@ -74,7 +73,6 @@
 
     // Performance multipliers based on device
     const SHAPE_DENSITY_MULTIPLIER = .4; // isMobile ? 0.4 : isLowEnd ? 0.6 : 1.0;
-    const ENABLE_BLUR = false; //!isMobile && !isLowEnd;
     const CONNECTION_UPDATE_INTERVAL = 1; //isMobile ? 3 : isLowEnd ? 2 : 1;
     const ENABLE_MOUSE_INTERACTION = !isMobile;
     // Per-frame chance of seeding a spontaneous fire. Only a seed rate: each
@@ -266,7 +264,7 @@
           }
         }
       }
-    } catch (e) {
+    } catch {
       // Ignore malformed overrides.
     }
 
@@ -410,23 +408,6 @@
       const dy = -3 * mt2 * p0.y + 3 * mt2 * p1.y - 6 * mt * t * p1.y + 6 * mt * t * p2.y - 3 * t2 * p2.y + 3 * t2 * p3.y;
 
       return { dx, dy };
-    };
-
-    // Get perpendicular direction (normalized) at a point on the Bezier curve
-    const bezierPerpendicular = (t: number, p0: {x: number, y: number}, p1: {x: number, y: number},
-                                 p2: {x: number, y: number}, p3: {x: number, y: number}) => {
-      const tangent = bezierTangent(t, p0, p1, p2, p3);
-
-      // Perpendicular is (-dy, dx) rotated 90° counter-clockwise
-      const perpX = -tangent.dy;
-      const perpY = tangent.dx;
-
-      // Normalize
-      const length = Math.sqrt(perpX * perpX + perpY * perpY);
-      return {
-        x: perpX / length,
-        y: perpY / length
-      };
     };
 
     // ==================== SHAPE GENERATION FUNCTIONS ====================
@@ -840,7 +821,6 @@
 
       // Generate shapes along the curve
       const spacing = shapeConfig.distribution.spacing;
-      const spacingRandomness = shapeConfig.distribution.spacingRandomness;
       const boundsInset = shapeConfig.distribution.boundsInset;
 
       // Sample count scales with the curve's actual length rather than being a
@@ -1770,7 +1750,6 @@
 
     // Performance tracking
     let connectionUpdateCounter = 0;
-    let frameTimeWarningCount = 0;
 
     // Death rate acceleration during transitions
     let isTransitioning = false;
@@ -2136,11 +2115,6 @@
       }
       }  // End of shouldUpdateConnections check
 
-      // Track slow frames (no console output — telemetry only).
-      const frameTime = performance.now() - frameStartTime;
-      if (frameTime > frameBudget) {
-        frameTimeWarningCount++;
-      }
     };
 
     // console.log('Animation loop started with optimizations:', {

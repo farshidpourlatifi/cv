@@ -23,7 +23,6 @@ export function formatPeriodDuration(period: string): string {
   }
 
   const years = endYear - startYear;
-  const months = 0; // Could be enhanced to handle months if needed
 
   if (years === 0) {
     return 'Less than a year';

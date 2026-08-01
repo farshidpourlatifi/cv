@@ -123,7 +123,7 @@ export const prerender = true;
       const SECTIONS = ['contact','top','skills','experience'];
       let current = 'contact';
       let overrides = {};
-      try { overrides = JSON.parse(localStorage.getItem('canvasTuneOverrides') || '{}'); } catch(e){}
+      try { overrides = JSON.parse(localStorage.getItem('canvasTuneOverrides') || '{}'); } catch {}
 
       const $ = (id) => document.getElementById(id);
       const getVal = (g,k) => (overrides[current]?.[g]?.[k] !== undefined) ? overrides[current][g][k] : DEFAULTS[current][g][k];
@@ -141,7 +141,7 @@ export const prerender = true;
       function reload() { $('preview').src = '/?t=' + Date.now() + '#' + current; }
 
       $('preview').addEventListener('load', () => {
-        try { setTimeout(() => $('preview').contentWindow.postMessage({ type:'section-change', section: current }, '*'), 350); } catch(e){}
+        try { setTimeout(() => $('preview').contentWindow.postMessage({ type:'section-change', section: current }, '*'), 350); } catch {}
       });
 
       function numRow(g, k, val) {
