@@ -10,41 +10,49 @@ This website prioritizes mobile devices with progressive enhancement for desktop
 - **Desktop**: Tab-based navigation with URL routing, multi-column layouts, interactive carousels
 - **Breakpoint**: `768px` (tablet/desktop threshold)
 
-[📖 Read the full Mobile-First Design Documentation](./docs/mobile-first-design.md)
-
 ## 🚀 Project Structure
 
 ```text
 /
 ├── public/
-│   ├── bg.svg                    # Original design background
-│   └── downloads/
-│       └── cv.pdf                # Downloadable CV
+│   ├── bg.svg                           # Original design background
+│   ├── favicon.svg
+│   ├── og-image.png                     # Social preview image
+│   └── farshid-pourlatifi.pdf           # Downloadable CV
+├── scripts/
+│   ├── build-output-checks.mjs          # Post-build assertions over dist/
+│   └── validate-data.js                 # Schema validation for src/data/
 ├── src/
 │   ├── components/
 │   │   ├── Background/
 │   │   │   ├── PaperCanvasExact.astro   # Geometric shapes (Paper.js)
+│   │   │   ├── HeaderCanvas.astro       # Social-header canvas (dev pages)
 │   │   │   └── StaticBackground.astro   # Multi-layer background
 │   │   ├── Footer/
 │   │   │   └── SocialLinks.astro        # LinkedIn + CV download
 │   │   ├── Navigation/
-│   │   │   └── TabNav.astro             # Desktop tab navigation
+│   │   │   └── TabNav.astro             # Section navigation
 │   │   └── Sections/
-│   │       ├── Hero.astro               # Name and title
-│   │       ├── Skills.astro             # Frontend/Backend skills
-│   │       └── Experience.astro         # Work experience
+│   │       ├── Hero.astro               # Name, title, summary
+│   │       ├── Skills.astro             # Skills carousel
+│   │       ├── Experience.astro         # Work history + credentials
+│   │       └── Closing.astro            # Contact / closing
+│   ├── data/                            # GENERATED CV JSON — never hand-edit
+│   ├── dev-pages/                       # Dev-only routes (never built)
 │   ├── layouts/
-│   │   ├── BaseLayout.astro             # Base HTML + styles
+│   │   ├── BaseLayout.astro             # Base HTML + global styles
 │   │   └── CVLayout.astro               # CV-specific layout
 │   ├── pages/
-│   │   ├── index.astro                  # Home route (/)
-│   │   ├── skills.astro                 # Skills route (/skills)
-│   │   └── experience.astro             # Experience route (/experience)
-│   └── utils/
-│       └── data-loader.ts               # Load CV data from JSON
+│   │   ├── index.astro                  # Single-page CV (/)
+│   │   └── 404.astro                    # Not-found page
+│   ├── types/
+│   │   └── cv.types.ts                  # Zod schemas for src/data/
+│   └── utils/                           # Data loading, formatting, email, perf
+├── tests/
+│   ├── unit/                            # Vitest specs
+│   ├── e2e/                             # Playwright specs
+│   └── security/                        # Live-URL header checks
 ├── docs/
-│   ├── mobile-first-design.md           # Mobile-first documentation
-│   ├── geometric-philosophy.md          # Background animation philosophy
 │   └── figma/                           # Figma design specs
 └── package.json
 ```
@@ -54,6 +62,9 @@ This website prioritizes mobile devices with progressive enhancement for desktop
 - **`src/components/`** - Reusable Astro components
 - **`src/pages/`** - File-based routing (each file = route)
 - **`src/layouts/`** - Page layout templates
+- **`src/data/`** - Generated CV content. See [AGENTS.md](./AGENTS.md) before touching it
+- **`tests/`** - Unit, e2e and security suites
+- **`scripts/`** - Validation and post-build checks
 - **`docs/`** - Project documentation
 - **`public/`** - Static assets (served as-is)
 
@@ -73,18 +84,16 @@ All commands are run from the root of the project, from a terminal:
 ## 🎨 Features
 
 - **Mobile-First Responsive Design** - Optimized for mobile, enhanced for desktop
-- **URL-Based Navigation** - Direct links to sections (`/`, `/skills`, `/experience`)
-- **Paper.js Animations** - Interactive geometric background with 50+ shapes
+- **Anchor Navigation** - One page, four sections (`#top`, `#skills`, `#experience`, `#contact`); the active section is tracked on scroll and reflected in the URL
+- **Paper.js Animations** - Interactive geometric canvas background, disabled under `prefers-reduced-motion`
 - **Figma-Perfect Design** - Exact positioning and styling from design specs
-- **Performance Optimized** - Fast loading, minimal JavaScript on mobile
-- **Accessible** - Semantic HTML, keyboard navigation, ARIA labels
+- **Performance Optimized** - Prerendered to static HTML, with JS budgets enforced at build time
+- **Accessible** - Semantic HTML, keyboard navigation, ARIA labels, axe-checked in e2e
 
 ## 📖 Documentation
 
-- [Mobile-First Design Guide](./docs/mobile-first-design.md) - Responsive architecture and patterns
-- [Geometric Philosophy](./docs/geometric-philosophy.md) - Background animation system
 - [Figma Specifications](./docs/figma/) - Original design documentation
-- [Development Guide](./CLAUDE.md) - Working with Claude AI for development
+- [AI-Assisted Development Guide](./AGENTS.md) - Conventions, quality gates, and deployment workflow
 
 ## 🌐 Deployment
 
@@ -99,7 +108,8 @@ The site is deployed on [Netlify](https://www.netlify.com/) with automatic deplo
 - **Styling**: CSS with custom properties (mobile-first)
 - **Animations**: Paper.js for canvas-based geometric shapes
 - **Deployment**: Netlify with Astro adapter
-- **Data**: JSON-based CV content (`/online-cv/` directory)
+- **Data**: JSON CV content in `src/data/`, validated by Zod schemas in `src/types/`
+- **Quality**: ESLint + Prettier (`bun run verify`), enforced by a lefthook pre-commit hook
 
 ## 👀 Learn More
 
@@ -111,10 +121,11 @@ The site is deployed on [Netlify](https://www.netlify.com/) with automatic deplo
 
 | Script                      | What it does                                                                                                                                                                                                                                                                                                                                                                                                 |
 | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `bun run verify`            | ESLint + Prettier over the whole repo. Also runs as a staged-file pre-commit hook (`lefthook.yml`), so skipping it just moves the failure to commit time.                                                                                                                                                                                                                                                    |
 | `bun run test`              | Vitest unit + data-integrity tests (`tests/unit/`). The data-integrity tests are **hard regression guards** over the structure and prose of `src/data/*.json`.                                                                                                                                                                                                                                               |
 | `bun run test:build-output` | Post-`build` checks over `dist/` (`scripts/build-output-checks.mjs`): prerender, 404/sitemap contracts, dev-only pages absent, PDF > 400KB, plaintext-email + em-dash sweep, and JS budgets (total ≤ 200KB gzip, Paper.js chunk ≤ 130KB).                                                                                                                                                                    |
 | `bun run test:e2e`          | Playwright e2e (`tests/e2e/`) — desktop 1440×900 + mobile Pixel 7. Content, links, console hygiene, axe a11y, keyboard, reduced-motion, responsive, SEO/meta. Runs in ~1–2 min.                                                                                                                                                                                                                              |
-| `bun run test:all`          | `validate` → `test` → `build` → `test:build-output` → `test:e2e`.                                                                                                                                                                                                                                                                                                                                            |
+| `bun run test:all`          | `verify` → `validate` → `test` → `build` → `test:build-output` → `test:e2e`. `verify` runs first so a lint/format failure surfaces in seconds instead of after the e2e suite.                                                                                                                                                                                                                                |
 | `bun run audit`             | Dependency audit (`bun audit`). Needs registry/network access — falls back to `npm audit --omit=dev` (requires generating a lockfile with `npm i --package-lock-only`).                                                                                                                                                                                                                                      |
 | `bun run test:security`     | Security-header checks (`tests/security/headers-check.mjs`) against a **live URL**. Netlify serves the headers, so run it against a deploy: `TEST_URL=https://deploy-preview-N--site.netlify.app bun run test:security` (defaults to production). Asserts CSP / X-Frame-Options / nosniff / Referrer-Policy / Permissions-Policy on `/`, a 404, and the PDF, and that external links carry `rel="noopener"`. |
 | `bun run test:perf`         | Lighthouse CI (`lighthouserc.cjs`) against `dist/`, mobile-throttled. Budgets: performance ≥ 90, accessibility ≥ 95, SEO ≥ 95; LCP ≤ 2.5s, CLS ≤ 0.1, TBT ≤ 300ms. Requires Chrome. Run after `bun run build`.                                                                                                                                                                                               |
