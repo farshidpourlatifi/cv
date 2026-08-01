@@ -9,7 +9,7 @@
  * Returns a human-readable duration
  */
 export function formatPeriodDuration(period: string): string {
-  const [start, end] = period.split('–').map(s => s.trim());
+  const [start, end] = period.split('–').map((s) => s.trim());
 
   if (!start || !end) {
     return period;
@@ -40,25 +40,35 @@ export function groupTechnologies(technologies: string[]): Map<string, string[]>
   const groups = new Map<string, string[]>();
 
   const categories = {
-    'Frontend': ['React', 'Vue', 'Angular', 'Svelte', 'TypeScript', 'JavaScript', 'jQuery', 'BackboneJS', 'Mithril'],
-    'Backend': ['Python', 'FastAPI', 'Node.js', 'PHP', 'HapiJS', 'Express', 'ASP.NET', 'C#'],
-    'Database': ['PostgreSQL', 'MySQL', 'MongoDB', 'Redis', 'Elasticsearch', 'SQL Server', 'Solr'],
-    'DevOps': ['Docker', 'Jenkins', 'GitHub Actions', 'TeamCity', 'AWS', 'Azure', 'Nginx', 'Apache'],
-    'Testing': ['Vitest', 'Playwright', 'Cypress', 'Jest', 'Nightwatch'],
+    Frontend: [
+      'React',
+      'Vue',
+      'Angular',
+      'Svelte',
+      'TypeScript',
+      'JavaScript',
+      'jQuery',
+      'BackboneJS',
+      'Mithril',
+    ],
+    Backend: ['Python', 'FastAPI', 'Node.js', 'PHP', 'HapiJS', 'Express', 'ASP.NET', 'C#'],
+    Database: ['PostgreSQL', 'MySQL', 'MongoDB', 'Redis', 'Elasticsearch', 'SQL Server', 'Solr'],
+    DevOps: ['Docker', 'Jenkins', 'GitHub Actions', 'TeamCity', 'AWS', 'Azure', 'Nginx', 'Apache'],
+    Testing: ['Vitest', 'Playwright', 'Cypress', 'Jest', 'Nightwatch'],
     'AI/ML': ['Vocode', 'Dify', 'ElevenLabs', 'Claude', 'n8n'],
     'E-commerce': ['Magento', 'Shopify', 'BigCommerce', 'WordPress'],
   };
 
   // Initialize groups
-  Object.keys(categories).forEach(key => groups.set(key, []));
+  Object.keys(categories).forEach((key) => groups.set(key, []));
   groups.set('Other', []);
 
   // Categorize technologies
-  technologies.forEach(tech => {
+  technologies.forEach((tech) => {
     let categorized = false;
 
     for (const [category, keywords] of Object.entries(categories)) {
-      if (keywords.some(keyword => tech.toLowerCase().includes(keyword.toLowerCase()))) {
+      if (keywords.some((keyword) => tech.toLowerCase().includes(keyword.toLowerCase()))) {
         groups.get(category)?.push(tech);
         categorized = true;
         break;
@@ -71,7 +81,7 @@ export function groupTechnologies(technologies: string[]): Map<string, string[]>
   });
 
   // Remove empty categories
-  Array.from(groups.keys()).forEach(key => {
+  Array.from(groups.keys()).forEach((key) => {
     if (groups.get(key)?.length === 0) {
       groups.delete(key);
     }
@@ -170,7 +180,7 @@ export function formatNumber(num: number): string {
 export function getInitials(name: string): string {
   return name
     .split(' ')
-    .map(part => part[0])
+    .map((part) => part[0])
     .join('')
     .toUpperCase()
     .slice(0, 3);
@@ -180,7 +190,7 @@ export function getInitials(name: string): string {
  * Convert a period string to start and end years
  */
 export function parsePeriod(period: string): { start: number; end: number | 'present' } {
-  const [start, end] = period.split('–').map(s => s.trim());
+  const [start, end] = period.split('–').map((s) => s.trim());
 
   return {
     start: parseInt(start || '0'),

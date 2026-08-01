@@ -54,7 +54,7 @@ export function getConfig(): Config {
  */
 export function getExperienceBySlug(slug: string): ExperiencePosition | undefined {
   const experience = getExperience();
-  return experience.positions.find(pos => pos.slug === slug);
+  return experience.positions.find((pos) => pos.slug === slug);
 }
 
 /**
@@ -62,7 +62,7 @@ export function getExperienceBySlug(slug: string): ExperiencePosition | undefine
  */
 export function getAllExperienceSlugs(): string[] {
   const experience = getExperience();
-  return experience.positions.map(pos => pos.slug);
+  return experience.positions.map((pos) => pos.slug);
 }
 
 /**
@@ -80,8 +80,8 @@ export function getAllTechnologies(): string[] {
   const experience = getExperience();
   const techSet = new Set<string>();
 
-  experience.positions.forEach(position => {
-    position.technologies.forEach(tech => techSet.add(tech));
+  experience.positions.forEach((position) => {
+    position.technologies.forEach((tech) => techSet.add(tech));
   });
 
   return Array.from(techSet).sort();
@@ -94,10 +94,11 @@ export function getExperienceByYearRange(): Map<string, ExperiencePosition[]> {
   const experience = getExperience();
   const grouped = new Map<string, ExperiencePosition[]>();
 
-  experience.positions.forEach(position => {
+  experience.positions.forEach((position) => {
     // Extract year range (e.g., "2020 – 2024" -> "2020-2024")
     const yearMatch = position.period.match(/(\d{4})/);
-    const decade = yearMatch && yearMatch[1] ? `${Math.floor(parseInt(yearMatch[1]) / 10) * 10}s` : 'Other';
+    const decade =
+      yearMatch && yearMatch[1] ? `${Math.floor(parseInt(yearMatch[1]) / 10) * 10}s` : 'Other';
 
     if (!grouped.has(decade)) {
       grouped.set(decade, []);
@@ -113,7 +114,7 @@ export function getExperienceByYearRange(): Map<string, ExperiencePosition[]> {
  */
 export function getCurrentPosition(): ExperiencePosition | undefined {
   const experience = getExperience();
-  return experience.positions.find(pos => pos.period.toLowerCase().includes('present'));
+  return experience.positions.find((pos) => pos.period.toLowerCase().includes('present'));
 }
 
 /**
@@ -123,8 +124,8 @@ export function searchPositionsByTechnology(tech: string): ExperiencePosition[] 
   const experience = getExperience();
   const searchTerm = tech.toLowerCase();
 
-  return experience.positions.filter(position =>
-    position.technologies.some(t => t.toLowerCase().includes(searchTerm))
+  return experience.positions.filter((position) =>
+    position.technologies.some((t) => t.toLowerCase().includes(searchTerm))
   );
 }
 

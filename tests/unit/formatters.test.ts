@@ -43,7 +43,11 @@ describe('formatters', () => {
   });
 
   it('sortByDate orders most-recent first', () => {
-    const items = [{ period: '2016 – 2019' }, { period: '2024 – Present' }, { period: '2009 – 2014' }];
+    const items = [
+      { period: '2016 – 2019' },
+      { period: '2024 – Present' },
+      { period: '2009 – 2014' },
+    ];
     expect(sortByDate(items).map((i) => i.period)).toEqual([
       '2024 – Present',
       '2016 – 2019',

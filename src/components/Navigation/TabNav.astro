@@ -25,13 +25,15 @@ const SECTIONS = [
 
 <nav class="tab-nav" id="tab-navigation" data-active-section="top" aria-label="Sections">
   <ul class="nav-list">
-    {SECTIONS.map((section, index) => (
-      <li class="nav-item" data-section={section.id} data-index={index}>
-        <a href={`#${section.id}`} class="nav-tab" data-section={section.id}>
-          {section.label}
-        </a>
-      </li>
-    ))}
+    {
+      SECTIONS.map((section, index) => (
+        <li class="nav-item" data-section={section.id} data-index={index}>
+          <a href={`#${section.id}`} class="nav-tab" data-section={section.id}>
+            {section.label}
+          </a>
+        </li>
+      ))
+    }
   </ul>
 </nav>
 
@@ -82,8 +84,18 @@ const SECTIONS = [
     background: var(--color-primary);
     /* Ellipse fading to transparent at the rim — a soft arc with no hard edge.
        `closest-side` keys the radius to the box, so it scales with the links. */
-    -webkit-mask-image: radial-gradient(ellipse closest-side at center, #000 55%, rgba(0, 0, 0, 0.78) 80%, transparent 100%);
-    mask-image: radial-gradient(ellipse closest-side at center, #000 55%, rgba(0, 0, 0, 0.78) 80%, transparent 100%);
+    -webkit-mask-image: radial-gradient(
+      ellipse closest-side at center,
+      #000 55%,
+      rgba(0, 0, 0, 0.78) 80%,
+      transparent 100%
+    );
+    mask-image: radial-gradient(
+      ellipse closest-side at center,
+      #000 55%,
+      rgba(0, 0, 0, 0.78) 80%,
+      transparent 100%
+    );
     pointer-events: none;
   }
 

@@ -52,7 +52,8 @@
     // console.log('Paper.js setup complete');
 
     // ==================== DEVICE DETECTION & OPTIMIZATION ====================
-    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth < 768;
+    const isMobile =
+      /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth < 768;
     // Sections that show the canvas on mobile. The canvas is a single fixed,
     // full-viewport layer shared by every section, so it can't be present in
     // one and absent in another — visibility has to follow the scroll
@@ -72,7 +73,7 @@
     }
 
     // Performance multipliers based on device
-    const SHAPE_DENSITY_MULTIPLIER = .4; // isMobile ? 0.4 : isLowEnd ? 0.6 : 1.0;
+    const SHAPE_DENSITY_MULTIPLIER = 0.4; // isMobile ? 0.4 : isLowEnd ? 0.6 : 1.0;
     const CONNECTION_UPDATE_INTERVAL = 1; //isMobile ? 3 : isLowEnd ? 2 : 1;
     const ENABLE_MOUSE_INTERACTION = !isMobile;
     // Per-frame chance of seeding a spontaneous fire. Only a seed rate: each
@@ -84,36 +85,34 @@
 
     // Helper function to get CSS variable value
     const getCSSVariable = (variableName: string): string => {
-      return getComputedStyle(document.documentElement)
-        .getPropertyValue(variableName)
-        .trim();
+      return getComputedStyle(document.documentElement).getPropertyValue(variableName).trim();
     };
 
     // Colors - using your Figma Design System from BaseLayout.astro
     const colors = {
-      primary: getCSSVariable('--color-primary') || '#0A3A52',              // Darkest Blue - Primary BG
-      primaryLight: getCSSVariable('--color-primary-light') || '#004B72',   // Dark Blue
-      secondary: getCSSVariable('--color-secondary') || '#006BA5',          // Medium Blue - Interactive
+      primary: getCSSVariable('--color-primary') || '#0A3A52', // Darkest Blue - Primary BG
+      primaryLight: getCSSVariable('--color-primary-light') || '#004B72', // Dark Blue
+      secondary: getCSSVariable('--color-secondary') || '#006BA5', // Medium Blue - Interactive
       secondaryLight: getCSSVariable('--color-secondary-light') || '#3E9FD4', // Cyan - Highlights & Titles
-      tertiary: getCSSVariable('--color-secondary') || '#006BA5',           // Alias for secondary (backward compatibility)
-      accent: getCSSVariable('--color-accent') || '#F0000F',                // Primary Red - CTA
-      accentDark: getCSSVariable('--color-accent-dark') || '#BF0B16',       // Dark Red
-      lineAccent: getCSSVariable('--color-line-accent') || '#E00514',       // Line accents
+      tertiary: getCSSVariable('--color-secondary') || '#006BA5', // Alias for secondary (backward compatibility)
+      accent: getCSSVariable('--color-accent') || '#F0000F', // Primary Red - CTA
+      accentDark: getCSSVariable('--color-accent-dark') || '#BF0B16', // Dark Red
+      lineAccent: getCSSVariable('--color-line-accent') || '#E00514', // Line accents
       white: getCSSVariable('--color-white') || '#FFFFFF',
-      background: getCSSVariable('--color-primary') || '#0A3A52',           // Use primary color as background (matches page bg)
+      background: getCSSVariable('--color-primary') || '#0A3A52', // Use primary color as background (matches page bg)
     };
 
     // Configuration presets for different sections
     const configPresets = {
       top: {
-        pattern: 'diagonal',  // Diagonal sine wave pattern
+        pattern: 'diagonal', // Diagonal sine wave pattern
         sizes: { circle: [14, 18, 12], rect: [15, 22, 18], triangle: [17, 14, 20] },
         distribution: {
           minDistance: 50,
           bandWidth: 300,
           sineAmplitude: 100,
           sineFrequency: 0.004,
-          spacing: 5 / SHAPE_DENSITY_MULTIPLIER,  // Acceptance rate: higher = more shapes
+          spacing: 5 / SHAPE_DENSITY_MULTIPLIER, // Acceptance rate: higher = more shapes
           spacingRandomness: 3,
           edgeMargin: 50,
           boundsInset: 30,
@@ -121,7 +120,7 @@
         appearance: { strokeWidthOptions: [2, 3, 5], solidFillProbability: 0.4 },
       },
       skills: {
-        pattern: 'curve',  // Bezier curve using control points
+        pattern: 'curve', // Bezier curve using control points
         sizes: { circle: [5], rect: [5], triangle: [5] },
         distribution: {
           minDistance: 10,
@@ -130,7 +129,7 @@
           // left; the curve's control points were pulled left by the same
           // measure so the extra width lands on-screen instead of being culled
           // off the right edge.
-          bandWidth: 600,     // Width of curve band
+          bandWidth: 600, // Width of curve band
           // Despite the name, this is an acceptance rate, not a gap:
           // `Math.random() < spacing / 100`. Higher = MORE shapes. At 40 the
           // divisor makes it 100, i.e. every sample is kept — this is the
@@ -162,11 +161,11 @@
           // larger network passing through rather than one that starts and stops
           // in view.
           curveControlPoints: [
-            { x: 0.92, y: 1.35 },   // Start: below the bottom edge, on the right
-            { x: 0.86, y: 0.70 },   // Control: slight lean left, lower
-            { x: 0.84, y: 0.15 },   // Control: slight lean left, upper
-            { x: 0.89, y: -0.35 }   // End: above the top edge, on the right
-          ]
+            { x: 0.92, y: 1.35 }, // Start: below the bottom edge, on the right
+            { x: 0.86, y: 0.7 }, // Control: slight lean left, lower
+            { x: 0.84, y: 0.15 }, // Control: slight lean left, upper
+            { x: 0.89, y: -0.35 }, // End: above the top edge, on the right
+          ],
         },
         appearance: { strokeWidthOptions: [2], solidFillProbability: 0 },
       },
@@ -214,11 +213,11 @@
           // the ends sat at 0.08/0.03, which bowed the run into an S across the
           // timeline rail instead of tracking the edge.
           curveControlPoints: [
-            { x: 0.04, y: -0.35 },  // Start: above the top edge, on the left
-            { x: 0.09, y: 0.15 },   // Control: slight lean right, upper
-            { x: 0.07, y: 0.70 },   // Control: slight lean right, lower
-            { x: 0.01, y: 1.35 }    // End: below the bottom edge, on the left
-          ]
+            { x: 0.04, y: -0.35 }, // Start: above the top edge, on the left
+            { x: 0.09, y: 0.15 }, // Control: slight lean right, upper
+            { x: 0.07, y: 0.7 }, // Control: slight lean right, lower
+            { x: 0.01, y: 1.35 }, // End: below the bottom edge, on the left
+          ],
         },
         appearance: { strokeWidthOptions: [2], solidFillProbability: 0.2 },
       },
@@ -232,11 +231,11 @@
         connections: { maxDistance: 190, staticStrokeWidth: 2, staticDashArray: [1, 3] },
         distribution: {
           minDistance: 14,
-          bandWidth: 40,          // radial thickness of the ring
-          circleRadius: 310,      // ring radius
-          circleCentered: true,   // centre the circle in the viewport
+          bandWidth: 40, // radial thickness of the ring
+          circleRadius: 310, // ring radius
+          circleCentered: true, // centre the circle in the viewport
           circleOffsetY: 0,
-          spacing: 19,            // runtime spacing (already ÷ SHAPE_DENSITY_MULTIPLIER)
+          spacing: 19, // runtime spacing (already ÷ SHAPE_DENSITY_MULTIPLIER)
           spacingRandomness: 8,
           edgeMargin: 57,
           boundsInset: 0,
@@ -258,7 +257,8 @@
             if (!preset) continue;
             const o = overrides[key] || {};
             if (o.sizes) preset.sizes = { ...preset.sizes, ...o.sizes };
-            if (o.connections) preset.connections = { ...(preset.connections || {}), ...o.connections };
+            if (o.connections)
+              preset.connections = { ...(preset.connections || {}), ...o.connections };
             if (o.distribution) preset.distribution = { ...preset.distribution, ...o.distribution };
             if (o.appearance) preset.appearance = { ...preset.appearance, ...o.appearance };
           }
@@ -294,8 +294,10 @@
         maxDistance: preset.connections?.maxDistance ?? connectionConfig.maxDistance,
         // Per-section resting line thickness and dash pattern; fall back to the
         // global defaults.
-        staticStrokeWidth: (preset.connections as any)?.staticStrokeWidth ?? connectionConfig.staticStrokeWidth,
-        staticDashArray: (preset.connections as any)?.staticDashArray ?? connectionConfig.staticDashArray,
+        staticStrokeWidth:
+          (preset.connections as any)?.staticStrokeWidth ?? connectionConfig.staticStrokeWidth,
+        staticDashArray:
+          (preset.connections as any)?.staticDashArray ?? connectionConfig.staticDashArray,
       },
       appearance: {
         ...preset.appearance,
@@ -308,7 +310,11 @@
         solidFillProbability: preset.appearance.solidFillProbability ?? 0,
       },
       fade: { fadeInDuration: 10, fadeOutDuration: 10 },
-      fireEffects: { randomFireProbability: 0.003, glowStrokeMultiplier: 3, glowBrightnessMultiplier: 0.3 },
+      fireEffects: {
+        randomFireProbability: 0.003,
+        glowStrokeMultiplier: 3,
+        glowBrightnessMultiplier: 0.3,
+      },
       regeneration: { jitterX: 0, jitterY: 0, defaultSizeFallback: 20 },
     });
 
@@ -317,45 +323,45 @@
     // from it as the per-section fallback.
     const connectionConfig = {
       // Connection creation
-      maxDistance: 120,          // Maximum distance to connect shapes
-      probability: 0.9,          // Probability of creating a connection (0-1)
+      maxDistance: 120, // Maximum distance to connect shapes
+      probability: 0.9, // Probability of creating a connection (0-1)
 
       // Static connection line appearance
-      staticOpacity: 0.6,        // Base opacity of connection lines (0-1)
-      staticStrokeWidth: 1,     // Line thickness
-      staticDashArray: [1, 3],    // Dash pattern [dash, gap]
+      staticOpacity: 0.6, // Base opacity of connection lines (0-1)
+      staticStrokeWidth: 1, // Line thickness
+      staticDashArray: [1, 3], // Dash pattern [dash, gap]
 
       // Pulsing animation for connection lines
-      pulseBaseOpacity: 0.5,     // Minimum opacity during pulse
-      pulseAmount: 0.5,           // How much the pulse adds to opacity
+      pulseBaseOpacity: 0.5, // Minimum opacity during pulse
+      pulseAmount: 0.5, // How much the pulse adds to opacity
 
       // Traveling pulse animation
       pulseSpeed: {
-        min: 0.04,               // Minimum pulse travel speed (slower)
-        max: 0.08,                // Maximum pulse travel speed (faster)
+        min: 0.04, // Minimum pulse travel speed (slower)
+        max: 0.08, // Maximum pulse travel speed (faster)
       },
 
       // Traveling pulse stroke width animation
       pulseStrokeWidth: {
-        start: 0.05,               // Starting width (thin)
-        peak: 3,                  // Peak width (thick)
-        end: .05,                   // Ending width (medium)
+        start: 0.05, // Starting width (thin)
+        peak: 3, // Peak width (thick)
+        end: 0.05, // Ending width (medium)
       },
 
       // Phase durations for pulse animation
-      pulseGrowthPhase: 0.3,      // Duration of growth phase (0-1)
-      pulseFadePhase: 0.7,        // Duration of fade/shrink phase (0-1)
+      pulseGrowthPhase: 0.3, // Duration of growth phase (0-1)
+      pulseFadePhase: 0.7, // Duration of fade/shrink phase (0-1)
 
       // Pulse visual effects
       pulseVisuals: {
-        opacityMultiplier: 0.5,   // How much base pulse opacity affects final value (0-1)
-        opacityOffset: 0.5,       // Offset added to pulse opacity calculation (0-1)
+        opacityMultiplier: 0.5, // How much base pulse opacity affects final value (0-1)
+        opacityOffset: 0.5, // Offset added to pulse opacity calculation (0-1)
       },
 
       // Connection data initialization
       initialization: {
-        maxAge: 60,               // Maximum initial age for staggered animation
-        initialFireTime: -300,   // Initial lastFireTime value (frame number)
+        maxAge: 60, // Maximum initial age for staggered animation
+        initialFireTime: -300, // Initial lastFireTime value (frame number)
       },
     };
 
@@ -365,8 +371,13 @@
     // ==================== BEZIER CURVE FUNCTIONS ====================
 
     // Cubic Bezier curve function: B(t) = (1-t)³P0 + 3(1-t)²tP1 + 3(1-t)t²P2 + t³P3
-    const bezierPoint = (t: number, p0: {x: number, y: number}, p1: {x: number, y: number},
-                         p2: {x: number, y: number}, p3: {x: number, y: number}) => {
+    const bezierPoint = (
+      t: number,
+      p0: { x: number; y: number },
+      p1: { x: number; y: number },
+      p2: { x: number; y: number },
+      p3: { x: number; y: number }
+    ) => {
       const mt = 1 - t;
       const mt2 = mt * mt;
       const mt3 = mt2 * mt;
@@ -375,15 +386,19 @@
 
       return {
         x: mt3 * p0.x + 3 * mt2 * t * p1.x + 3 * mt * t2 * p2.x + t3 * p3.x,
-        y: mt3 * p0.y + 3 * mt2 * t * p1.y + 3 * mt * t2 * p2.y + t3 * p3.y
+        y: mt3 * p0.y + 3 * mt2 * t * p1.y + 3 * mt * t2 * p2.y + t3 * p3.y,
       };
     };
 
     // Approximate the arc length of a Bezier curve by walking it in fixed
     // parameter steps and summing the chord lengths. 50 steps is plenty here:
     // the result only sets a sample count, so small error is irrelevant.
-    const bezierLength = (p0: {x: number, y: number}, p1: {x: number, y: number},
-                          p2: {x: number, y: number}, p3: {x: number, y: number}) => {
+    const bezierLength = (
+      p0: { x: number; y: number },
+      p1: { x: number; y: number },
+      p2: { x: number; y: number },
+      p3: { x: number; y: number }
+    ) => {
       const STEPS = 50;
       let length = 0;
       let prev = bezierPoint(0, p0, p1, p2, p3);
@@ -398,14 +413,31 @@
     };
 
     // Calculate tangent (derivative) of Bezier curve at parameter t
-    const bezierTangent = (t: number, p0: {x: number, y: number}, p1: {x: number, y: number},
-                           p2: {x: number, y: number}, p3: {x: number, y: number}) => {
+    const bezierTangent = (
+      t: number,
+      p0: { x: number; y: number },
+      p1: { x: number; y: number },
+      p2: { x: number; y: number },
+      p3: { x: number; y: number }
+    ) => {
       const mt = 1 - t;
       const mt2 = mt * mt;
       const t2 = t * t;
 
-      const dx = -3 * mt2 * p0.x + 3 * mt2 * p1.x - 6 * mt * t * p1.x + 6 * mt * t * p2.x - 3 * t2 * p2.x + 3 * t2 * p3.x;
-      const dy = -3 * mt2 * p0.y + 3 * mt2 * p1.y - 6 * mt * t * p1.y + 6 * mt * t * p2.y - 3 * t2 * p2.y + 3 * t2 * p3.y;
+      const dx =
+        -3 * mt2 * p0.x +
+        3 * mt2 * p1.x -
+        6 * mt * t * p1.x +
+        6 * mt * t * p2.x -
+        3 * t2 * p2.x +
+        3 * t2 * p3.x;
+      const dy =
+        -3 * mt2 * p0.y +
+        3 * mt2 * p1.y -
+        6 * mt * t * p1.y +
+        6 * mt * t * p2.y -
+        3 * t2 * p2.y +
+        3 * t2 * p3.y;
 
       return { dx, dy };
     };
@@ -414,7 +446,13 @@
 
     // Pre-calculate constants used in generation
     const shapeTypes = ['circle', 'rect', 'triangle'];
-    const colorOptions = [colors.primaryLight, colors.secondary, colors.accent, colors.tertiary, colors.white];
+    const colorOptions = [
+      colors.primaryLight,
+      colors.secondary,
+      colors.accent,
+      colors.tertiary,
+      colors.white,
+    ];
 
     // Generate shapes within a diagonal sine wave band (bottom-left to top-right)
     const generateShapesInDiagonalBand = () => {
@@ -431,8 +469,7 @@
 
       // Calculate diagonal distance
       const diagonalLength = Math.sqrt(
-        Math.pow(endPoint.x - startPoint.x, 2) +
-        Math.pow(endPoint.y - startPoint.y, 2)
+        Math.pow(endPoint.x - startPoint.x, 2) + Math.pow(endPoint.y - startPoint.y, 2)
       );
 
       // Unit vector along diagonal
@@ -453,7 +490,7 @@
 
       // Check if position is too close to existing shapes
       const isTooClose = (x: number, y: number, existing: any[]) => {
-        return existing.some(shape => {
+        return existing.some((shape) => {
           const dx = shape.x - x;
           const dy = shape.y - y;
           const distance = Math.sqrt(dx * dx + dy * dy);
@@ -466,7 +503,11 @@
       const edgeMargin = shapeConfig.distribution.edgeMargin;
       const spacingRandomness = shapeConfig.distribution.spacingRandomness;
 
-      for (let t = edgeMargin; t < diagonalLength - edgeMargin; t += spacing + Math.random() * spacingRandomness) {
+      for (
+        let t = edgeMargin;
+        t < diagonalLength - edgeMargin;
+        t += spacing + Math.random() * spacingRandomness
+      ) {
         // Position along the diagonal
         const baseX = startPoint.x + directionX * t;
         const baseY = startPoint.y + directionY * t;
@@ -483,10 +524,13 @@
 
         // Check bounds and overlap (reduced padding for more density)
         const boundsInset = shapeConfig.distribution.boundsInset;
-        if (x >= boundsInset && x <= paper.view.size.width - boundsInset &&
-            y >= boundsInset && y <= paper.view.size.height - boundsInset &&
-            !isTooClose(x, y, generatedShapes)) {
-
+        if (
+          x >= boundsInset &&
+          x <= paper.view.size.width - boundsInset &&
+          y >= boundsInset &&
+          y <= paper.view.size.height - boundsInset &&
+          !isTooClose(x, y, generatedShapes)
+        ) {
           // Equal distribution: cycle through shape types
           const type = shapeTypes[shapeCounter % shapeTypes.length];
           shapeCounter++;
@@ -509,30 +553,33 @@
           if (type === 'circle') {
             generatedShapes.push({
               type: 'circle',
-              x, y,
+              x,
+              y,
               radius: size,
               strokeColor,
-              strokeWidth
+              strokeWidth,
             });
           } else if (type === 'rect') {
             generatedShapes.push({
               type: 'rect',
-              x, y,
+              x,
+              y,
               width: size,
               height: size,
               radius: Math.random() > 0.5 ? 2.5 : 4.5,
               rotation,
               strokeColor,
-              strokeWidth
+              strokeWidth,
             });
           } else if (type === 'triangle') {
             generatedShapes.push({
               type: 'triangle',
-              x, y,
+              x,
+              y,
               size,
               rotation,
               strokeColor,
-              strokeWidth
+              strokeWidth,
             });
           }
         }
@@ -577,7 +624,13 @@
       // Shape types for equal distribution
       const shapeTypes = ['circle', 'rect', 'triangle'];
       const sizes = shapeConfig.sizes;
-      const colorOptions = [colors.primaryLight, colors.secondary, colors.accent, colors.tertiary, colors.white];
+      const colorOptions = [
+        colors.primaryLight,
+        colors.secondary,
+        colors.accent,
+        colors.tertiary,
+        colors.white,
+      ];
       const strokeWidthOptions = shapeConfig.appearance.strokeWidthOptions;
 
       // Counters for equal distribution
@@ -587,7 +640,7 @@
 
       // Check if position is too close to existing shapes
       const isTooClose = (x: number, y: number, existing: any[]) => {
-        return existing.some(shape => {
+        return existing.some((shape) => {
           const dx = shape.x - x;
           const dy = shape.y - y;
           const distance = Math.sqrt(dx * dx + dy * dy);
@@ -601,7 +654,11 @@
       const spacingRandomness = shapeConfig.distribution.spacingRandomness;
       const boundsInset = shapeConfig.distribution.boundsInset;
 
-      for (let y = edgeMargin; y < height - edgeMargin; y += spacing + Math.random() * spacingRandomness) {
+      for (
+        let y = edgeMargin;
+        y < height - edgeMargin;
+        y += spacing + Math.random() * spacingRandomness
+      ) {
         // Progress along the line (0 at bottom, 1 at top)
         const progress = y / height;
 
@@ -614,10 +671,13 @@
         const yAdjusted = y + perpY * bandOffset;
 
         // Check bounds and overlap
-        if (x >= boundsInset && x <= paper.view.size.width - boundsInset &&
-            yAdjusted >= boundsInset && yAdjusted <= height - boundsInset &&
-            !isTooClose(x, yAdjusted, generatedShapes)) {
-
+        if (
+          x >= boundsInset &&
+          x <= paper.view.size.width - boundsInset &&
+          yAdjusted >= boundsInset &&
+          yAdjusted <= height - boundsInset &&
+          !isTooClose(x, yAdjusted, generatedShapes)
+        ) {
           // Equal distribution: cycle through shape types
           const type = shapeTypes[shapeCounter % shapeTypes.length];
           shapeCounter++;
@@ -640,30 +700,33 @@
           if (type === 'circle') {
             generatedShapes.push({
               type: 'circle',
-              x, y: yAdjusted,
+              x,
+              y: yAdjusted,
               radius: size,
               strokeColor,
-              strokeWidth
+              strokeWidth,
             });
           } else if (type === 'rect') {
             generatedShapes.push({
               type: 'rect',
-              x, y: yAdjusted,
+              x,
+              y: yAdjusted,
               width: size,
               height: size,
               radius: Math.random() > 0.5 ? 2.5 : 4.5,
               rotation,
               strokeColor,
-              strokeWidth
+              strokeWidth,
             });
           } else if (type === 'triangle') {
             generatedShapes.push({
               type: 'triangle',
-              x, y: yAdjusted,
+              x,
+              y: yAdjusted,
               size,
               rotation,
               strokeColor,
-              strokeWidth
+              strokeWidth,
             });
           }
         }
@@ -698,7 +761,7 @@
 
       // Check if position is too close to existing shapes
       const isTooClose = (x: number, y: number, existing: any[]) => {
-        return existing.some(shape => {
+        return existing.some((shape) => {
           const dx = shape.x - x;
           const dy = shape.y - y;
           const distance = Math.sqrt(dx * dx + dy * dy);
@@ -724,10 +787,13 @@
         const y = centerY + r * Math.sin(angle);
 
         // Check bounds and overlap
-        if (x >= boundsInset && x <= paper.view.size.width - boundsInset &&
-            y >= boundsInset && y <= paper.view.size.height - boundsInset &&
-            !isTooClose(x, y, generatedShapes)) {
-
+        if (
+          x >= boundsInset &&
+          x <= paper.view.size.width - boundsInset &&
+          y >= boundsInset &&
+          y <= paper.view.size.height - boundsInset &&
+          !isTooClose(x, y, generatedShapes)
+        ) {
           // Equal distribution: cycle through shape types
           const type = shapeTypes[shapeCounter % shapeTypes.length];
           shapeCounter++;
@@ -750,30 +816,33 @@
           if (type === 'circle') {
             generatedShapes.push({
               type: 'circle',
-              x, y,
+              x,
+              y,
               radius: size,
               strokeColor,
-              strokeWidth
+              strokeWidth,
             });
           } else if (type === 'rect') {
             generatedShapes.push({
               type: 'rect',
-              x, y,
+              x,
+              y,
               width: size,
               height: size,
               radius: Math.random() > 0.5 ? 2.5 : 4.5,
               rotation,
               strokeColor,
-              strokeWidth
+              strokeWidth,
             });
           } else if (type === 'triangle') {
             generatedShapes.push({
               type: 'triangle',
-              x, y,
+              x,
+              y,
               size,
               rotation,
               strokeColor,
-              strokeWidth
+              strokeWidth,
             });
           }
         }
@@ -796,10 +865,22 @@
       }
 
       // Convert control points to pixel coordinates
-      const p0 = { x: controlPoints[0].x * paper.view.size.width, y: controlPoints[0].y * paper.view.size.height };
-      const p1 = { x: controlPoints[1].x * paper.view.size.width, y: controlPoints[1].y * paper.view.size.height };
-      const p2 = { x: controlPoints[2].x * paper.view.size.width, y: controlPoints[2].y * paper.view.size.height };
-      const p3 = { x: controlPoints[3].x * paper.view.size.width, y: controlPoints[3].y * paper.view.size.height };
+      const p0 = {
+        x: controlPoints[0].x * paper.view.size.width,
+        y: controlPoints[0].y * paper.view.size.height,
+      };
+      const p1 = {
+        x: controlPoints[1].x * paper.view.size.width,
+        y: controlPoints[1].y * paper.view.size.height,
+      };
+      const p2 = {
+        x: controlPoints[2].x * paper.view.size.width,
+        y: controlPoints[2].y * paper.view.size.height,
+      };
+      const p3 = {
+        x: controlPoints[3].x * paper.view.size.width,
+        y: controlPoints[3].y * paper.view.size.height,
+      };
 
       const sizes = shapeConfig.sizes;
       const strokeWidthOptions = shapeConfig.appearance.strokeWidthOptions;
@@ -811,7 +892,7 @@
 
       // Check if position is too close to existing shapes
       const isTooClose = (x: number, y: number, existing: any[]) => {
-        return existing.some(shape => {
+        return existing.some((shape) => {
           const dx = shape.x - x;
           const dy = shape.y - y;
           const distance = Math.sqrt(dx * dx + dy * dy);
@@ -855,10 +936,13 @@
         const y = curvePoint.y + perpNormY * bandOffset;
 
         // Check bounds and overlap
-        if (x >= boundsInset && x <= paper.view.size.width - boundsInset &&
-            y >= boundsInset && y <= paper.view.size.height - boundsInset &&
-            !isTooClose(x, y, generatedShapes)) {
-
+        if (
+          x >= boundsInset &&
+          x <= paper.view.size.width - boundsInset &&
+          y >= boundsInset &&
+          y <= paper.view.size.height - boundsInset &&
+          !isTooClose(x, y, generatedShapes)
+        ) {
           // Random spacing check
           if (Math.random() < spacing / 100) {
             // Equal distribution: cycle through shape types
@@ -883,30 +967,33 @@
             if (type === 'circle') {
               generatedShapes.push({
                 type: 'circle',
-                x, y,
+                x,
+                y,
                 radius: size,
                 strokeColor,
-                strokeWidth
+                strokeWidth,
               });
             } else if (type === 'rect') {
               generatedShapes.push({
                 type: 'rect',
-                x, y,
+                x,
+                y,
                 width: size,
                 height: size,
                 radius: Math.random() > 0.5 ? 2.5 : 4.5,
                 rotation,
                 strokeColor,
-                strokeWidth
+                strokeWidth,
               });
             } else if (type === 'triangle') {
               generatedShapes.push({
                 type: 'triangle',
-                x, y,
+                x,
+                y,
                 size,
                 rotation,
                 strokeColor,
-                strokeWidth
+                strokeWidth,
               });
             }
           }
@@ -941,7 +1028,7 @@
 
       // Check if position is too close to existing shapes
       const isTooClose = (x: number, y: number) => {
-        return existingShapes.some(shape => {
+        return existingShapes.some((shape) => {
           const dx = shape.position.x - x;
           const dy = shape.position.y - y;
           const distance = Math.sqrt(dx * dx + dy * dy);
@@ -966,10 +1053,22 @@
             y = paper.view.size.height * 0.5;
           } else {
             // Convert control points to pixel coordinates
-            const p0 = { x: controlPoints[0].x * paper.view.size.width, y: controlPoints[0].y * paper.view.size.height };
-            const p1 = { x: controlPoints[1].x * paper.view.size.width, y: controlPoints[1].y * paper.view.size.height };
-            const p2 = { x: controlPoints[2].x * paper.view.size.width, y: controlPoints[2].y * paper.view.size.height };
-            const p3 = { x: controlPoints[3].x * paper.view.size.width, y: controlPoints[3].y * paper.view.size.height };
+            const p0 = {
+              x: controlPoints[0].x * paper.view.size.width,
+              y: controlPoints[0].y * paper.view.size.height,
+            };
+            const p1 = {
+              x: controlPoints[1].x * paper.view.size.width,
+              y: controlPoints[1].y * paper.view.size.height,
+            };
+            const p2 = {
+              x: controlPoints[2].x * paper.view.size.width,
+              y: controlPoints[2].y * paper.view.size.height,
+            };
+            const p3 = {
+              x: controlPoints[3].x * paper.view.size.width,
+              y: controlPoints[3].y * paper.view.size.height,
+            };
 
             // Random point along curve (t from 0 to 1)
             const t = Math.random();
@@ -988,7 +1087,6 @@
             x = curvePoint.x + perpNormX * bandOffset;
             y = curvePoint.y + perpNormY * bandOffset;
           }
-
         } else if (pattern === 'vertical') {
           // Vertical line pattern with positioning and angle
           const horizontalPosition = (shapeConfig.distribution as any).horizontalPosition || 0.5;
@@ -1019,7 +1117,6 @@
           const bandOffset = (Math.random() - 0.5) * bandWidth;
           x = lineX + perpX * bandOffset;
           y = y + perpY * bandOffset;
-
         } else if (pattern === 'circle') {
           // Circular pattern — centred in the viewport or touching bottom.
           const circleRadius = (shapeConfig.distribution as any).circleRadius || 500;
@@ -1037,7 +1134,6 @@
 
           x = centerX + r * Math.cos(angle);
           y = centerY + r * Math.sin(angle);
-
         } else {
           // Diagonal pattern
           const bandWidth = shapeConfig.distribution.bandWidth;
@@ -1048,8 +1144,7 @@
           const startPoint = { x: 0, y: paper.view.size.height };
           const endPoint = { x: paper.view.size.width, y: 0 };
           const diagonalLength = Math.sqrt(
-            Math.pow(endPoint.x - startPoint.x, 2) +
-            Math.pow(endPoint.y - startPoint.y, 2)
+            Math.pow(endPoint.x - startPoint.x, 2) + Math.pow(endPoint.y - startPoint.y, 2)
           );
 
           const directionX = (endPoint.x - startPoint.x) / diagonalLength;
@@ -1068,9 +1163,13 @@
         }
 
         // Check bounds and overlap
-        if (x >= boundsInset && x <= paper.view.size.width - boundsInset &&
-            y >= boundsInset && y <= paper.view.size.height - boundsInset &&
-            !isTooClose(x, y)) {
+        if (
+          x >= boundsInset &&
+          x <= paper.view.size.width - boundsInset &&
+          y >= boundsInset &&
+          y <= paper.view.size.height - boundsInset &&
+          !isTooClose(x, y)
+        ) {
           return { x, y };
         }
 
@@ -1080,7 +1179,7 @@
       // If we couldn't find a good spot, return a random position in the center
       return {
         x: paper.view.size.width * (0.3 + Math.random() * 0.4),
-        y: paper.view.size.height * (0.3 + Math.random() * 0.4)
+        y: paper.view.size.height * (0.3 + Math.random() * 0.4),
       };
     };
 
@@ -1330,10 +1429,10 @@
     // Pre-create reusable color objects to avoid repeated allocations
     const bgFillColor = new paper.Color(colors.background);
 
-    shapesData.forEach(shapeData => {
+    shapesData.forEach((shapeData) => {
       let shape: paper.Path | paper.Shape;
 
-      switch(shapeData.type) {
+      switch (shapeData.type) {
         case 'circle':
           shape = new paper.Path.Circle({
             center: [shapeData.x, shapeData.y],
@@ -1345,7 +1444,7 @@
 
         case 'rect':
           shape = new paper.Path.Rectangle({
-            point: [shapeData.x - shapeData.width/2, shapeData.y - shapeData.height/2],
+            point: [shapeData.x - shapeData.width / 2, shapeData.y - shapeData.height / 2],
             size: [shapeData.width, shapeData.height],
             radius: shapeData.radius || 0,
             strokeColor: shapeData.strokeColor,
@@ -1370,7 +1469,7 @@
             shape.rotate(shapeData.rotation);
           }
           // shape.smooth();
-          shape.segments.forEach(segment => {
+          shape.segments.forEach((segment) => {
             segment.smooth();
           });
           break;
@@ -1392,25 +1491,37 @@
       // Fill hides connection lines running behind the shape. Most take the
       // background colour and read as outlines; a random few take their own
       // stroke colour and read as solid nodes. Lines get no fill.
-      const isSolid = shapeData.type !== 'line' &&
-        Math.random() < shapeConfig.appearance.solidFillProbability;
+      const isSolid =
+        shapeData.type !== 'line' && Math.random() < shapeConfig.appearance.solidFillProbability;
       if (shapeData.type !== 'line') {
         // Clone to avoid reference issues
         shape.fillColor = isSolid ? new paper.Color(shapeData.strokeColor) : bgFillColor.clone();
       }
 
       // Store original position and lifecycle data
-      const initialLifespan = shapeConfig.lifespan.min + Math.random() * (shapeConfig.lifespan.max - shapeConfig.lifespan.min);
+      const initialLifespan =
+        shapeConfig.lifespan.min +
+        Math.random() * (shapeConfig.lifespan.max - shapeConfig.lifespan.min);
       shape.data = {
         originalPosition: shape.position.clone(),
         originalRotation: shapeData.rotation || 0,
         floatPhaseY: Math.random() * Math.PI * 2, // Y-axis phase
         floatPhaseX: Math.random() * Math.PI * 2, // X-axis phase (different)
-        rotationSpeed: shapeConfig.rotationSpeed.min + Math.random() * (shapeConfig.rotationSpeed.max - shapeConfig.rotationSpeed.min),
-        floatSpeedY: shapeConfig.floatSpeed.yMin + Math.random() * (shapeConfig.floatSpeed.yMax - shapeConfig.floatSpeed.yMin),
-        floatSpeedX: shapeConfig.floatSpeed.xMin + Math.random() * (shapeConfig.floatSpeed.xMax - shapeConfig.floatSpeed.xMin),
-        amplitudeY: shapeConfig.amplitude.yMin + Math.random() * (shapeConfig.amplitude.yMax - shapeConfig.amplitude.yMin),
-        amplitudeX: shapeConfig.amplitude.xMin + Math.random() * (shapeConfig.amplitude.xMax - shapeConfig.amplitude.xMin),
+        rotationSpeed:
+          shapeConfig.rotationSpeed.min +
+          Math.random() * (shapeConfig.rotationSpeed.max - shapeConfig.rotationSpeed.min),
+        floatSpeedY:
+          shapeConfig.floatSpeed.yMin +
+          Math.random() * (shapeConfig.floatSpeed.yMax - shapeConfig.floatSpeed.yMin),
+        floatSpeedX:
+          shapeConfig.floatSpeed.xMin +
+          Math.random() * (shapeConfig.floatSpeed.xMax - shapeConfig.floatSpeed.xMin),
+        amplitudeY:
+          shapeConfig.amplitude.yMin +
+          Math.random() * (shapeConfig.amplitude.yMax - shapeConfig.amplitude.yMin),
+        amplitudeX:
+          shapeConfig.amplitude.xMin +
+          Math.random() * (shapeConfig.amplitude.xMax - shapeConfig.amplitude.xMin),
         // Lifecycle properties
         age: 0,
         lifespan: initialLifespan,
@@ -1452,10 +1563,11 @@
 
           // Only connect if within range and moving towards top-right direction
           // (target shape should be to the right and/or above)
-          if (distance < shapeConfig.connections.maxDistance &&
-              (dx > 0 || dy < 0) && // Right or up
-              Math.random() < connectionConfig.probability) {
-
+          if (
+            distance < shapeConfig.connections.maxDistance &&
+            (dx > 0 || dy < 0) && // Right or up
+            Math.random() < connectionConfig.probability
+          ) {
             // Create line with gradient-like color effect
             const line = new paper.Path.Line({
               from: shape.position,
@@ -1471,7 +1583,9 @@
               startShape: shape,
               endShape: otherShape,
               age: Math.random() * connectionConfig.initialization.maxAge, // Random starting age for staggered animation
-              pulseSpeed: connectionConfig.pulseSpeed.min + Math.random() * (connectionConfig.pulseSpeed.max - connectionConfig.pulseSpeed.min),
+              pulseSpeed:
+                connectionConfig.pulseSpeed.min +
+                Math.random() * (connectionConfig.pulseSpeed.max - connectionConfig.pulseSpeed.min),
               travelingPulses: [], // Array of pulses traveling along this connection
             };
 
@@ -1485,7 +1599,7 @@
     // console.log(`Created ${connections.length} neuron connections`);
 
     // Send all connection lines to the back so shapes are drawn on top
-    connections.forEach(connection => {
+    connections.forEach((connection) => {
       connection.sendToBack();
     });
 
@@ -1500,10 +1614,11 @@
         const distance = Math.sqrt(dx * dx + dy * dy);
 
         // Only connect if within range and moving towards top-right direction
-        if (distance < shapeConfig.connections.maxDistance &&
-            (dx > 0 || dy < 0) && // Right or up
-            Math.random() < connectionConfig.probability) {
-
+        if (
+          distance < shapeConfig.connections.maxDistance &&
+          (dx > 0 || dy < 0) && // Right or up
+          Math.random() < connectionConfig.probability
+        ) {
           const line = new paper.Path.Line({
             from: shape.position,
             to: otherShape.position,
@@ -1517,7 +1632,9 @@
             startShape: shape,
             endShape: otherShape,
             age: Math.random() * connectionConfig.initialization.maxAge,
-            pulseSpeed: connectionConfig.pulseSpeed.min + Math.random() * (connectionConfig.pulseSpeed.max - connectionConfig.pulseSpeed.min),
+            pulseSpeed:
+              connectionConfig.pulseSpeed.min +
+              Math.random() * (connectionConfig.pulseSpeed.max - connectionConfig.pulseSpeed.min),
             travelingPulses: [],
           };
 
@@ -1535,10 +1652,11 @@
         const distance = Math.sqrt(dx * dx + dy * dy);
 
         // Only connect if within range and moving towards top-right direction
-        if (distance < shapeConfig.connections.maxDistance &&
-            (dx > 0 || dy < 0) && // Right or up
-            Math.random() < connectionConfig.probability) {
-
+        if (
+          distance < shapeConfig.connections.maxDistance &&
+          (dx > 0 || dy < 0) && // Right or up
+          Math.random() < connectionConfig.probability
+        ) {
           const line = new paper.Path.Line({
             from: otherShape.position,
             to: shape.position,
@@ -1552,7 +1670,9 @@
             startShape: otherShape,
             endShape: shape,
             age: Math.random() * connectionConfig.initialization.maxAge,
-            pulseSpeed: connectionConfig.pulseSpeed.min + Math.random() * (connectionConfig.pulseSpeed.max - connectionConfig.pulseSpeed.min),
+            pulseSpeed:
+              connectionConfig.pulseSpeed.min +
+              Math.random() * (connectionConfig.pulseSpeed.max - connectionConfig.pulseSpeed.min),
             travelingPulses: [],
           };
 
@@ -1569,7 +1689,8 @@
 
     // Easing functions for smoother motion
     const easeInOutSine = (t: number) => -(Math.cos(Math.PI * t) - 1) / 2;
-    const easeInOutCubic = (t: number) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    const easeInOutCubic = (t: number) =>
+      t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
     // Helper function to regenerate a shape with equal distribution
     const regenerateShape = (shape: paper.Path, index: number) => {
@@ -1607,7 +1728,13 @@
       const newSize = sizeOptions[sizeIndex] || shapeConfig.regeneration.defaultSizeFallback;
 
       // Equal distribution of colors (cycle through)
-      const colorOptions = [colors.primaryLight, colors.secondary, colors.accent, colors.tertiary, colors.white];
+      const colorOptions = [
+        colors.primaryLight,
+        colors.secondary,
+        colors.accent,
+        colors.tertiary,
+        colors.white,
+      ];
       const newColor = colorOptions[colorCounter % colorOptions.length];
       colorCounter++;
 
@@ -1625,7 +1752,7 @@
       // Create new shape
       let newShape: paper.Path | paper.Shape;
 
-      switch(newType) {
+      switch (newType) {
         case 'circle':
           newShape = new paper.Path.Circle({
             center: [newX, newY],
@@ -1637,7 +1764,7 @@
 
         case 'rect':
           newShape = new paper.Path.Rectangle({
-            point: [newX - newSize/2, newY - newSize/2],
+            point: [newX - newSize / 2, newY - newSize / 2],
             size: [newSize, newSize],
             radius: Math.random() > 0.5 ? 2.5 : 4.5,
             strokeColor: newColor,
@@ -1657,9 +1784,9 @@
           });
           newShape.rotate(newRotation);
           // newShape.smooth();
-          newShape.segments.forEach(segment => {
-          segment.smooth();
-        });
+          newShape.segments.forEach((segment) => {
+            segment.smooth();
+          });
           break;
 
         default:
@@ -1673,17 +1800,29 @@
       newShape.fillColor = newIsSolid ? new paper.Color(newColor) : bgFillColor.clone();
 
       // Reset lifecycle data with new randomized values
-      const regeneratedLifespan = shapeConfig.lifespan.min + Math.random() * (shapeConfig.lifespan.max - shapeConfig.lifespan.min);
+      const regeneratedLifespan =
+        shapeConfig.lifespan.min +
+        Math.random() * (shapeConfig.lifespan.max - shapeConfig.lifespan.min);
       newShape.data = {
         originalPosition: newShape.position.clone(),
         originalRotation: newRotation,
         floatPhaseY: Math.random() * Math.PI * 2,
         floatPhaseX: Math.random() * Math.PI * 2,
-        rotationSpeed: shapeConfig.rotationSpeed.min + Math.random() * (shapeConfig.rotationSpeed.max - shapeConfig.rotationSpeed.min),
-        floatSpeedY: shapeConfig.floatSpeed.yMin + Math.random() * (shapeConfig.floatSpeed.yMax - shapeConfig.floatSpeed.yMin),
-        floatSpeedX: shapeConfig.floatSpeed.xMin + Math.random() * (shapeConfig.floatSpeed.xMax - shapeConfig.floatSpeed.xMin),
-        amplitudeY: shapeConfig.amplitude.yMin + Math.random() * (shapeConfig.amplitude.yMax - shapeConfig.amplitude.yMin),
-        amplitudeX: shapeConfig.amplitude.xMin + Math.random() * (shapeConfig.amplitude.xMax - shapeConfig.amplitude.xMin),
+        rotationSpeed:
+          shapeConfig.rotationSpeed.min +
+          Math.random() * (shapeConfig.rotationSpeed.max - shapeConfig.rotationSpeed.min),
+        floatSpeedY:
+          shapeConfig.floatSpeed.yMin +
+          Math.random() * (shapeConfig.floatSpeed.yMax - shapeConfig.floatSpeed.yMin),
+        floatSpeedX:
+          shapeConfig.floatSpeed.xMin +
+          Math.random() * (shapeConfig.floatSpeed.xMax - shapeConfig.floatSpeed.xMin),
+        amplitudeY:
+          shapeConfig.amplitude.yMin +
+          Math.random() * (shapeConfig.amplitude.yMax - shapeConfig.amplitude.yMin),
+        amplitudeX:
+          shapeConfig.amplitude.xMin +
+          Math.random() * (shapeConfig.amplitude.xMax - shapeConfig.amplitude.xMin),
         age: 0,
         lifespan: regeneratedLifespan,
         originalLifespan: regeneratedLifespan, // Track original lifespan
@@ -1893,16 +2032,23 @@
         // Apply glow effect based on firing state (optimized)
         if (shape.data.fireIntensity > 0) {
           // FIRING: Increase stroke width to create glow
-          shape.strokeWidth = shape.data.originalStrokeWidth + shape.data.fireIntensity * shapeConfig.fireEffects.glowStrokeMultiplier;
+          shape.strokeWidth =
+            shape.data.originalStrokeWidth +
+            shape.data.fireIntensity * shapeConfig.fireEffects.glowStrokeMultiplier;
 
           // FIRING: Brighten the stroke color (reuse existing color object)
           if (!shape.data.glowColor) {
             shape.data.glowColor = new paper.Color(shape.data.originalStrokeColor);
           }
           const currentBrightness = shape.strokeColor?.brightness || 0;
-          shape.data.glowColor.brightness = currentBrightness + shape.data.fireIntensity * shapeConfig.fireEffects.glowBrightnessMultiplier;
+          shape.data.glowColor.brightness =
+            currentBrightness +
+            shape.data.fireIntensity * shapeConfig.fireEffects.glowBrightnessMultiplier;
           shape.strokeColor = shape.data.glowColor;
-        } else if (shape.data.isFiring === false && shape.strokeWidth !== shape.data.originalStrokeWidth) {
+        } else if (
+          shape.data.isFiring === false &&
+          shape.strokeWidth !== shape.data.originalStrokeWidth
+        ) {
           // IDLE: Restore to original stroke appearance (only if changed)
           shape.strokeWidth = shape.data.originalStrokeWidth;
           if (!shape.data.originalColorObject) {
@@ -1937,184 +2083,195 @@
       });
 
       // Animate neuron connections (throttled based on device)
-      const shouldUpdateConnections = (connectionUpdateCounter++ % CONNECTION_UPDATE_INTERVAL === 0);
+      const shouldUpdateConnections = connectionUpdateCounter++ % CONNECTION_UPDATE_INTERVAL === 0;
 
       if (shouldUpdateConnections && !budgetExceeded) {
         for (let i = connections.length - 1; i >= 0; i--) {
           const connection = connections[i];
 
-        // Safety check: ensure both shapes are still valid
-        const startShape = connection.data.startShape;
-        const endShape = connection.data.endShape;
+          // Safety check: ensure both shapes are still valid
+          const startShape = connection.data.startShape;
+          const endShape = connection.data.endShape;
 
-        if (!startShape || !endShape || !shapes.includes(startShape) || !shapes.includes(endShape)) {
-          // Clean up invalid connection
-          connection.data.travelingPulses.forEach((pulse: any) => {
-            if (pulse.segment) pulse.segment.remove();
-          });
-          connection.remove();
-          connections.splice(i, 1);
-          continue;
-        }
-
-        // Update connection positions to follow shapes
-        const startPos = startShape.position;
-        const endPos = endShape.position;
-
-        // Optimize: Only update segments if position changed significantly (>1px)
-        const seg0 = connection.segments[0].point;
-        const seg1 = connection.segments[1].point;
-
-        if (Math.abs(seg0.x - startPos.x) > 1 || Math.abs(seg0.y - startPos.y) > 1) {
-          connection.segments[0].point = startPos;
-        }
-        if (Math.abs(seg1.x - endPos.x) > 1 || Math.abs(seg1.y - endPos.y) > 1) {
-          connection.segments[1].point = endPos;
-        }
-
-        // Cache gradient object to avoid recreation every frame
-        if (!connection.data.gradient) {
-          const startNodeColor = new paper.Color(startShape.strokeColor);
-          const endNodeColor = new paper.Color(endShape.strokeColor);
-
-          connection.data.gradient = new paper.Color({
-            gradient: {
-              stops: [
-                [startNodeColor, 0],
-                [endNodeColor, 1]
-              ]
-            },
-            origin: startPos,
-            destination: endPos
-          });
-          connection.data.gradientStartColor = startNodeColor;
-          connection.data.gradientEndColor = endNodeColor;
-        }
-
-        // Update gradient origin/destination (cheaper than recreating)
-        connection.data.gradient.origin = startPos;
-        connection.data.gradient.destination = endPos;
-
-        connection.strokeColor = connection.data.gradient;
-
-        // Pulsing opacity animation (like neurons firing)
-        connection.data.age += connection.data.pulseSpeed;
-        const pulseValue = Math.sin(connection.data.age);
-        connection.opacity = connectionConfig.pulseBaseOpacity +
-          (pulseValue * connectionConfig.pulseVisuals.opacityMultiplier + connectionConfig.pulseVisuals.opacityOffset) * connectionConfig.pulseAmount;
-
-        // Make connections fade with their connected shapes
-        const startOpacity = connection.data.startShape.opacity;
-        const endOpacity = connection.data.endShape.opacity;
-        const minShapeOpacity = Math.min(startOpacity, endOpacity);
-        connection.opacity *= minShapeOpacity;
-
-        // Animate traveling pulses
-        const pulses = connection.data.travelingPulses;
-        for (let i = pulses.length - 1; i >= 0; i--) {
-          const pulse = pulses[i];
-          pulse.progress += pulse.speed;
-
-          // Two-phase animation: grow then fade (pre-calculated constants)
-          const phase1Duration = connectionConfig.pulseGrowthPhase;
-          const phase2Duration = connectionConfig.pulseFadePhase;
-
-          // Pre-calculate for performance
-          const swStart = connectionConfig.pulseStrokeWidth.start;
-          const swPeak = connectionConfig.pulseStrokeWidth.peak;
-          const swEnd = connectionConfig.pulseStrokeWidth.end;
-          const swGrowthRange = swPeak - swStart;
-          const swShrinkRange = swEnd - swPeak;
-
-          let pulseStart = 0;
-          let pulseEnd = 0;
-          let opacity = 0.9;
-          let strokeWidth = swStart;
-
-          // Track if we've fired the target neuron yet
-          if (!pulse.hasFired && pulse.progress >= phase1Duration) {
-            // Fire the target neuron as soon as the pulse reaches it
-            fireShape(connection.data.endShape, time);
-            pulse.hasFired = true;
-          }
-
-          if (pulse.progress <= phase1Duration) {
-            // Phase 1: Growing from A to B
-            const t = pulse.progress / phase1Duration; // Normalize to 0-1
-            const easedProgress = easeInOutCubic(t); // Apply easing
-
-            pulseStart = 0;
-            pulseEnd = easedProgress; // Grows from 0 to 1
-            opacity = 0.9; // Full opacity during growth
-
-            // Stroke width grows from start to peak (optimized calculation)
-            strokeWidth = swStart + swGrowthRange * easedProgress;
-          } else {
-            // Phase 2: Shrinking from start while fading
-            const t = (pulse.progress - phase1Duration) / phase2Duration; // Normalize to 0-1
-            const easedProgress = easeInOutCubic(t); // Apply easing
-
-            pulseStart = easedProgress; // Shrinks from 0 to 1
-            pulseEnd = 1; // Stays at end
-            opacity = 0.9 * (1 - easedProgress); // Fade out as it shrinks
-
-            // Stroke width shrinks from peak to end (optimized calculation)
-            strokeWidth = swPeak + swShrinkRange * easedProgress;
-          }
-
-          // Optimize color interpolation - cache and reuse color objects
-          if (!pulse.colorCache) {
-            pulse.colorCache = {
-              start: new paper.Color(startShape.strokeColor),
-              end: new paper.Color(endShape.strokeColor),
-              current: new paper.Color(startShape.strokeColor)
-            };
-          }
-
-          // Lerp between start and end color based on the pulse's average position
-          const averagePosition = (pulseStart + pulseEnd) * 0.5; // Midpoint
-          const cc = pulse.colorCache;
-
-          // Reuse existing color object instead of creating new one
-          cc.current.red = cc.start.red + (cc.end.red - cc.start.red) * averagePosition;
-          cc.current.green = cc.start.green + (cc.end.green - cc.start.green) * averagePosition;
-          cc.current.blue = cc.start.blue + (cc.end.blue - cc.start.blue) * averagePosition;
-
-          const pulseColor = cc.current;
-
-          if (!pulse.segment) {
-            pulse.segment = new paper.Path.Line({
-              from: startPos.add(endPos.subtract(startPos).multiply(pulseStart)),
-              to: startPos.add(endPos.subtract(startPos).multiply(pulseEnd)),
-              strokeColor: pulseColor,
-              strokeWidth: strokeWidth,
-              strokeCap: 'round',
+          if (
+            !startShape ||
+            !endShape ||
+            !shapes.includes(startShape) ||
+            !shapes.includes(endShape)
+          ) {
+            // Clean up invalid connection
+            connection.data.travelingPulses.forEach((pulse: any) => {
+              if (pulse.segment) pulse.segment.remove();
             });
-
-            // Send pulse to back so it appears behind shapes
-            pulse.segment.sendToBack();
-          } else {
-            // Update segment position, color, and stroke width
-            pulse.segment.segments[0].point = startPos.add(endPos.subtract(startPos).multiply(pulseStart));
-            pulse.segment.segments[1].point = startPos.add(endPos.subtract(startPos).multiply(pulseEnd));
-            pulse.segment.strokeColor = pulseColor;
-            pulse.segment.strokeWidth = strokeWidth;
+            connection.remove();
+            connections.splice(i, 1);
+            continue;
           }
 
-          // Apply the calculated opacity
-          pulse.segment.opacity = opacity;
+          // Update connection positions to follow shapes
+          const startPos = startShape.position;
+          const endPos = endShape.position;
 
-          // If pulse completed both phases, clean up
-          if (pulse.progress >= 1) {
-            if (pulse.segment) {
-              pulse.segment.remove(); // Clean up the pulse segment
+          // Optimize: Only update segments if position changed significantly (>1px)
+          const seg0 = connection.segments[0].point;
+          const seg1 = connection.segments[1].point;
+
+          if (Math.abs(seg0.x - startPos.x) > 1 || Math.abs(seg0.y - startPos.y) > 1) {
+            connection.segments[0].point = startPos;
+          }
+          if (Math.abs(seg1.x - endPos.x) > 1 || Math.abs(seg1.y - endPos.y) > 1) {
+            connection.segments[1].point = endPos;
+          }
+
+          // Cache gradient object to avoid recreation every frame
+          if (!connection.data.gradient) {
+            const startNodeColor = new paper.Color(startShape.strokeColor);
+            const endNodeColor = new paper.Color(endShape.strokeColor);
+
+            connection.data.gradient = new paper.Color({
+              gradient: {
+                stops: [
+                  [startNodeColor, 0],
+                  [endNodeColor, 1],
+                ],
+              },
+              origin: startPos,
+              destination: endPos,
+            });
+            connection.data.gradientStartColor = startNodeColor;
+            connection.data.gradientEndColor = endNodeColor;
+          }
+
+          // Update gradient origin/destination (cheaper than recreating)
+          connection.data.gradient.origin = startPos;
+          connection.data.gradient.destination = endPos;
+
+          connection.strokeColor = connection.data.gradient;
+
+          // Pulsing opacity animation (like neurons firing)
+          connection.data.age += connection.data.pulseSpeed;
+          const pulseValue = Math.sin(connection.data.age);
+          connection.opacity =
+            connectionConfig.pulseBaseOpacity +
+            (pulseValue * connectionConfig.pulseVisuals.opacityMultiplier +
+              connectionConfig.pulseVisuals.opacityOffset) *
+              connectionConfig.pulseAmount;
+
+          // Make connections fade with their connected shapes
+          const startOpacity = connection.data.startShape.opacity;
+          const endOpacity = connection.data.endShape.opacity;
+          const minShapeOpacity = Math.min(startOpacity, endOpacity);
+          connection.opacity *= minShapeOpacity;
+
+          // Animate traveling pulses
+          const pulses = connection.data.travelingPulses;
+          for (let i = pulses.length - 1; i >= 0; i--) {
+            const pulse = pulses[i];
+            pulse.progress += pulse.speed;
+
+            // Two-phase animation: grow then fade (pre-calculated constants)
+            const phase1Duration = connectionConfig.pulseGrowthPhase;
+            const phase2Duration = connectionConfig.pulseFadePhase;
+
+            // Pre-calculate for performance
+            const swStart = connectionConfig.pulseStrokeWidth.start;
+            const swPeak = connectionConfig.pulseStrokeWidth.peak;
+            const swEnd = connectionConfig.pulseStrokeWidth.end;
+            const swGrowthRange = swPeak - swStart;
+            const swShrinkRange = swEnd - swPeak;
+
+            let pulseStart = 0;
+            let pulseEnd = 0;
+            let opacity = 0.9;
+            let strokeWidth = swStart;
+
+            // Track if we've fired the target neuron yet
+            if (!pulse.hasFired && pulse.progress >= phase1Duration) {
+              // Fire the target neuron as soon as the pulse reaches it
+              fireShape(connection.data.endShape, time);
+              pulse.hasFired = true;
             }
-            pulses.splice(i, 1); // Remove completed pulse
+
+            if (pulse.progress <= phase1Duration) {
+              // Phase 1: Growing from A to B
+              const t = pulse.progress / phase1Duration; // Normalize to 0-1
+              const easedProgress = easeInOutCubic(t); // Apply easing
+
+              pulseStart = 0;
+              pulseEnd = easedProgress; // Grows from 0 to 1
+              opacity = 0.9; // Full opacity during growth
+
+              // Stroke width grows from start to peak (optimized calculation)
+              strokeWidth = swStart + swGrowthRange * easedProgress;
+            } else {
+              // Phase 2: Shrinking from start while fading
+              const t = (pulse.progress - phase1Duration) / phase2Duration; // Normalize to 0-1
+              const easedProgress = easeInOutCubic(t); // Apply easing
+
+              pulseStart = easedProgress; // Shrinks from 0 to 1
+              pulseEnd = 1; // Stays at end
+              opacity = 0.9 * (1 - easedProgress); // Fade out as it shrinks
+
+              // Stroke width shrinks from peak to end (optimized calculation)
+              strokeWidth = swPeak + swShrinkRange * easedProgress;
+            }
+
+            // Optimize color interpolation - cache and reuse color objects
+            if (!pulse.colorCache) {
+              pulse.colorCache = {
+                start: new paper.Color(startShape.strokeColor),
+                end: new paper.Color(endShape.strokeColor),
+                current: new paper.Color(startShape.strokeColor),
+              };
+            }
+
+            // Lerp between start and end color based on the pulse's average position
+            const averagePosition = (pulseStart + pulseEnd) * 0.5; // Midpoint
+            const cc = pulse.colorCache;
+
+            // Reuse existing color object instead of creating new one
+            cc.current.red = cc.start.red + (cc.end.red - cc.start.red) * averagePosition;
+            cc.current.green = cc.start.green + (cc.end.green - cc.start.green) * averagePosition;
+            cc.current.blue = cc.start.blue + (cc.end.blue - cc.start.blue) * averagePosition;
+
+            const pulseColor = cc.current;
+
+            if (!pulse.segment) {
+              pulse.segment = new paper.Path.Line({
+                from: startPos.add(endPos.subtract(startPos).multiply(pulseStart)),
+                to: startPos.add(endPos.subtract(startPos).multiply(pulseEnd)),
+                strokeColor: pulseColor,
+                strokeWidth: strokeWidth,
+                strokeCap: 'round',
+              });
+
+              // Send pulse to back so it appears behind shapes
+              pulse.segment.sendToBack();
+            } else {
+              // Update segment position, color, and stroke width
+              pulse.segment.segments[0].point = startPos.add(
+                endPos.subtract(startPos).multiply(pulseStart)
+              );
+              pulse.segment.segments[1].point = startPos.add(
+                endPos.subtract(startPos).multiply(pulseEnd)
+              );
+              pulse.segment.strokeColor = pulseColor;
+              pulse.segment.strokeWidth = strokeWidth;
+            }
+
+            // Apply the calculated opacity
+            pulse.segment.opacity = opacity;
+
+            // If pulse completed both phases, clean up
+            if (pulse.progress >= 1) {
+              if (pulse.segment) {
+                pulse.segment.remove(); // Clean up the pulse segment
+              }
+              pulses.splice(i, 1); // Remove completed pulse
+            }
           }
         }
-      }
-      }  // End of shouldUpdateConnections check
-
+      } // End of shouldUpdateConnections check
     };
 
     // console.log('Animation loop started with optimizations:', {
@@ -2138,12 +2295,12 @@
         const hitResult = paper.project.hitTest(event.point, {
           fill: true,
           stroke: true,
-          tolerance: 5
+          tolerance: 5,
         });
 
         if (hitResult && hitResult.item) {
           // Check if the hit item is one of our shapes
-          const hoveredShape = shapes.find(s => s === hitResult.item);
+          const hoveredShape = shapes.find((s) => s === hitResult.item);
 
           if (hoveredShape && hoveredShape !== lastHoveredShape) {
             // Fire the shape when mouse enters it
@@ -2175,9 +2332,7 @@
     if (!canvas) return;
 
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const veryLowEnd = navigator.hardwareConcurrency
-      ? navigator.hardwareConcurrency < 2
-      : false;
+    const veryLowEnd = navigator.hardwareConcurrency ? navigator.hardwareConcurrency < 2 : false;
     if (reduced || veryLowEnd) {
       // Never download or run the animation.
       canvas.style.display = 'none';

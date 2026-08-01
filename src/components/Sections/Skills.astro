@@ -43,50 +43,57 @@ for (let i = 0; i < categories.length; i += PER_PAGE) {
 
   <!-- Featured tier: the curated groups a reader should see first. Chips give
        them more visual weight than the plain full breakdown below. -->
-  {featured.length > 0 && (
-    <div class="skills-featured">
-      {featured.map(group => (
-        <div class="featured-group">
-          <h3 class="featured-label">{group.label}</h3>
-          <ul class="featured-items">
-            {group.items.map(item => (
-              <li class="featured-chip">{item}</li>
-            ))}
-          </ul>
-        </div>
-      ))}
-    </div>
-  )}
+  {
+    featured.length > 0 && (
+      <div class="skills-featured">
+        {featured.map((group) => (
+          <div class="featured-group">
+            <h3 class="featured-label">{group.label}</h3>
+            <ul class="featured-items">
+              {group.items.map((item) => (
+                <li class="featured-chip">{item}</li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    )
+  }
 
   <!-- Secondary tier: the full categorized inventory, collapsed by default so
        it doesn't overwhelm the page but stays available. -->
   <details class="skills-more">
     <summary class="skills-more-summary">Full skills list</summary>
 
-  <!-- Carousel: one page (two categories) at a time on desktop; on mobile
+    <!-- Carousel: one page (two categories) at a time on desktop; on mobile
        every page is displayed, so all categories stack and scroll.
        The two columns mirror each other around a center gutter: the left
        column is right-aligned, the right column left-aligned. -->
-  <div class="skills-carousel">
-    {pages.map((page, pageIndex) => (
-      <div class="skills-page" data-skills-page={pageIndex} class:list={[{ 'is-active': pageIndex === 0 }]}>
-        <div class="skills-cards">
-          {page.map((category, colIndex) => (
-            <div class="skill-column" data-col={colIndex === 0 ? 'left' : 'right'}>
-              <h3 class="column-title">{category.label}</h3>
-              <div class="skills-list">
-                {category.items.map(skill => (
-                  <p class="skill-item">{skill}</p>
-                ))}
-              </div>
+    <div class="skills-carousel">
+      {
+        pages.map((page, pageIndex) => (
+          <div
+            class="skills-page"
+            data-skills-page={pageIndex}
+            class:list={[{ 'is-active': pageIndex === 0 }]}
+          >
+            <div class="skills-cards">
+              {page.map((category, colIndex) => (
+                <div class="skill-column" data-col={colIndex === 0 ? 'left' : 'right'}>
+                  <h3 class="column-title">{category.label}</h3>
+                  <div class="skills-list">
+                    {category.items.map((skill) => (
+                      <p class="skill-item">{skill}</p>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      </div>
-    ))}
+          </div>
+        ))
+      }
     </div>
   </details>
-
 </section>
 
 <style>
@@ -289,12 +296,12 @@ for (let i = 0; i < categories.length; i += PER_PAGE) {
       align-items: start;
     }
 
-    .skill-column[data-col="left"] {
+    .skill-column[data-col='left'] {
       text-align: right;
       align-items: flex-end;
     }
 
-    .skill-column[data-col="right"] {
+    .skill-column[data-col='right'] {
       text-align: left;
       align-items: flex-start;
     }

@@ -140,7 +140,9 @@ export class PerformanceMonitor {
     console.group('📊 Performance Metrics');
     console.log(`FPS: Current=${metrics.fps}, Avg=${metrics.avgFps}, Min=${metrics.minFps}`);
     console.log(`Memory: ${metrics.memory} (${metrics.memoryMB.toFixed(1)}MB)`);
-    console.log(`Dropped Frames: ${metrics.droppedFrames}/${metrics.totalFrames} (${this.getDroppedFramePercentage()}%)`);
+    console.log(
+      `Dropped Frames: ${metrics.droppedFrames}/${metrics.totalFrames} (${this.getDroppedFramePercentage()}%)`
+    );
     console.log(`Performance Rating: ${this.getPerformanceRating()}`);
     console.groupEnd();
   }
@@ -149,9 +151,10 @@ export class PerformanceMonitor {
    * Gets current performance metrics
    */
   getMetrics(): PerformanceMetrics {
-    const avgFps = this.fpsHistory.length > 0
-      ? Math.round(this.fpsHistory.reduce((a, b) => a + b, 0) / this.fpsHistory.length)
-      : 0;
+    const avgFps =
+      this.fpsHistory.length > 0
+        ? Math.round(this.fpsHistory.reduce((a, b) => a + b, 0) / this.fpsHistory.length)
+        : 0;
     const minFps = this.fpsHistory.length > 0 ? Math.min(...this.fpsHistory) : 0;
 
     let memoryMB = 0;
@@ -171,7 +174,7 @@ export class PerformanceMonitor {
       memory: memoryStr,
       memoryMB,
       droppedFrames: this.droppedFrames,
-      totalFrames: this.totalFrames
+      totalFrames: this.totalFrames,
     };
   }
 
@@ -287,7 +290,12 @@ export function trackWebVitals() {
       const lcpObserver = new PerformanceObserver((list) => {
         const entries = list.getEntries();
         const lastEntry = entries[entries.length - 1] as any;
-        console.log('✅ LCP:', lastEntry.startTime.toFixed(0), 'ms', lastEntry.startTime < 2500 ? '(Good)' : '(Needs improvement)');
+        console.log(
+          '✅ LCP:',
+          lastEntry.startTime.toFixed(0),
+          'ms',
+          lastEntry.startTime < 2500 ? '(Good)' : '(Needs improvement)'
+        );
       });
       lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] });
 
@@ -296,7 +304,12 @@ export function trackWebVitals() {
         const entries = list.getEntries();
         entries.forEach((entry: any) => {
           const fid = entry.processingStart - entry.startTime;
-          console.log('✅ FID:', fid.toFixed(0), 'ms', fid < 100 ? '(Good)' : '(Needs improvement)');
+          console.log(
+            '✅ FID:',
+            fid.toFixed(0),
+            'ms',
+            fid < 100 ? '(Good)' : '(Needs improvement)'
+          );
         });
       });
       fidObserver.observe({ entryTypes: ['first-input'] });
@@ -309,7 +322,11 @@ export function trackWebVitals() {
             clsScore += entry.value;
           }
         }
-        console.log('✅ CLS:', clsScore.toFixed(3), clsScore < 0.1 ? '(Good)' : '(Needs improvement)');
+        console.log(
+          '✅ CLS:',
+          clsScore.toFixed(3),
+          clsScore < 0.1 ? '(Good)' : '(Needs improvement)'
+        );
       });
       clsObserver.observe({ entryTypes: ['layout-shift'] });
     } catch (e) {
@@ -323,9 +340,21 @@ export function trackWebVitals() {
       const perfData = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
       if (perfData) {
         console.group('⚡ Page Load Performance');
-        console.log('DOM Content Loaded:', (perfData.domContentLoadedEventEnd - perfData.domContentLoadedEventStart).toFixed(0), 'ms');
-        console.log('Load Complete:', (perfData.loadEventEnd - perfData.loadEventStart).toFixed(0), 'ms');
-        console.log('DOM Interactive:', (perfData.domInteractive - perfData.fetchStart).toFixed(0), 'ms');
+        console.log(
+          'DOM Content Loaded:',
+          (perfData.domContentLoadedEventEnd - perfData.domContentLoadedEventStart).toFixed(0),
+          'ms'
+        );
+        console.log(
+          'Load Complete:',
+          (perfData.loadEventEnd - perfData.loadEventStart).toFixed(0),
+          'ms'
+        );
+        console.log(
+          'DOM Interactive:',
+          (perfData.domInteractive - perfData.fetchStart).toFixed(0),
+          'ms'
+        );
         console.log('Total Time:', (perfData.loadEventEnd - perfData.fetchStart).toFixed(0), 'ms');
         console.groupEnd();
       }

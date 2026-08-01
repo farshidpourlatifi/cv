@@ -5,13 +5,7 @@ export default [
   // Build output and tool reports are generated, not authored. Without this the
   // minified vendor bundles under dist/ are linted and report unused variables.
   {
-    ignores: [
-      'dist/**',
-      '.astro/**',
-      'playwright-report/**',
-      'test-results/**',
-      'public/**',
-    ],
+    ignores: ['dist/**', '.astro/**', 'playwright-report/**', 'test-results/**', 'public/**'],
   },
 
   // Recommended config for Astro. Its .astro entry delegates the frontmatter to

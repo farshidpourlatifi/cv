@@ -36,10 +36,16 @@ test('keyboard-only: nav and contact are reachable with a visible focus ring', a
     if (!info) continue;
     visited.push(info.cls);
     if (STYLED.some((c) => info.cls.includes(c))) {
-      expect(info.outlineVisible, `no visible focus ring on <${info.tag} class="${info.cls}">`).toBe(true);
+      expect(
+        info.outlineVisible,
+        `no visible focus ring on <${info.tag} class="${info.cls}">`
+      ).toBe(true);
     }
   }
-  expect(visited.some((c) => c.includes('nav-tab')), 'never tabbed to a nav link').toBe(true);
+  expect(
+    visited.some((c) => c.includes('nav-tab')),
+    'never tabbed to a nav link'
+  ).toBe(true);
   expect(
     visited.some((c) => c.includes('contact-email') || c.includes('copy-icon')),
     'never tabbed to the contact controls'

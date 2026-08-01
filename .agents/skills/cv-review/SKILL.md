@@ -34,14 +34,14 @@ Inspect only evidence relevant to the selected mode. Prefer source data over ren
 
 Give each reviewer the same scope, target role if provided, and evidence boundary. Require it to read [report-contract.md](references/report-contract.md) plus its own rubric.
 
-| Reviewer | Rubric |
-|---|---|
-| `recruiter-reviewer` | [recruiter.md](references/recruiter.md) |
-| `technical-hiring-manager` | [technical-hiring-manager.md](references/technical-hiring-manager.md) |
-| `content-consistency-reviewer` | [content-consistency.md](references/content-consistency.md) |
-| `ux-accessibility-reviewer` | [ux-accessibility.md](references/ux-accessibility.md) |
-| `seo-performance-reviewer` | [seo-performance.md](references/seo-performance.md) |
-| `security-privacy-reviewer` | [security-privacy.md](references/security-privacy.md) |
+| Reviewer                       | Rubric                                                                |
+| ------------------------------ | --------------------------------------------------------------------- |
+| `recruiter-reviewer`           | [recruiter.md](references/recruiter.md)                               |
+| `technical-hiring-manager`     | [technical-hiring-manager.md](references/technical-hiring-manager.md) |
+| `content-consistency-reviewer` | [content-consistency.md](references/content-consistency.md)           |
+| `ux-accessibility-reviewer`    | [ux-accessibility.md](references/ux-accessibility.md)                 |
+| `seo-performance-reviewer`     | [seo-performance.md](references/seo-performance.md)                   |
+| `security-privacy-reviewer`    | [security-privacy.md](references/security-privacy.md)                 |
 
 Run independent reviewers concurrently when the harness supports it. Use small batches when concurrency is limited. Do not let reviewers edit files, post messages, or silently broaden the review.
 

@@ -36,7 +36,7 @@ function parsePeriod(period: string) {
     year: yearStr,
     // Numeric start year for sorting (NaN-safe: unparseable sorts last).
     startYear: parseInt(yearStr, 10) || 0,
-    isPresent: end === 'Present'
+    isPresent: end === 'Present',
   };
 }
 ---
@@ -47,51 +47,51 @@ function parsePeriod(period: string) {
 
   <!-- Experience List (mobile: all visible, desktop: carousel) -->
   <div class="experience-carousel">
-    {positions.map((position, index) => {
-      const startDate = parsePeriod(position.period);
-      return (
-        <div class="experience-item" data-experience-index={index}>
-          <div class="experience-content">
-            <!-- Date Badge (Left) -->
-            <div class="date-badge" data-present={startDate.isPresent ? 'true' : 'false'}>
-              {startDate.month ? (
-                <>
-                  <div class="badge-month">{startDate.month}</div>
-                  <div class="badge-year">{startDate.year}</div>
-                </>
-              ) : (
-                <div class="badge-year-only">{startDate.year}</div>
-              )}
-            </div>
+    {
+      positions.map((position, index) => {
+        const startDate = parsePeriod(position.period);
+        return (
+          <div class="experience-item" data-experience-index={index}>
+            <div class="experience-content">
+              {/* Date Badge (Left) */}
+              <div class="date-badge" data-present={startDate.isPresent ? 'true' : 'false'}>
+                {startDate.month ? (
+                  <>
+                    <div class="badge-month">{startDate.month}</div>
+                    <div class="badge-year">{startDate.year}</div>
+                  </>
+                ) : (
+                  <div class="badge-year-only">{startDate.year}</div>
+                )}
+              </div>
 
-            <!-- Company Info (Center-Left) -->
-            <div class="company-info">
-              <h3 class="job-title">{position.position}</h3>
-              <p class="company-details">
-                {position.company} · {position.location}
-              </p>
-              <p class="company-period">{position.period}</p>
-              <p class="company-type">{position.employment_type}</p>
-            </div>
-
-            <!-- Achievements + Skills (Right) -->
-            <div class="details-display">
-              <ul class="achievements-list">
-                {position.achievements.map(achievement => (
-                  <li class="achievement-item">{achievement}</li>
-                ))}
-              </ul>
-              <div class="skills-display">
-                <h4 class="skills-label">Skills:</h4>
-                <p class="skills-text">
-                  {position.technologies.join(' · ')}
+              {/* Company Info (Center-Left) */}
+              <div class="company-info">
+                <h3 class="job-title">{position.position}</h3>
+                <p class="company-details">
+                  {position.company} · {position.location}
                 </p>
+                <p class="company-period">{position.period}</p>
+                <p class="company-type">{position.employment_type}</p>
+              </div>
+
+              {/* Achievements + Skills (Right) */}
+              <div class="details-display">
+                <ul class="achievements-list">
+                  {position.achievements.map((achievement) => (
+                    <li class="achievement-item">{achievement}</li>
+                  ))}
+                </ul>
+                <div class="skills-display">
+                  <h4 class="skills-label">Skills:</h4>
+                  <p class="skills-text">{position.technologies.join(' · ')}</p>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      );
-    })}
+        );
+      })
+    }
   </div>
 
   <!-- Education / Certifications / Languages -->
@@ -102,29 +102,34 @@ function parsePeriod(period: string) {
       <p class="credential-secondary">{education.institution} · {education.period}</p>
     </div>
 
-    {certifications.length > 0 && (
-      <div class="credential-group">
-        <h3 class="credential-heading">Certifications</h3>
-        <ul class="credential-list">
-          {certifications.map(cert => (
-            <li class="credential-item">{cert}</li>
-          ))}
-        </ul>
-      </div>
-    )}
+    {
+      certifications.length > 0 && (
+        <div class="credential-group">
+          <h3 class="credential-heading">Certifications</h3>
+          <ul class="credential-list">
+            {certifications.map((cert) => (
+              <li class="credential-item">{cert}</li>
+            ))}
+          </ul>
+        </div>
+      )
+    }
 
-    {languages.length > 0 && (
-      <div class="credential-group">
-        <h3 class="credential-heading">Languages</h3>
-        <ul class="credential-list plain">
-          {languages.map(lang => (
-            <li class="credential-item plain">{lang.language} - {lang.proficiency}</li>
-          ))}
-        </ul>
-      </div>
-    )}
+    {
+      languages.length > 0 && (
+        <div class="credential-group">
+          <h3 class="credential-heading">Languages</h3>
+          <ul class="credential-list plain">
+            {languages.map((lang) => (
+              <li class="credential-item plain">
+                {lang.language} - {lang.proficiency}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )
+    }
   </div>
-
 </section>
 
 <style>
@@ -248,12 +253,12 @@ function parsePeriod(period: string) {
   }
 
   /* Current role: accent the badge so "present" reads visually */
-  .date-badge[data-present="true"] {
+  .date-badge[data-present='true'] {
     background: var(--color-secondary-light);
   }
 
   /* Navy on the cyan "present" badge — 4.79:1, vs 2.51:1 for white. */
-  .date-badge[data-present="true"] .badge-year-only {
+  .date-badge[data-present='true'] .badge-year-only {
     color: var(--color-primary);
   }
 

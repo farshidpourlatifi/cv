@@ -43,7 +43,7 @@ export default defineConfig({
     devOnlyPages(),
     // React only for interactive islands (p5.js background)
     react({
-      include: ['**/Background*.tsx', '**/Background*.jsx']
+      include: ['**/Background*.tsx', '**/Background*.jsx'],
     }),
 
     // Sitemap for SEO — exclude the dev tuner and the social-image utility
@@ -81,7 +81,7 @@ export default defineConfig({
       rollupOptions: {
         output: {
           manualChunks: {
-            'p5': ['p5'],
+            p5: ['p5'],
           },
         },
       },

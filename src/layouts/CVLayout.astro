@@ -22,7 +22,7 @@ const personal = getPersonalInfo();
 const {
   title,
   description,
-  showBackground = config.features.enable_geometric_background
+  showBackground = config.features.enable_geometric_background,
 } = Astro.props;
 
 // Branded console banner. The email is read from the contact link's split data
@@ -34,9 +34,7 @@ const consoleBanner = `${personal.name} — ${personal.title.split(' | ')[0]}`;
 <BaseLayout title={title} description={description}>
   <div class="cv-layout">
     <!-- Background Layer -->
-    {showBackground && (
-      <StaticBackground />
-    )}
+    {showBackground && <StaticBackground />}
 
     <!-- Content Layer -->
     <div class="content-layer">
@@ -67,9 +65,8 @@ const consoleBanner = `${personal.name} — ${personal.title.split(' | ')[0]}`;
         // runtime (same source as the mailto) — a DOM read the minifier can't
         // fold into a plain literal.
         const link = document.querySelector('.contact-email');
-        const email = link && link.dataset.u && link.dataset.d
-          ? link.dataset.u + '@' + link.dataset.d
-          : '';
+        const email =
+          link && link.dataset.u && link.dataset.d ? link.dataset.u + '@' + link.dataset.d : '';
         console.log('%c' + banner, style);
         console.log('You read consoles. Good instinct.');
         console.log(

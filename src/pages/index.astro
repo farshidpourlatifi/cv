@@ -94,19 +94,19 @@ export const prerender = true;
   }
 
   /* Top (hero) section - Full viewport and initially visible */
-  [data-page-section="top"] {
+  [data-page-section='top'] {
     min-height: 100vh;
     opacity: 1;
     transform: translateY(0);
   }
 
   /* Skills section with overlay */
-  [data-page-section="skills"] {
+  [data-page-section='skills'] {
     position: relative;
     min-height: 100vh;
   }
 
-  [data-page-section="skills"]::after {
+  [data-page-section='skills']::after {
     content: '';
     position: absolute;
     top: 0;
@@ -118,22 +118,22 @@ export const prerender = true;
   }
 
   /* Experience section */
-  [data-page-section="experience"] {
+  [data-page-section='experience'] {
     min-height: 100vh;
   }
 
   /* Skills and Experience grow past one screen, so they start under the nav
      rather than centering, letting their titles stick while content scrolls. */
-  [data-page-section="experience"],
-  [data-page-section="skills"],
-  [data-page-section="experience"] .section-content,
-  [data-page-section="skills"] .section-content {
+  [data-page-section='experience'],
+  [data-page-section='skills'],
+  [data-page-section='experience'] .section-content,
+  [data-page-section='skills'] .section-content {
     align-items: flex-start;
     justify-content: flex-start;
   }
 
-  [data-page-section="experience"] .section-content,
-  [data-page-section="skills"] .section-content {
+  [data-page-section='experience'] .section-content,
+  [data-page-section='skills'] .section-content {
     flex-direction: column;
     height: auto;
   }
@@ -204,13 +204,13 @@ export const prerender = true;
     const observerOptions = {
       root: null,
       rootMargin: '-20% 0px -60% 0px', // Trigger when section is 20% from top
-      threshold: 0
+      threshold: 0,
     };
 
     const sections = document.querySelectorAll('.page-section');
 
     const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
+      entries.forEach((entry) => {
         // Add animation class when section comes into view
         if (entry.isIntersecting) {
           entry.target.classList.add('in-view');
@@ -225,75 +225,91 @@ export const prerender = true;
           // Notify background component about section change
           if (sectionId && sectionId !== currentSection) {
             currentSection = sectionId;
-            window.postMessage({
-              type: 'section-change',
-              section: sectionId
-            }, '*');
+            window.postMessage(
+              {
+                type: 'section-change',
+                section: sectionId,
+              },
+              '*'
+            );
           }
         }
       });
     }, observerOptions);
 
-    sections.forEach(section => observer.observe(section));
+    sections.forEach((section) => observer.observe(section));
 
     // Continuous scroll progress tracking for smooth background transitions
-    window.addEventListener('scroll', () => {
-      // Get all sections and their positions
-      const sectionsArray = Array.from(sections) as HTMLElement[];
-      const scrollTop = window.scrollY;
+    window.addEventListener(
+      'scroll',
+      () => {
+        // Get all sections and their positions
+        const sectionsArray = Array.from(sections) as HTMLElement[];
+        const scrollTop = window.scrollY;
 
-      // Find which two sections we're between based on scroll position
-      for (let i = 0; i < sectionsArray.length - 1; i++) {
-        const fromSectionEl = sectionsArray[i];
-        const toSectionEl = sectionsArray[i + 1];
+        // Find which two sections we're between based on scroll position
+        for (let i = 0; i < sectionsArray.length - 1; i++) {
+          const fromSectionEl = sectionsArray[i];
+          const toSectionEl = sectionsArray[i + 1];
 
-        if (!fromSectionEl || !toSectionEl) continue;
+          if (!fromSectionEl || !toSectionEl) continue;
 
-        const fromTop = fromSectionEl.offsetTop;
-        const toTop = toSectionEl.offsetTop;
+          const fromTop = fromSectionEl.offsetTop;
+          const toTop = toSectionEl.offsetTop;
 
-        // Calculate the transition range (from the start of current section to start of next)
-        const transitionStart = fromTop;
-        const transitionEnd = toTop;
-        const transitionRange = transitionEnd - transitionStart;
+          // Calculate the transition range (from the start of current section to start of next)
+          const transitionStart = fromTop;
+          const transitionEnd = toTop;
+          const transitionRange = transitionEnd - transitionStart;
 
-        // Check if we're in this transition zone
-        if (scrollTop >= transitionStart && scrollTop < transitionEnd) {
-          // Calculate progress (0 to 1) through this transition
-          const progress = (scrollTop - transitionStart) / transitionRange;
-          const clampedProgress = Math.max(0, Math.min(1, progress));
+          // Check if we're in this transition zone
+          if (scrollTop >= transitionStart && scrollTop < transitionEnd) {
+            // Calculate progress (0 to 1) through this transition
+            const progress = (scrollTop - transitionStart) / transitionRange;
+            const clampedProgress = Math.max(0, Math.min(1, progress));
 
-          // Send continuous progress updates
-          window.postMessage({
-            type: 'scroll-progress',
-            fromSection: fromSectionEl.id,
-            toSection: toSectionEl.id,
-            progress: clampedProgress
-          }, '*');
+            // Send continuous progress updates
+            window.postMessage(
+              {
+                type: 'scroll-progress',
+                fromSection: fromSectionEl.id,
+                toSection: toSectionEl.id,
+                progress: clampedProgress,
+              },
+              '*'
+            );
 
-          break;
+            break;
+          }
         }
-      }
-    }, { passive: true });
+      },
+      { passive: true }
+    );
 
     // Handle initial hash from URL
     const initialHash = window.location.hash.substring(1);
     if (initialHash && ['top', 'skills', 'experience', 'contact'].includes(initialHash)) {
       currentSection = initialHash;
       setTimeout(() => {
-        window.postMessage({
-          type: 'section-change',
-          section: initialHash
-        }, '*');
+        window.postMessage(
+          {
+            type: 'section-change',
+            section: initialHash,
+          },
+          '*'
+        );
       }, 100);
     } else {
       // Initialize with the top section
       history.replaceState(null, '', '#top');
       setTimeout(() => {
-        window.postMessage({
-          type: 'section-change',
-          section: 'top'
-        }, '*');
+        window.postMessage(
+          {
+            type: 'section-change',
+            section: 'top',
+          },
+          '*'
+        );
       }, 100);
     }
   });

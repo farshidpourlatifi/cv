@@ -85,9 +85,7 @@ check(
 // Em-dashes in rendered body text only (head + scripts legitimately use the
 // "Name — Role" convention for <title>/og:title and the console banner).
 const stripHeadAndScripts = (html) =>
-  html
-    .replace(/<head[\s\S]*?<\/head>/gi, '')
-    .replace(/<script[\s\S]*?<\/script>/gi, '');
+  html.replace(/<head[\s\S]*?<\/head>/gi, '').replace(/<script[\s\S]*?<\/script>/gi, '');
 for (const p of collect(DIST, ['.html'])) {
   const body = stripHeadAndScripts(readFileSync(p, 'utf8'));
   check(!body.includes('—'), `no em-dash in rendered body of ${p.replace(DIST, 'dist')}`);

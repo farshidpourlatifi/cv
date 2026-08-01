@@ -45,6 +45,7 @@ When implementing complex features or running low on context (>80% token usage):
 4. **Reference in commits**: Link to docs in commit messages
 
 **Example**: Neural network background documentation:
+
 - `/docs/NEURAL_NETWORK_CURVES.md` - Bezier curve system
 - `/docs/SCROLL_MORPHING_PLAN.md` - Scroll-based morphing plan
 - `/docs/NEURAL_NETWORK_BACKGROUND.md` - Overall architecture
@@ -52,6 +53,7 @@ When implementing complex features or running low on context (>80% token usage):
 ### Why This Matters
 
 AI assistants have a limited context window. Complex sessions can reach this limit. Documentation ensures:
+
 - ✅ Work is preserved even if context is lost
 - ✅ Future AI sessions can pick up where you left off
 - ✅ You have reference material for the implementation
@@ -78,6 +80,7 @@ AI assistants have a limited context window. Complex sessions can reach this lim
 Your AI assistant is excellent for:
 
 ✅ **Code Updates**
+
 - Updating your work experience
 - Adding new skills
 - Modifying design/colors
@@ -85,6 +88,7 @@ Your AI assistant is excellent for:
 - Improving responsiveness
 
 ✅ **Feature Development**
+
 - Adding new sections (Portfolio, Blog, Projects)
 - Implementing contact forms
 - Adding animations
@@ -92,12 +96,14 @@ Your AI assistant is excellent for:
 - Creating dark mode
 
 ✅ **Optimization**
+
 - Performance improvements
 - SEO optimization
 - Accessibility enhancements
 - Code refactoring
 
 ✅ **Documentation**
+
 - Writing guides
 - Creating README updates
 - Explaining code changes
@@ -115,17 +121,19 @@ Your AI assistant is excellent for:
 #### 2. **Provide Context**
 
 Always mention:
+
 - Which file you're editing (`index.html`)
 - Which section (Experience, Skills, Contact)
 - What you want to achieve
 - Any constraints (color scheme, design style)
 
 **Example:**
+
 ```
-I need to add a new work experience in index.html. 
-The company is "TechCorp" (2024-Present), 
-role is "Tech Lead", 
-location is "Remote", 
+I need to add a new work experience in index.html.
+The company is "TechCorp" (2024-Present),
+role is "Tech Lead",
+location is "Remote",
 and here are 4 achievements: [list]
 Please add it BEFORE the Younea experience.
 ```
@@ -141,6 +149,7 @@ Rather than asking for everything at once:
 #### 4. **Review and Test**
 
 After your AI assistant provides code:
+
 1. Review the changes carefully
 2. Test in browser (open `index.html`)
 3. Check mobile responsiveness
@@ -149,6 +158,7 @@ After your AI assistant provides code:
 ### Example Prompts
 
 #### Adding New Experience
+
 ```
 Add a new work experience to index.html:
 - Company: NewCo
@@ -166,6 +176,7 @@ Add it as the FIRST entry in the experiences array.
 ```
 
 #### Updating Skills
+
 ```
 Add these new skills to the skills object in index.html:
 - Frontend: Add "Next.js" and "Remix"
@@ -174,6 +185,7 @@ Add these new skills to the skills object in index.html:
 ```
 
 #### Changing Design
+
 ```
 Change the color scheme from purple/indigo to blue/cyan:
 - Replace all "indigo" with "blue"
@@ -182,6 +194,7 @@ Change the color scheme from purple/indigo to blue/cyan:
 ```
 
 #### Adding New Section
+
 ```
 Add a "Projects" section to index.html:
 - Create a new tab called "projects"
@@ -232,6 +245,7 @@ git push -u origin main
 #### Step 3: Verify Upload
 
 Go to your repository on GitHub and verify all files are there:
+
 - index.html
 - netlify.toml
 - package.json
@@ -267,6 +281,7 @@ git push
 Use clear, descriptive commit messages:
 
 ✅ **Good:**
+
 ```bash
 git commit -m "Add: Redis caching achievement to Younea role"
 git commit -m "Update: Changed color scheme to blue/cyan"
@@ -275,6 +290,7 @@ git commit -m "Feature: Added dark mode toggle"
 ```
 
 ❌ **Bad:**
+
 ```bash
 git commit -m "update"
 git commit -m "changes"
@@ -332,6 +348,7 @@ Click "Deploy site"
 #### Step 3: Set Up Deploy Notifications (Optional)
 
 In Netlify dashboard:
+
 1. Go to Site settings → Build & deploy → Deploy notifications
 2. Add notification for "Deploy succeeded"
 3. Options:
@@ -422,6 +439,7 @@ Your site can be in these states:
 4. **Netlify (Live)** - Deployed and accessible
 
 Check status:
+
 - **GitHub:** https://github.com/YOUR_USERNAME/cv-website
 - **Netlify:** https://app.netlify.com/sites/YOUR_SITE
 
@@ -443,6 +461,7 @@ This is separate from Git history - you have two levels of backup!
 ### Task 1: Update Work Experience
 
 **With your AI assistant:**
+
 ```
 Please update my Younea work experience in index.html:
 - Change period from "2024 - Present" to "2024 - 2025"
@@ -452,6 +471,7 @@ Please update my Younea work experience in index.html:
 ```
 
 **Deploy:**
+
 ```bash
 git add index.html
 git commit -m "Update: Added NewTech, updated Younea dates"
@@ -461,6 +481,7 @@ git push
 ### Task 2: Add New Skills
 
 **With your AI assistant:**
+
 ```
 Add these skills to index.html:
 - AI section: Add "LangChain", "Vector Databases"
@@ -468,6 +489,7 @@ Add these skills to index.html:
 ```
 
 **Deploy:**
+
 ```bash
 git add index.html
 git commit -m "Add: New AI and frontend skills"
@@ -477,6 +499,7 @@ git push
 ### Task 3: Fix Bug
 
 **With your AI assistant:**
+
 ```
 The mobile menu isn't showing on screens smaller than 768px.
 Can you add proper responsive styles for the tab navigation?
@@ -484,6 +507,7 @@ Test it works on mobile viewport.
 ```
 
 **Deploy:**
+
 ```bash
 git add index.html
 git commit -m "Fix: Mobile navigation responsive styling"
@@ -493,6 +517,7 @@ git push
 ### Task 4: Major Redesign
 
 **Use branches:**
+
 ```bash
 # Create branch
 git checkout -b redesign/new-layout
@@ -521,6 +546,7 @@ git push -u origin redesign/new-layout
 ### 1. Always Test Locally First
 
 Before pushing:
+
 ```bash
 # Open in browser
 open index.html
@@ -530,6 +556,7 @@ bunx serve .
 ```
 
 Check:
+
 - ✅ Content updated correctly
 - ✅ No typos
 - ✅ Links work
@@ -541,12 +568,14 @@ Check:
 Don't make 10 changes and commit once:
 
 ❌ **Bad:**
+
 ```bash
 # Changed 15 things
 git commit -m "Updates"
 ```
 
 ✅ **Good:**
+
 ```bash
 git commit -m "Update: Younea experience"
 # ... more work ...
@@ -558,6 +587,7 @@ git commit -m "Fix: Mobile menu"
 ### 3. Write Descriptive Commits
 
 Use prefixes:
+
 - `Add:` - New content/features
 - `Update:` - Modified existing content
 - `Fix:` - Bug fixes
@@ -569,6 +599,7 @@ Use prefixes:
 ### 4. Keep GitHub and Local in Sync
 
 Always pull before starting work:
+
 ```bash
 git pull
 # Make changes
@@ -578,6 +609,7 @@ git push
 ### 5. Use .gitignore
 
 The `.gitignore` file prevents committing:
+
 - `.netlify/` folder (local Netlify state)
 - `.DS_Store` (Mac system files)
 - `node_modules/` (if you add npm packages)
@@ -588,11 +620,13 @@ Never commit these!
 ### 6. Backup Strategy
 
 You have multiple backups:
+
 1. **Local** - Your computer
 2. **GitHub** - Full git history
 3. **Netlify** - Deployment history
 
 Even if you delete something, you can recover from:
+
 - Git history: `git log` → `git checkout`
 - Netlify: Deploys tab → Publish old deploy
 
@@ -623,12 +657,12 @@ Assistant: [Implements Netlify Forms]
 ### Pattern 2: Explain Then Do
 
 ```
-You: "I want to add a blog section. 
+You: "I want to add a blog section.
 Explain the best approach for a static site."
 
 Assistant: [Explains options]
 
-You: "Let's go with approach #2. 
+You: "Let's go with approach #2.
 Implement it with 3 sample posts."
 
 Assistant: [Implements]
@@ -653,12 +687,12 @@ Assistant: [Provides fixed code]
 ### Pattern 4: Generate Variations
 
 ```
-You: "Show me 3 different color scheme options 
+You: "Show me 3 different color scheme options
 for my CV site. Just CSS changes."
 
 Assistant: [Shows 3 variations]
 
-You: "I like #2. Apply it and make the 
+You: "I like #2. Apply it and make the
 gradients more subtle."
 
 Assistant: [Applies with refinement]
@@ -676,6 +710,7 @@ git push
 ```
 
 **Solution:**
+
 ```bash
 # Pull latest changes first
 git pull --rebase
@@ -688,6 +723,7 @@ git push
 ### Issue: Netlify Build Failed
 
 **Check build logs:**
+
 1. Go to Netlify dashboard
 2. Click failed deployment
 3. Read build log
@@ -695,6 +731,7 @@ git push
 5. Push again
 
 **Common causes:**
+
 - Syntax error in HTML
 - Missing file referenced
 - Invalid netlify.toml
@@ -702,10 +739,12 @@ git push
 ### Issue: Changes Not Showing
 
 **Clear cache:**
+
 1. Hard refresh: Ctrl+Shift+R (Windows) or Cmd+Shift+R (Mac)
 2. Or open in incognito/private mode
 
 **Check Netlify:**
+
 - Verify deploy succeeded
 - Check deploy time matches your push time
 
@@ -717,6 +756,7 @@ git pull
 ```
 
 **Solution:**
+
 ```bash
 # Open index.html
 # Look for conflict markers:
@@ -743,11 +783,13 @@ git push
 ### Issue: Wrong Content Deployed
 
 **Rollback on Netlify:**
+
 1. Go to Netlify → Deploys
 2. Find good deployment
 3. Click "Publish deploy"
 
 **Or revert in Git:**
+
 ```bash
 # Find commit to revert to
 git log
@@ -780,16 +822,16 @@ on:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Validate HTML
         run: |
           echo "Checking index.html exists"
           test -f index.html
           echo "✅ HTML file exists"
-      
+
       - name: Check for TODOs
         run: |
           if grep -r "TODO" index.html; then
@@ -797,7 +839,7 @@ jobs:
             exit 1
           fi
           echo "✅ No TODOs found"
-      
+
       - name: Success
         run: echo "🎉 All checks passed!"
 ```
@@ -850,6 +892,7 @@ git checkout -- index.html
 ### Netlify Status
 
 Check deployment at:
+
 ```
 https://app.netlify.com/sites/YOUR_SITE/deploys
 ```
@@ -857,6 +900,7 @@ https://app.netlify.com/sites/YOUR_SITE/deploys
 ### Working with your AI assistant
 
 **Fast iteration:**
+
 1. Ask your AI assistant for a change
 2. Copy code to index.html
 3. Test in browser
@@ -865,6 +909,7 @@ https://app.netlify.com/sites/YOUR_SITE/deploys
 6. Repeat
 
 **Quality workflow:**
+
 1. Plan changes with your AI assistant
 2. Implement in branch
 3. Test thoroughly
@@ -908,6 +953,7 @@ git push                           # Deploy
 ### Never Edit Directly on GitHub
 
 Always edit locally, then push:
+
 - Better testing
 - Git history
 - Easier rollback
@@ -931,6 +977,7 @@ Always edit locally, then push:
 ### Working with your AI assistant
 
 Just ask naturally:
+
 - "How do I add X to my CV?"
 - "This isn't working, can you fix it?"
 - "Show me 3 ways to improve Y"
@@ -956,4 +1003,4 @@ What's wrong?"
 
 **Happy coding! 🚀**
 
-*This workflow combines the power of an AI assistant for development, Git for version control, GitHub for storage, and Netlify for deployment - giving you a professional, automated pipeline for your CV website.*
+_This workflow combines the power of an AI assistant for development, Git for version control, GitHub for storage, and Netlify for deployment - giving you a professional, automated pipeline for your CV website._

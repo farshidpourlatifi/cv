@@ -91,26 +91,25 @@ const siteName = config.site.author;
          address must never be a literal in the shipped HTML (it's assembled at
          runtime for the contact CTA); LinkedIn is the public contact channel
          here. -->
-    <script type="application/ld+json" set:html={JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "Person",
-      "name": personal.name,
-      "jobTitle": personal.title,
-      "address": {
-        "@type": "PostalAddress",
-        "addressLocality": personal.location
-      },
-      "sameAs": [
-        `https://${personal.linkedin}`
-      ],
-      "url": config.site.url
-    })} />
+    <script
+      type="application/ld+json"
+      set:html={JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'Person',
+        name: personal.name,
+        jobTitle: personal.title,
+        address: {
+          '@type': 'PostalAddress',
+          addressLocality: personal.location,
+        },
+        sameAs: [`https://${personal.linkedin}`],
+        url: config.site.url,
+      })}
+    />
   </head>
   <body>
     <!-- Skip to main content for accessibility -->
-    <a href="#main-content" class="skip-to-main">
-      Skip to main content
-    </a>
+    <a href="#main-content" class="skip-to-main"> Skip to main content </a>
 
     <slot />
   </body>
@@ -122,53 +121,55 @@ const siteName = config.site.author;
     /* Figma Design System Colors */
 
     /* Primary Blues (Dark Background) */
-    --color-primary: #0A3A52;          /* Darkest Blue - Primary BG */
-    --color-primary-light: #004B72;     /* Dark Blue */
-    --color-secondary: #006BA5;         /* Medium Blue - Interactive */
-    --color-secondary-light: #57ACDC;   /* Cyan - Highlights & Titles (>=4.5:1 on navy for small text) */
+    --color-primary: #0a3a52; /* Darkest Blue - Primary BG */
+    --color-primary-light: #004b72; /* Dark Blue */
+    --color-secondary: #006ba5; /* Medium Blue - Interactive */
+    --color-secondary-light: #57acdc; /* Cyan - Highlights & Titles (>=4.5:1 on navy for small text) */
 
     /* Accent Colors */
-    --color-accent: #F0000F;            /* Primary Red - CTA */
-    --color-focus: #FF4D57;             /* Focus outline red - >=3:1 on navy (non-text contrast) */
-    --color-accent-dark: #BF0B16;       /* Dark Red */
-    --color-accent-light: #FF1322;      /* Light Red */
-    --color-accent-pink: #F3555F;       /* Pink Red */
+    --color-accent: #f0000f; /* Primary Red - CTA */
+    --color-focus: #ff4d57; /* Focus outline red - >=3:1 on navy (non-text contrast) */
+    --color-accent-dark: #bf0b16; /* Dark Red */
+    --color-accent-light: #ff1322; /* Light Red */
+    --color-accent-pink: #f3555f; /* Pink Red */
 
     /* Blues & Cyans (Extended Palette) */
-    --color-blue-dark: #1C7DB3;         /* Blue */
-    --color-cyan-light: #6ACBFF;        /* Light Cyan */
-    --color-cyan-lighter: #A4E0FF;      /* Very Light Cyan */
-    --color-blue-light: #B2D8EC;        /* Light Blue */
+    --color-blue-dark: #1c7db3; /* Blue */
+    --color-cyan-light: #6acbff; /* Light Cyan */
+    --color-cyan-lighter: #a4e0ff; /* Very Light Cyan */
+    --color-blue-light: #b2d8ec; /* Light Blue */
 
     /* Decorative Line Accent */
-    --color-line-accent: #E00514;       /* Line accents in design */
+    --color-line-accent: #e00514; /* Line accents in design */
 
     /* Neutral Colors */
-    --color-white: #FFFFFF;
+    --color-white: #ffffff;
     --color-black: #000000;
-    --color-gray-dark: #474747;         /* Dark Gray */
-    --color-gray: #71717B;              /* Medium Gray */
-    --color-gray-light: #7A7A82;        /* Light Gray */
-    --color-gray-lighter: #D4D3D8;      /* Very Light Gray */
+    --color-gray-dark: #474747; /* Dark Gray */
+    --color-gray: #71717b; /* Medium Gray */
+    --color-gray-light: #7a7a82; /* Light Gray */
+    --color-gray-lighter: #d4d3d8; /* Very Light Gray */
 
     /* Background Gradient */
-    --color-bg-from: #0A3A52;
-    --color-bg-to: #004B72;
+    --color-bg-from: #0a3a52;
+    --color-bg-to: #004b72;
 
     /* Legacy gray scale (for compatibility) */
-    --color-gray-50: #F9FAFB;
-    --color-gray-100: #F3F4F6;
-    --color-gray-200: #E5E7EB;
-    --color-gray-300: #D1D5DB;
-    --color-gray-400: #9CA3AF;
-    --color-gray-500: #6B7280;
-    --color-gray-600: #4B5563;
+    --color-gray-50: #f9fafb;
+    --color-gray-100: #f3f4f6;
+    --color-gray-200: #e5e7eb;
+    --color-gray-300: #d1d5db;
+    --color-gray-400: #9ca3af;
+    --color-gray-500: #6b7280;
+    --color-gray-600: #4b5563;
     --color-gray-700: #374151;
-    --color-gray-800: #1F2937;
+    --color-gray-800: #1f2937;
     --color-gray-900: #111827;
 
     /* Typography - Figma Design System */
-    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --font-sans:
+      'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+      sans-serif;
     --font-display: 'Inter', var(--font-sans);
 
     /* Font Weights */
@@ -177,32 +178,32 @@ const siteName = config.site.author;
     --font-bold: 700;
 
     /* Font sizes from Figma - EXACT values */
-    --text-xs: 0.5rem;       /* 8px - Present label */
-    --text-xxs: 0.625rem;    /* 10px - Date labels */
-    --text-sm: 0.875rem;     /* 14px - Skills, descriptions */
-    --text-base: 1rem;       /* 16px - Body text */
-    --text-lg: 1.125rem;     /* 18px - Pagination */
-    --text-xl: 1.25rem;      /* 20px - Navigation */
-    --text-2xl: 1.5rem;      /* 24px - Section subheadings */
-    --text-3xl: 1.563rem;    /* 25px - Subtitle */
-    --text-4xl: 3.75rem;     /* 60px - Last name */
-    --text-5xl: 4.375rem;    /* 70px - First name & Section titles */
+    --text-xs: 0.5rem; /* 8px - Present label */
+    --text-xxs: 0.625rem; /* 10px - Date labels */
+    --text-sm: 0.875rem; /* 14px - Skills, descriptions */
+    --text-base: 1rem; /* 16px - Body text */
+    --text-lg: 1.125rem; /* 18px - Pagination */
+    --text-xl: 1.25rem; /* 20px - Navigation */
+    --text-2xl: 1.5rem; /* 24px - Section subheadings */
+    --text-3xl: 1.563rem; /* 25px - Subtitle */
+    --text-4xl: 3.75rem; /* 60px - Last name */
+    --text-5xl: 4.375rem; /* 70px - First name & Section titles */
     --text-hero-first: 70px; /* Exact 70px for first name */
-    --text-hero-last: 60px;  /* Exact 60px for last name */
+    --text-hero-last: 60px; /* Exact 60px for last name */
     --text-hero-title: 25px; /* Exact 25px for title */
 
     /* Spacing */
-    --space-1: 0.25rem;      /* 4px */
-    --space-2: 0.5rem;       /* 8px */
-    --space-3: 0.75rem;      /* 12px */
-    --space-4: 1rem;         /* 16px */
-    --space-5: 1.25rem;      /* 20px */
-    --space-6: 1.5rem;       /* 24px */
-    --space-8: 2rem;         /* 32px */
-    --space-10: 2.5rem;      /* 40px */
-    --space-12: 3rem;        /* 48px */
-    --space-16: 4rem;        /* 64px */
-    --space-20: 5rem;        /* 80px */
+    --space-1: 0.25rem; /* 4px */
+    --space-2: 0.5rem; /* 8px */
+    --space-3: 0.75rem; /* 12px */
+    --space-4: 1rem; /* 16px */
+    --space-5: 1.25rem; /* 20px */
+    --space-6: 1.5rem; /* 24px */
+    --space-8: 2rem; /* 32px */
+    --space-10: 2.5rem; /* 40px */
+    --space-12: 3rem; /* 48px */
+    --space-16: 4rem; /* 64px */
+    --space-20: 5rem; /* 80px */
 
     /* Breakpoints (for reference) */
     --screen-sm: 640px;
@@ -272,7 +273,9 @@ const siteName = config.site.author;
   }
 
   /* CSS Reset */
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
@@ -286,7 +289,9 @@ const siteName = config.site.author;
       scroll-behavior: auto !important;
     }
 
-    *, *::before, *::after {
+    *,
+    *::before,
+    *::after {
       animation-duration: 0.001ms !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.001ms !important;
@@ -338,7 +343,12 @@ const siteName = config.site.author;
   }
 
   /* Typography */
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: var(--font-display);
     font-weight: var(--font-semibold);
     line-height: 1.2;
@@ -353,10 +363,18 @@ const siteName = config.site.author;
     font-size: var(--text-4xl);
     line-height: 1.22; /* 73px/60px from Figma */
   }
-  h3 { font-size: var(--text-2xl); }
-  h4 { font-size: var(--text-xl); }
-  h5 { font-size: var(--text-lg); }
-  h6 { font-size: var(--text-base); }
+  h3 {
+    font-size: var(--text-2xl);
+  }
+  h4 {
+    font-size: var(--text-xl);
+  }
+  h5 {
+    font-size: var(--text-lg);
+  }
+  h6 {
+    font-size: var(--text-base);
+  }
 
   p {
     margin-bottom: var(--space-4);
@@ -380,7 +398,8 @@ const siteName = config.site.author;
   }
 
   /* Lists */
-  ul, ol {
+  ul,
+  ol {
     list-style: none;
   }
 
@@ -400,9 +419,9 @@ const siteName = config.site.author;
   /* Responsive text scaling for mobile */
   @media (max-width: 767px) {
     :root {
-      --text-5xl: 2.5rem;   /* 40px - Smaller on mobile */
-      --text-4xl: 2rem;     /* 32px - Smaller on mobile */
-      --text-3xl: 1.25rem;  /* 20px */
+      --text-5xl: 2.5rem; /* 40px - Smaller on mobile */
+      --text-4xl: 2rem; /* 32px - Smaller on mobile */
+      --text-3xl: 1.25rem; /* 20px */
       --text-2xl: 1.125rem; /* 18px */
     }
   }

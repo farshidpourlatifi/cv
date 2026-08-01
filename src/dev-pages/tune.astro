@@ -18,61 +18,153 @@ export const prerender = true;
     <meta name="robots" content="noindex, nofollow" />
     <title>Canvas Tuner</title>
     <style>
-      :root { color-scheme: dark; }
-      * { box-sizing: border-box; }
+      :root {
+        color-scheme: dark;
+      }
+      * {
+        box-sizing: border-box;
+      }
       body {
         margin: 0;
-        font: 13px/1.4 -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        font:
+          13px/1.4 -apple-system,
+          BlinkMacSystemFont,
+          'Segoe UI',
+          sans-serif;
         background: #0b1620;
         color: #e6eef5;
         display: grid;
         grid-template-columns: 380px 1fr;
         height: 100vh;
       }
-      #panel { overflow-y: auto; border-right: 1px solid #1e3346; padding: 12px 14px 60px; }
-      #preview-wrap { position: relative; }
-      iframe { width: 100%; height: 100%; border: 0; background: #0A3A52; }
+      #panel {
+        overflow-y: auto;
+        border-right: 1px solid #1e3346;
+        padding: 12px 14px 60px;
+      }
+      #preview-wrap {
+        position: relative;
+      }
+      iframe {
+        width: 100%;
+        height: 100%;
+        border: 0;
+        background: #0a3a52;
+      }
 
-      h1 { font-size: 14px; margin: 4px 0 12px; color: #6ACBFF; }
-      .tabs { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+      h1 {
+        font-size: 14px;
+        margin: 4px 0 12px;
+        color: #6acbff;
+      }
+      .tabs {
+        display: flex;
+        gap: 6px;
+        margin-bottom: 12px;
+        flex-wrap: wrap;
+      }
       .tab {
-        padding: 5px 10px; border: 1px solid #24405a; border-radius: 6px;
-        background: #10202e; color: #cfe0ee; cursor: pointer; font-size: 12px;
+        padding: 5px 10px;
+        border: 1px solid #24405a;
+        border-radius: 6px;
+        background: #10202e;
+        color: #cfe0ee;
+        cursor: pointer;
+        font-size: 12px;
       }
-      .tab.active { background: #1b6ec2; border-color: #1b6ec2; color: #fff; }
+      .tab.active {
+        background: #1b6ec2;
+        border-color: #1b6ec2;
+        color: #fff;
+      }
       .grp-title {
-        text-transform: uppercase; letter-spacing: 0.05em; font-size: 10px;
-        color: #6d8aa3; margin: 14px 0 6px; border-bottom: 1px solid #1a2c3d; padding-bottom: 3px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-size: 10px;
+        color: #6d8aa3;
+        margin: 14px 0 6px;
+        border-bottom: 1px solid #1a2c3d;
+        padding-bottom: 3px;
       }
-      .row { margin-bottom: 9px; }
-      .row label { display: flex; justify-content: space-between; margin-bottom: 3px; }
-      .row .val { color: #6ACBFF; font-variant-numeric: tabular-nums; }
-      .row input[type=range] { width: 100%; accent-color: #1b6ec2; }
-      .row input[type=text], .row select {
-        width: 100%; background: #0d1c28; border: 1px solid #24405a; color: #e6eef5;
-        border-radius: 5px; padding: 5px 7px; font: inherit;
+      .row {
+        margin-bottom: 9px;
       }
-      .row.inline { display: flex; align-items: center; gap: 8px; }
-      .row.inline label { margin: 0; }
-      .actions { display: flex; gap: 8px; margin: 16px 0 8px; flex-wrap: wrap; }
+      .row label {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 3px;
+      }
+      .row .val {
+        color: #6acbff;
+        font-variant-numeric: tabular-nums;
+      }
+      .row input[type='range'] {
+        width: 100%;
+        accent-color: #1b6ec2;
+      }
+      .row input[type='text'],
+      .row select {
+        width: 100%;
+        background: #0d1c28;
+        border: 1px solid #24405a;
+        color: #e6eef5;
+        border-radius: 5px;
+        padding: 5px 7px;
+        font: inherit;
+      }
+      .row.inline {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .row.inline label {
+        margin: 0;
+      }
+      .actions {
+        display: flex;
+        gap: 8px;
+        margin: 16px 0 8px;
+        flex-wrap: wrap;
+      }
       button.act {
-        padding: 6px 10px; border: 1px solid #24405a; border-radius: 6px;
-        background: #12283a; color: #cfe0ee; cursor: pointer; font-size: 12px;
+        padding: 6px 10px;
+        border: 1px solid #24405a;
+        border-radius: 6px;
+        background: #12283a;
+        color: #cfe0ee;
+        cursor: pointer;
+        font-size: 12px;
       }
-      button.act:hover { background: #1b3651; }
+      button.act:hover {
+        background: #1b3651;
+      }
       textarea {
-        width: 100%; height: 150px; background: #0d1c28; border: 1px solid #24405a;
-        color: #b7ffcf; border-radius: 6px; padding: 8px; font: 11px/1.4 monospace; margin-top: 8px;
+        width: 100%;
+        height: 150px;
+        background: #0d1c28;
+        border: 1px solid #24405a;
+        color: #b7ffcf;
+        border-radius: 6px;
+        padding: 8px;
+        font: 11px/1.4 monospace;
+        margin-top: 8px;
         display: none;
       }
-      .hint { color: #6d8aa3; font-size: 11px; margin: 8px 0; }
+      .hint {
+        color: #6d8aa3;
+        font-size: 11px;
+        margin: 8px 0;
+      }
     </style>
   </head>
   <body>
     <div id="panel">
       <h1>🎛 Canvas Tuner</h1>
       <div class="tabs" id="tabs"></div>
-      <div class="hint">Changes save + reload the preview automatically. The preview is forced to the selected preset.</div>
+      <div class="hint">
+        Changes save + reload the preview automatically. The preview is forced to the selected
+        preset.
+      </div>
       <div id="controls"></div>
       <div class="actions">
         <button class="act" id="copy">Copy config</button>
@@ -90,44 +182,94 @@ export const prerender = true;
       // spacing values are the runtime numbers (source uses X / 0.4).
       const DEFAULTS = {
         top: {
-          sizes: { circle: [14,18,12], rect: [15,22,18], triangle: [17,14,20] },
-          distribution: { minDistance:50, bandWidth:300, sineAmplitude:100, sineFrequency:0.004, spacing:12.5, spacingRandomness:3, edgeMargin:50, boundsInset:30 },
-          connections: { maxDistance:120, staticStrokeWidth:1 },
-          appearance: { strokeWidthOptions:[2,3,5], solidFillProbability:0.4 },
+          sizes: { circle: [14, 18, 12], rect: [15, 22, 18], triangle: [17, 14, 20] },
+          distribution: {
+            minDistance: 50,
+            bandWidth: 300,
+            sineAmplitude: 100,
+            sineFrequency: 0.004,
+            spacing: 12.5,
+            spacingRandomness: 3,
+            edgeMargin: 50,
+            boundsInset: 30,
+          },
+          connections: { maxDistance: 120, staticStrokeWidth: 1 },
+          appearance: { strokeWidthOptions: [2, 3, 5], solidFillProbability: 0.4 },
         },
         skills: {
-          sizes: { circle:[5], rect:[5], triangle:[5] },
-          distribution: { minDistance:10, bandWidth:600, spacing:100, samplePitch:6.7, spacingRandomness:3, edgeMargin:10, boundsInset:-60 },
-          connections: { maxDistance:120, staticStrokeWidth:1 },
-          appearance: { strokeWidthOptions:[2], solidFillProbability:0 },
+          sizes: { circle: [5], rect: [5], triangle: [5] },
+          distribution: {
+            minDistance: 10,
+            bandWidth: 600,
+            spacing: 100,
+            samplePitch: 6.7,
+            spacingRandomness: 3,
+            edgeMargin: 10,
+            boundsInset: -60,
+          },
+          connections: { maxDistance: 120, staticStrokeWidth: 1 },
+          appearance: { strokeWidthOptions: [2], solidFillProbability: 0 },
         },
         experience: {
-          sizes: { circle:[7.5], rect:[7.5], triangle:[7.5] },
-          distribution: { minDistance:10, bandWidth:260, spacing:100, samplePitch:6.7, spacingRandomness:3, edgeMargin:10, boundsInset:-10 },
-          connections: { maxDistance:85, staticStrokeWidth:1 },
-          appearance: { strokeWidthOptions:[2], solidFillProbability:0.2 },
+          sizes: { circle: [7.5], rect: [7.5], triangle: [7.5] },
+          distribution: {
+            minDistance: 10,
+            bandWidth: 260,
+            spacing: 100,
+            samplePitch: 6.7,
+            spacingRandomness: 3,
+            edgeMargin: 10,
+            boundsInset: -10,
+          },
+          connections: { maxDistance: 85, staticStrokeWidth: 1 },
+          appearance: { strokeWidthOptions: [2], solidFillProbability: 0.2 },
         },
         contact: {
-          sizes: { circle:[18,26,22], rect:[22,28,24], triangle:[24,22,28] },
-          distribution: { minDistance:190, bandWidth:70, circleRadius:350, circleCentered:true, circleOffsetY:0, spacing:137.5, spacingRandomness:3, edgeMargin:10, boundsInset:-40 },
-          connections: { maxDistance:100, staticStrokeWidth:6, staticDashArray:[] },
-          appearance: { strokeWidthOptions:[3,4], solidFillProbability:1 },
+          sizes: { circle: [18, 26, 22], rect: [22, 28, 24], triangle: [24, 22, 28] },
+          distribution: {
+            minDistance: 190,
+            bandWidth: 70,
+            circleRadius: 350,
+            circleCentered: true,
+            circleOffsetY: 0,
+            spacing: 137.5,
+            spacingRandomness: 3,
+            edgeMargin: 10,
+            boundsInset: -40,
+          },
+          connections: { maxDistance: 100, staticStrokeWidth: 6, staticDashArray: [] },
+          appearance: { strokeWidthOptions: [3, 4], solidFillProbability: 1 },
         },
       };
       const RANGES = {
-        minDistance:[0,400,1], bandWidth:[0,700,5], circleRadius:[0,900,5], circleOffsetY:[-500,500,5],
-        spacing:[1,300,0.5], samplePitch:[1,30,0.1], spacingRandomness:[0,20,1], edgeMargin:[0,120,1],
-        boundsInset:[-120,120,1], sineAmplitude:[0,300,5], sineFrequency:[0,0.02,0.0005],
-        maxDistance:[10,400,5], staticStrokeWidth:[0.5,14,0.5], solidFillProbability:[0,1,0.05],
+        minDistance: [0, 400, 1],
+        bandWidth: [0, 700, 5],
+        circleRadius: [0, 900, 5],
+        circleOffsetY: [-500, 500, 5],
+        spacing: [1, 300, 0.5],
+        samplePitch: [1, 30, 0.1],
+        spacingRandomness: [0, 20, 1],
+        edgeMargin: [0, 120, 1],
+        boundsInset: [-120, 120, 1],
+        sineAmplitude: [0, 300, 5],
+        sineFrequency: [0, 0.02, 0.0005],
+        maxDistance: [10, 400, 5],
+        staticStrokeWidth: [0.5, 14, 0.5],
+        solidFillProbability: [0, 1, 0.05],
       };
-      const SECTIONS = ['contact','top','skills','experience'];
+      const SECTIONS = ['contact', 'top', 'skills', 'experience'];
       let current = 'contact';
       let overrides = {};
-      try { overrides = JSON.parse(localStorage.getItem('canvasTuneOverrides') || '{}'); } catch {}
+      try {
+        overrides = JSON.parse(localStorage.getItem('canvasTuneOverrides') || '{}');
+      } catch {}
 
       const $ = (id) => document.getElementById(id);
-      const getVal = (g,k) => (overrides[current]?.[g]?.[k] !== undefined) ? overrides[current][g][k] : DEFAULTS[current][g][k];
-      const setVal = (g,k,v) => {
+      const getVal = (g, k) =>
+        overrides[current]?.[g]?.[k] !== undefined
+          ? overrides[current][g][k]
+          : DEFAULTS[current][g][k];
+      const setVal = (g, k, v) => {
         overrides[current] = overrides[current] || {};
         overrides[current][g] = overrides[current][g] || {};
         overrides[current][g][k] = v;
@@ -136,17 +278,34 @@ export const prerender = true;
       let timer;
       function save() {
         localStorage.setItem('canvasTuneOverrides', JSON.stringify(overrides));
-        clearTimeout(timer); timer = setTimeout(reload, 250);
+        clearTimeout(timer);
+        timer = setTimeout(reload, 250);
       }
-      function reload() { $('preview').src = '/?t=' + Date.now() + '#' + current; }
+      function reload() {
+        $('preview').src = '/?t=' + Date.now() + '#' + current;
+      }
 
       $('preview').addEventListener('load', () => {
-        try { setTimeout(() => $('preview').contentWindow.postMessage({ type:'section-change', section: current }, '*'), 350); } catch {}
+        try {
+          setTimeout(
+            () =>
+              $('preview').contentWindow.postMessage(
+                { type: 'section-change', section: current },
+                '*'
+              ),
+            350
+          );
+        } catch {}
       });
 
       function numRow(g, k, val) {
-        const r = RANGES[k] || [0, Math.max(10, Math.abs(val)*2 || 10), (Number.isInteger(val)?1:0.1)];
-        const row = document.createElement('div'); row.className = 'row';
+        const r = RANGES[k] || [
+          0,
+          Math.max(10, Math.abs(val) * 2 || 10),
+          Number.isInteger(val) ? 1 : 0.1,
+        ];
+        const row = document.createElement('div');
+        row.className = 'row';
         row.innerHTML = `<label><span>${k}</span><span class="val">${val}</span></label>
           <input type="range" min="${r[0]}" max="${r[1]}" step="${r[2]}" value="${val}">`;
         const slider = row.querySelector('input');
@@ -158,43 +317,61 @@ export const prerender = true;
         return row;
       }
       function boolRow(g, k, val) {
-        const row = document.createElement('div'); row.className = 'row inline';
-        row.innerHTML = `<input type="checkbox" ${val?'checked':''}><label>${k}</label>`;
-        row.querySelector('input').addEventListener('change', (e) => setVal(g,k,e.target.checked));
+        const row = document.createElement('div');
+        row.className = 'row inline';
+        row.innerHTML = `<input type="checkbox" ${val ? 'checked' : ''}><label>${k}</label>`;
+        row
+          .querySelector('input')
+          .addEventListener('change', (e) => setVal(g, k, e.target.checked));
         return row;
       }
       function arrRow(g, k, val) {
-        const row = document.createElement('div'); row.className = 'row';
+        const row = document.createElement('div');
+        row.className = 'row';
         row.innerHTML = `<label><span>${k}</span><span class="val">array</span></label>
           <input type="text" value="${val.join(', ')}">`;
         row.querySelector('input').addEventListener('change', (e) => {
-          const arr = e.target.value.split(',').map(s=>s.trim()).filter(s=>s!=='').map(Number).filter(n=>!isNaN(n));
+          const arr = e.target.value
+            .split(',')
+            .map((s) => s.trim())
+            .filter((s) => s !== '')
+            .map(Number)
+            .filter((n) => !isNaN(n));
           setVal(g, k, arr);
         });
         return row;
       }
       function dashRow(g, k, val) {
-        const row = document.createElement('div'); row.className = 'row';
+        const row = document.createElement('div');
+        row.className = 'row';
         const solid = Array.isArray(val) && val.length === 0;
         row.innerHTML = `<label><span>${k}</span></label>
-          <select><option value="solid" ${solid?'selected':''}>solid</option>
-          <option value="dotted" ${!solid?'selected':''}>dotted [1,3]</option></select>`;
-        row.querySelector('select').addEventListener('change', (e) => setVal(g,k, e.target.value==='solid' ? [] : [1,3]));
+          <select><option value="solid" ${solid ? 'selected' : ''}>solid</option>
+          <option value="dotted" ${!solid ? 'selected' : ''}>dotted [1,3]</option></select>`;
+        row
+          .querySelector('select')
+          .addEventListener('change', (e) =>
+            setVal(g, k, e.target.value === 'solid' ? [] : [1, 3])
+          );
         return row;
       }
 
       function render() {
-        const c = $('controls'); c.innerHTML = '';
+        const c = $('controls');
+        c.innerHTML = '';
         const def = DEFAULTS[current];
-        for (const g of ['sizes','distribution','connections','appearance']) {
+        for (const g of ['sizes', 'distribution', 'connections', 'appearance']) {
           if (!def[g]) continue;
-          const t = document.createElement('div'); t.className = 'grp-title'; t.textContent = g; c.appendChild(t);
+          const t = document.createElement('div');
+          t.className = 'grp-title';
+          t.textContent = g;
+          c.appendChild(t);
           for (const k of Object.keys(def[g])) {
-            const val = getVal(g,k);
-            if (k === 'staticDashArray') c.appendChild(dashRow(g,k,val));
-            else if (typeof val === 'boolean') c.appendChild(boolRow(g,k,val));
-            else if (Array.isArray(val)) c.appendChild(arrRow(g,k,val));
-            else c.appendChild(numRow(g,k,val));
+            const val = getVal(g, k);
+            if (k === 'staticDashArray') c.appendChild(dashRow(g, k, val));
+            else if (typeof val === 'boolean') c.appendChild(boolRow(g, k, val));
+            else if (Array.isArray(val)) c.appendChild(arrRow(g, k, val));
+            else c.appendChild(numRow(g, k, val));
           }
         }
         $('out').style.display = 'none';
@@ -202,17 +379,27 @@ export const prerender = true;
 
       // Tabs
       const tabsEl = $('tabs');
-      SECTIONS.forEach(s => {
-        const b = document.createElement('button'); b.className = 'tab' + (s===current?' active':''); b.textContent = s;
-        b.addEventListener('click', () => { current = s; document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.textContent===s)); render(); reload(); });
+      SECTIONS.forEach((s) => {
+        const b = document.createElement('button');
+        b.className = 'tab' + (s === current ? ' active' : '');
+        b.textContent = s;
+        b.addEventListener('click', () => {
+          current = s;
+          document
+            .querySelectorAll('.tab')
+            .forEach((t) => t.classList.toggle('active', t.textContent === s));
+          render();
+          reload();
+        });
         tabsEl.appendChild(b);
       });
 
       // Merged preset for copy output
       function mergedPreset() {
-        const def = DEFAULTS[current], o = overrides[current] || {};
+        const def = DEFAULTS[current],
+          o = overrides[current] || {};
         const out = {};
-        for (const g of ['sizes','distribution','connections','appearance']) {
+        for (const g of ['sizes', 'distribution', 'connections', 'appearance']) {
           if (!def[g]) continue;
           out[g] = { ...def[g], ...(o[g] || {}) };
         }
@@ -221,11 +408,21 @@ export const prerender = true;
       $('copy').addEventListener('click', () => {
         const m = mergedPreset();
         const txt = `${current}: ${JSON.stringify(m, null, 2)}`;
-        const ta = $('out'); ta.value = txt; ta.style.display = 'block';
+        const ta = $('out');
+        ta.value = txt;
+        ta.style.display = 'block';
         navigator.clipboard?.writeText(txt);
       });
-      $('reset').addEventListener('click', () => { delete overrides[current]; save(); render(); });
-      $('resetAll').addEventListener('click', () => { overrides = {}; save(); render(); });
+      $('reset').addEventListener('click', () => {
+        delete overrides[current];
+        save();
+        render();
+      });
+      $('resetAll').addEventListener('click', () => {
+        overrides = {};
+        save();
+        render();
+      });
 
       render();
     </script>

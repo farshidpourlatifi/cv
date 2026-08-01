@@ -14,7 +14,7 @@ import {
   PersonalInfoSchema,
   ExperienceSchema,
   SkillsSchema,
-  ConfigSchema
+  ConfigSchema,
 } from '../src/types/cv.types.ts';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -74,7 +74,7 @@ function validateFile(filename, schema, name) {
       return true;
     } else {
       logError(`${name} validation failed:`);
-      result.error.issues.forEach(issue => {
+      result.error.issues.forEach((issue) => {
         console.log(`  ${colors.red}→${colors.reset} ${issue.path.join('.')}: ${issue.message}`);
       });
       return false;
@@ -97,11 +97,9 @@ async function main() {
     { file: 'config.json', schema: ConfigSchema, name: 'Site Configuration' },
   ];
 
-  const results = validations.map(({ file, schema, name }) =>
-    validateFile(file, schema, name)
-  );
+  const results = validations.map(({ file, schema, name }) => validateFile(file, schema, name));
 
-  const allValid = results.every(result => result === true);
+  const allValid = results.every((result) => result === true);
 
   log('\n' + '='.repeat(60), colors.bold);
   if (allValid) {
@@ -116,7 +114,7 @@ async function main() {
   }
 }
 
-main().catch(error => {
+main().catch((error) => {
   logError(`Validation failed: ${error.message}`);
   process.exit(1);
 });

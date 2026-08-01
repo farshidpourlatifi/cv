@@ -41,19 +41,23 @@ const summary = config.professional_summary.split(/\.\s+/)[0] + '.';
 
     <!-- Title/Role -->
     <div class="hero-title">
-      {titleLines.map((line) => (
-        <div class="hero-title-line">{line}</div>
-      ))}
+      {titleLines.map((line) => <div class="hero-title-line">{line}</div>)}
     </div>
 
     <!-- Signal line -->
     <p class="hero-signals">
-      {signals.map((s, i) => (
-        <>
-          {i > 0 && <span class="hero-signal-sep" aria-hidden="true">·</span>}
-          <span class="hero-signal">{s}</span>
-        </>
-      ))}
+      {
+        signals.map((s, i) => (
+          <>
+            {i > 0 && (
+              <span class="hero-signal-sep" aria-hidden="true">
+                ·
+              </span>
+            )}
+            <span class="hero-signal">{s}</span>
+          </>
+        ))
+      }
     </p>
 
     <!-- Professional summary -->

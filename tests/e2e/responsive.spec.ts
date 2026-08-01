@@ -22,7 +22,9 @@ test('fixed nav + social icons carry a masking scrim over content', async ({ pag
       const el = document.querySelector(sel);
       if (!el) return false;
       const cs = getComputedStyle(el, pseudo);
-      return cs.content !== 'none' && cs.content !== '' && cs.backgroundColor !== 'rgba(0, 0, 0, 0)';
+      return (
+        cs.content !== 'none' && cs.content !== '' && cs.backgroundColor !== 'rgba(0, 0, 0, 0)'
+      );
     };
     return {
       nav: has('.nav-list', '::before'),
