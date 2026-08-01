@@ -1,0 +1,17 @@
+# Pre-commit gate. Both jobs are check-only on purpose: a hook that rewrites
+# files mid-commit produces commits whose contents were never read. When one
+# fails, run `bun run lint:fix` or `bun run format` yourself and re-stage.
+#
+# Only staged files are checked, so the hook stays fast enough that there is no
+# temptation to reach for --no-verify. The full-repo sweep is `bun run verify`,
+# which test:all runs first so it fails before paying for the e2e suite.
+pre-commit:
+  parallel: true
+  jobs:
+    - name: lint
+      glob: '*.{js,mjs,cjs,ts,tsx,astro}'
+      run: bunx eslint {staged_files}
+
+    - name: format
+      glob: '*.{js,mjs,cjs,ts,tsx,astro,json,md,css,yml,yaml}'
+      run: bunx prettier --check --ignore-unknown {staged_files}

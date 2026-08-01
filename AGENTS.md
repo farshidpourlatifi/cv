@@ -23,6 +23,38 @@ styles) still happens here as normal.
 
 ---
 
+## ✅ Quality gate — run before you commit
+
+**Run `bun run verify` (ESLint + Prettier) before committing, and
+`bun run test:all` before pushing anything that touches components, data
+schemas or scripts.** These are not optional politeness — a `lefthook`
+pre-commit hook runs the same two checks on staged files, so a commit that
+skips them fails at commit time anyway.
+
+| Command             | What it covers                                                 |
+| ------------------- | -------------------------------------------------------------- |
+| `bun run verify`    | ESLint + Prettier across the repo — seconds, run it constantly |
+| `bun run lint:fix`  | Auto-fixes the ESLint findings that are safely fixable         |
+| `bun run format`    | Rewrites files to Prettier style                               |
+| `bun run test:all`  | verify → validate → unit → build → build-output → e2e          |
+| `bun run preflight` | `test:all` plus `bun audit`                                    |
+
+Conventions worth knowing before you "fix" a finding:
+
+- **Prettier owns formatting, ESLint owns correctness.** Never add stylistic
+  rules to `eslint.config.js`; if the two ever disagree, Prettier wins.
+- **Errors block, warnings inform.** The warnings are mostly deliberate
+  `console` calls in `scripts/` and `performanceMonitor.ts`, plus `any` at the
+  Paper.js and `PerformanceObserver` boundaries. Do not silence a warning with
+  a disable comment to make a number go down.
+- **The hook never rewrites your files.** It checks and fails, leaving you to
+  run `lint:fix` / `format` and re-stage, so nothing lands that you have not
+  read.
+- **`src/data/` and `docs/figma/` are in `.prettierignore`** because their own
+  exporters own their formatting. See the generated-data warning above.
+
+---
+
 ## Overview
 
 This guide explains how to use an AI coding assistant (such as Claude Code or Codex) for developing and maintaining your CV website, plus GitHub integration for automated deployments.
