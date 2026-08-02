@@ -8,8 +8,7 @@
         "React",
         "TypeScript",
         "PHP",
-        "Python",
-        "WordPress REST API"
+        "Python"
       ]
     },
     {
@@ -17,7 +16,6 @@
       "items": [
         "Dify",
         "ElevenLabs",
-        "Twilio",
         "n8n",
         "AI Agent Development",
         "Voice Agent Optimization"
@@ -28,7 +26,7 @@
       "items": [
         "GitHub Actions",
         "Docker",
-        "CapRover",
+        "WP-CLI",
         "PHPUnit",
         "Vitest",
         "Playwright"
@@ -49,29 +47,23 @@
   "core_competencies": {
     "frontend_development": [
       "React",
-      "Redux Toolkit",
       "Vue.js 3",
       "TypeScript",
       "JavaScript (ES6+)",
       "Shadcn/ui",
       "Tailwind CSS",
-      "Vite",
       "BackboneJS"
     ],
     "backend_development": [
       "PHP",
-      "WordPress REST API",
       "Python",
       "Node.js",
-      "HapiJS",
       "RESTful APIs",
       "Service/Repository Architecture"
     ],
     "ai_automation": [
       "Dify",
       "ElevenLabs",
-      "Twilio",
-      "Vocode",
       "n8n",
       "AI Agent Development",
       "Voice Agent Optimization",
@@ -80,7 +72,6 @@
     "devops_cicd": [
       "GitHub Actions",
       "Docker",
-      "CapRover",
       "WP-CLI",
       "Jenkins",
       "CI/CD",
@@ -130,7 +121,6 @@
     ],
     "frontend_frameworks": [
       "React",
-      "Redux Toolkit",
       "Redux",
       "Vue.js 3",
       "BackboneJS",
@@ -145,17 +135,13 @@
       "LESS"
     ],
     "backend_frameworks": [
-      "WordPress REST API",
       "Node.js",
-      "HapiJS",
       "ASP.NET MVC",
       "Express.js"
     ],
     "ai_machine_learning": [
       "Dify",
       "ElevenLabs",
-      "Twilio",
-      "Vocode",
       "n8n",
       "Claude.ai",
       "AI Agent Development"
@@ -172,7 +158,6 @@
     "devops_cicd": [
       "GitHub Actions",
       "Docker",
-      "CapRover",
       "WP-CLI",
       "Jenkins",
       "TeamCity",
@@ -222,7 +207,6 @@
       "SVN"
     ],
     "api_development": [
-      "WordPress REST API",
       "RESTful APIs",
       "Webhooks",
       "GraphQL",
