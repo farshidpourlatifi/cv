@@ -24,9 +24,10 @@ const signals = [
   work_preferences.location_preference,
   total_experience_years ? `${total_experience_years}+ years` : null,
 ].filter(Boolean);
-// Hero shows only the opening sentence of the summary. The full summary lives in
-// the generated data; this is a presentation-only trim, not a content edit.
-const summary = config.professional_summary.split(/\.\s+/)[0] + '.';
+// The hero deliberately does not render config.professional_summary: the name,
+// title and signal line carry the pitch, and the summary repeated what the
+// title already said. It stays in the generated data (and in the meta
+// description) — this is a presentation choice, not a content edit.
 ---
 
 <section class="hero-section" id="hero">
@@ -59,9 +60,6 @@ const summary = config.professional_summary.split(/\.\s+/)[0] + '.';
         ))
       }
     </p>
-
-    <!-- Professional summary -->
-    <p class="hero-summary">{summary}</p>
   </div>
 </section>
 
@@ -150,16 +148,6 @@ const summary = config.professional_summary.split(/\.\s+/)[0] + '.';
     color: var(--color-secondary-light);
   }
 
-  /* Professional summary — the "15+ years" pitch, constrained for readability */
-  .hero-summary {
-    margin: var(--space-5) 0 0 0;
-    font-family: var(--font-display);
-    font-weight: var(--font-normal);
-    font-size: var(--text-base);
-    line-height: 1.6;
-    color: var(--color-blue-light);
-  }
-
   /* Mobile responsive */
   @media (max-width: 767px) {
     .hero-first-name {
@@ -179,11 +167,6 @@ const summary = config.professional_summary.split(/\.\s+/)[0] + '.';
 
     .hero-signals {
       font-size: var(--text-sm);
-    }
-
-    .hero-summary {
-      font-size: var(--text-sm);
-      line-height: 1.55;
     }
   }
 

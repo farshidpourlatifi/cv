@@ -6,16 +6,8 @@ import { resolve } from 'node:path';
 const EMAIL = JSON.parse(readFileSync(resolve(process.cwd(), 'src/data/personal.json'), 'utf8'))
   .email as string;
 
-// The hero trims the generated summary down to its opening sentence, so the
-// assertion tracks the data rather than any particular phrasing in it.
-const SUMMARY_OPENING =
-  (
-    JSON.parse(readFileSync(resolve(process.cwd(), 'src/data/config.json'), 'utf8'))
-      .professional_summary as string
-  ).split(/\.\s+/)[0] + '.';
-
 test.describe('Hero', () => {
-  test('shows name, two-line title, availability, and summary', async ({ page }) => {
+  test('shows name, two-line title and availability, and no summary line', async ({ page }) => {
     await page.goto('/');
     await expect(page.locator('h1')).toContainText('Farshid');
     await expect(page.locator('.hero-name')).toContainText('Pourlatifi');
@@ -26,7 +18,9 @@ test.describe('Hero', () => {
       'Multi-Tenant SaaS · AI Integration · Migrations'
     );
     await expect(page.locator('.hero-signals')).toContainText('Remote (EU time zones), UTC+3');
-    await expect(page.locator('.hero-summary')).toContainText(SUMMARY_OPENING);
+    // The professional summary was deliberately dropped from the hero; it still
+    // lives in the generated data and the meta description.
+    await expect(page.locator('.hero-summary')).toHaveCount(0);
   });
 });
 
