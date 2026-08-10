@@ -4,6 +4,19 @@
  *
  * Social media links footer with custom SVG icons
  */
+import { getPersonalInfo } from '../../utils/data-loader';
+
+const personal = getPersonalInfo();
+
+// personal.json is a generated file and does not carry `github` yet (the source
+// of truth is profile/cv-data.json in the Job Search Accelerator repo). Read it
+// from the data when present, fall back to the known profile so the icon works
+// today; the fallback becomes dead once the exporter emits the field.
+const githubUrl = personal.github
+  ? personal.github.startsWith('http')
+    ? personal.github
+    : `https://${personal.github}`
+  : 'https://github.com/farshidpourlatifi';
 ---
 
 <footer class="social-footer">
@@ -64,6 +77,30 @@
           fill="#FF2116"></path>
         <path
           d="M139.392 40.1875H126.949C126.722 38.5777 126.258 37.1477 125.557 35.8977C124.856 34.6288 123.956 33.5492 122.858 32.6591C121.759 31.7689 120.491 31.0871 119.051 30.6136C117.631 30.1402 116.087 29.9034 114.42 29.9034C111.409 29.9034 108.786 30.6515 106.551 32.1477C104.316 33.625 102.583 35.7841 101.352 38.625C100.121 41.447 99.5057 44.875 99.5057 48.9091C99.5057 53.0568 100.121 56.5417 101.352 59.3636C102.602 62.1856 104.345 64.3163 106.58 65.7557C108.814 67.1951 111.4 67.9148 114.335 67.9148C115.983 67.9148 117.508 67.697 118.909 67.2614C120.33 66.8258 121.589 66.1913 122.688 65.358C123.786 64.5057 124.695 63.4735 125.415 62.2614C126.153 61.0492 126.665 59.6667 126.949 58.1136L139.392 58.1705C139.07 60.8409 138.265 63.4167 136.977 65.8977C135.708 68.3598 133.994 70.5663 131.835 72.517C129.695 74.4489 127.138 75.983 124.165 77.1193C121.21 78.2367 117.867 78.7955 114.136 78.7955C108.947 78.7955 104.307 77.6212 100.216 75.2727C96.1439 72.9242 92.9242 69.5246 90.5568 65.0739C88.2083 60.6231 87.0341 55.2348 87.0341 48.9091C87.0341 42.5644 88.2273 37.1667 90.6136 32.7159C93 28.2652 96.2386 24.875 100.33 22.5455C104.42 20.197 109.023 19.0227 114.136 19.0227C117.508 19.0227 120.633 19.4962 123.511 20.4432C126.409 21.3902 128.975 22.7727 131.21 24.5909C133.445 26.3901 135.263 28.5966 136.665 31.2102C138.085 33.8239 138.994 36.8163 139.392 40.1875ZM158.724 19.8182L172.787 64.0227H173.327L187.418 19.8182H201.054L180.997 78H165.145L145.06 19.8182H158.724Z"
+          fill="white"></path>
+      </svg>
+    </a>
+
+    <!-- GitHub -->
+    <a
+      href={githubUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      title="GitHub"
+      aria-label="Open Farshid Pourlatifi's GitHub profile"
+    >
+      <svg
+        class="social-icon"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+        focusable="false"
+      >
+        <path
+          fill-rule="evenodd"
+          clip-rule="evenodd"
+          d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.387-1.335-1.756-1.335-1.756-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.418-1.305.762-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.468-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12Z"
           fill="white"></path>
       </svg>
     </a>
@@ -134,9 +171,13 @@
     height: auto;
   }
 
+  /* Lift only, no drop-shadow. `drop-shadow` traces each icon's own alpha, so
+     one shared rule read as three different hovers: the rectangular LinkedIn
+     and PDF badges picked up a boxy plate behind them, while the circular
+     GitHub mark showed almost nothing. Dropping the shadow is what makes the
+     three match. */
   .social-links a:hover .social-icon {
     transform: translateY(-4px) scale(1.1);
-    filter: drop-shadow(0 10px 20px rgba(62, 159, 212, 0.3));
   }
 
   /* Desktop styles (768px and up) */

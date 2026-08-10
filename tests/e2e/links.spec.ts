@@ -15,6 +15,13 @@ test('LinkedIn link points to the correct profile', async ({ page }) => {
   expect(href).toBe('https://www.linkedin.com/in/farshidpourlatifi');
 });
 
+test('GitHub link points to the correct profile and opens safely', async ({ page }) => {
+  await page.goto('/');
+  const gh = page.locator('a[href*="github.com/farshidpourlatifi"]').first();
+  await expect(gh).toHaveAttribute('href', 'https://github.com/farshidpourlatifi');
+  await expect(gh).toHaveAttribute('rel', /noopener/);
+});
+
 test('CV download link uses the download attribute', async ({ page }) => {
   await page.goto('/');
   const cv = page.locator('a[href="/farshid-pourlatifi.pdf"]').first();

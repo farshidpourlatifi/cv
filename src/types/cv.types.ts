@@ -19,6 +19,9 @@ export const PersonalInfoSchema = z.object({
   location: z.string(),
   email: z.string().email('Valid email is required'),
   linkedin: z.string().url().optional().or(z.string().min(1)),
+  // Optional until the exporter emits it — SocialLinks falls back to the known
+  // profile URL so the icon renders either way.
+  github: z.string().min(1).optional(),
   education: EducationSchema,
   languages: z.array(LanguageSchema),
   certifications: z.array(z.string()).default([]),
